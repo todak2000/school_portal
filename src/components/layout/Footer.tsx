@@ -18,7 +18,7 @@ const Footer = () => {
           Akwa Ibom State Schools Portal
           <br />
           Arise: Secure, Efficient, Data-Driven Planning for the future of our
-          Children's Education.
+          Children&apos;s Education.
         </p>
         <p className="text-primary font-geistMono">Copyright © {new Date().getFullYear()} - All right reserved</p>
       </aside>
