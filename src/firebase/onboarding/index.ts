@@ -216,7 +216,8 @@ export const getUserDataConcurrently = async (
  */
 const handleDeactivatedUser = async (): Promise<void> => {
   await signOut(firebaseAuth);
-  typeof window !== 'undefined' && window.localStorage.removeItem("aks_portal_user");
+  typeof window !== "undefined" &&
+    window.localStorage.removeItem("aks_portal_user");
 };
 
 /**
@@ -231,14 +232,11 @@ const handleDeactivatedUser = async (): Promise<void> => {
  */
 const sendVerificationEmail = async (user: User): Promise<void> => {
   try {
-    await sendEmailVerification(
-      user
-      //   {
-      //   Optional: Customize the action URL or email template if needed
-      //   url: 'https://your-app.com/verify-email',
-      //   handleCodeInApp: true,
-      // }
-    );
+    await sendEmailVerification(user, {
+      // Optional: Customize the action URL or email template if needed
+      url: `${process.env.NEXT_PUBLIC_URL}`,
+      handleCodeInApp: true,
+    });
     console.log(`Verification email sent to ${user.email}`);
   } catch (error: any) {
     console.error("Error sending verification email:", error.message);
@@ -330,7 +328,11 @@ export const adminLogin = async (
           message: "Oops! You are not authorized to access this app.",
         };
       }
-      typeof window !== 'undefined' && window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
+      typeof window !== "undefined" &&
+        window.localStorage.setItem(
+          "aks_portal_user",
+          JSON.stringify(userData)
+        );
       return {
         status: 200,
         message: "Login successful.",
@@ -364,7 +366,8 @@ export const fetchAdminData = async (
 ): Promise<Record<string, any> | null> => {
   try {
     const userData = await getUserData(userId, "admin");
-    typeof window !== 'undefined' && window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
+    typeof window !== "undefined" &&
+      window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
     return userData;
   } catch (error: any) {
     console.error("Error fetching admin user data:", error.message);
@@ -394,7 +397,8 @@ export const signingOut = async (): Promise<void> => {
  */
 const removeSession = (): void => {
   // Implementation to remove the session (e.g., clearing cookies, localStorage, etc.)
-  typeof window !== 'undefined' && window.localStorage.removeItem("aks_portal_user");
+  typeof window !== "undefined" &&
+    window.localStorage.removeItem("aks_portal_user");
 };
 
 /**
@@ -570,7 +574,11 @@ export const userSignin = async (data: LoginData): Promise<LoginResponse> => {
           message: "Oops! You are not authorized to access this app.",
         };
       }
-      typeof window !== 'undefined' && window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
+      typeof window !== "undefined" &&
+        window.localStorage.setItem(
+          "aks_portal_user",
+          JSON.stringify(userData)
+        );
       return {
         status: 200,
         message: "Login successful.",
@@ -606,7 +614,8 @@ export const fetchUserData = async (
 ): Promise<Record<string, any> | null> => {
   try {
     const userData = await getUserData(userId, role);
-    typeof window !== 'undefined' && window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
+    typeof window !== "undefined" &&
+      window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
     return userData;
   } catch (error: any) {
     console.error(`Error fetching ${role} user data:`, error.message);
