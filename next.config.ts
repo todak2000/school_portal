@@ -1,9 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
-    domains: ['vip.akwaibomstate.gov.ng'],
+    domains: ["vip.akwaibomstate.gov.ng"],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/old-path",
+        destination: "/new-path",
+        permanent: true,
+      },
+    ];
   },
 };
 

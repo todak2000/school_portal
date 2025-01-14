@@ -6,7 +6,7 @@ import authReducer from "./slices/auth";
 const store = configureStore({
   reducer: {
     auth: authReducer,
-    modal:modalReducer
+    modal: modalReducer,
     // Add other reducers here if needed
   },
   devTools: process.env.NODE_ENV !== "production",

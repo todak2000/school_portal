@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 "use client";
 
 import LoaderSpin from "@/components/loader/LoaderSpin";
 import { RootState } from "@/store";
+import { setUser } from "@/store/slices/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 interface WithAuthOptions {
   requiredRole?: string;
@@ -15,24 +17,41 @@ const withAuth = (
   options?: WithAuthOptions
 ) => {
   const Wrapper: React.FC = (props) => {
+    const dispatch = useDispatch();
     const router = useRouter();
     const { user, loading, role } = useSelector(
       (state: RootState) => state.auth
     );
+
+    const localUser =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("aks_portal_user")
+        : null;
+    const jsonUser = localUser ? JSON.parse(localUser) : null;
+
     const { requiredRole } = options || {};
+
     useEffect(() => {
       if (!loading) {
-        if (!user) {
+        if (!user && !jsonUser) {
           if (requiredRole === "admin") {
             router.replace("/admin/onboarding/signin");
           } else {
-            router.replace("/login");
+            router.replace("/");
           }
-        } else if (requiredRole && role !== requiredRole) {
+        } else if (
+          requiredRole &&
+          ((role && role !== requiredRole) || jsonUser.role !== requiredRole)
+        ) {
           router.replace("/unauthorized");
+        } else if (
+          requiredRole &&
+          ((role && role === requiredRole) || jsonUser.role === requiredRole)
+        ) {
+          !user && dispatch(setUser(jsonUser));
         }
       }
-    }, [user, loading, role, requiredRole, router]);
+    }, [user, loading, role, requiredRole, router, jsonUser, dispatch]);
 
     if (loading || !user || (requiredRole && role !== requiredRole)) {
       return (

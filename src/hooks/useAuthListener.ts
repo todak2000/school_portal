@@ -9,7 +9,6 @@ import { getUserDataConcurrently } from "@/firebase/onboarding";
 
 const useAuthListener = () => {
   const dispatch = useDispatch();
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(
       firebaseAuth,

@@ -1,5 +1,3 @@
-// middleware.ts
-
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import cookie from "cookie";
@@ -8,7 +6,7 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Define public paths that don't require authentication
-  const publicPaths = ["/login", "/signup", "/api/", "/favicon.ico", "/_next/"];
+  const publicPaths = ["/login", "/register", "/api/", "/favicon.ico", "/_next/", 'admin/onboarding', 'school_admin/onboarding'];
   const isPublic = publicPaths.some((path) => pathname.startsWith(path));
 
   if (isPublic) {
@@ -19,10 +17,11 @@ export function middleware(req: NextRequest) {
   const cookies = req.headers.get("cookie") || "";
   const parsedCookies = cookie.parse(cookies);
   const token = parsedCookies.token;
+  console.log(token, "token");
 
   if (!token) {
     const url = req.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = "/";
     return NextResponse.redirect(url);
   }
 

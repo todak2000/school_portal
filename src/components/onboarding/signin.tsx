@@ -134,6 +134,8 @@ const SignIn = React.memo(() => {
         message: "An unexpected error occurred. Please try again.",
         type: "error",
       });
+    } finally{
+      dispatch(setModal({ open: false, type: "" }));
     }
   };
 
@@ -252,7 +254,7 @@ const SignIn = React.memo(() => {
         <p className="text-xs text-gray-200 font-geistMono">
           Yet to register your child/Ward?{" "}
           <a
-            href="#"
+            href="/register"
             className="text-orange-600 hover:text-orange-700 font-medium"
           >
             Register

@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   type User,
-  signInWithPopup,
   onAuthStateChanged as _onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -11,7 +11,7 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 
-import { firebaseAuth } from "..";
+import { firebaseAuth, storage } from "..";
 import CRUDOperation from "../functions/CRUDOperation";
 
 import { DocumentData, Timestamp } from "firebase/firestore";
@@ -30,6 +30,7 @@ import {
   generateStudentID,
   generateTeacherID,
 } from "@/helpers/generateStudentID";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 const adminOperation = new CRUDOperation(Collection.Admins);
 const teacherOperation = new CRUDOperation(Collection.Teachers);
@@ -92,8 +93,8 @@ export const addUserDataToDatabase = async (
       createdAt: Timestamp.fromDate(new Date()),
       email: user.email,
       fullname: data.name,
-      teacherId: generateTeacherID(data.schoolId),
-      schoolId: data.schoolId,
+      teacherId: generateTeacherID(data.school),
+      schoolId: data.school,
       subjectsTaught: data.subjectsTaught ?? [], //an array of subject ids
       isAdmin: true,
       role: "teacher",
@@ -102,26 +103,29 @@ export const addUserDataToDatabase = async (
     };
     await teacherOperation.add(teacher);
   } else {
+    const id = generateStudentID(data.school);
+
     const student = {
       id: user.uid,
 
       createdAt: Timestamp.fromDate(new Date()),
       email: user.email,
-      studentId: generateStudentID(data.schoolId), // schoold ID is  not uuid, but custom code e.g. AKS/UYO/001
+      studentId: id, // schoold ID is  not uuid, but custom code e.g. AKS/UYO/001
       fullname: data.name,
-      passportUrl: data.passportUrl,
-      birthCertificateUrl: data.birthCertificateUrl,
-      schoolId: data.schoolId,
+      passportUrl: "", //await uploadImage(data.passportUrl,`${data.name}_${id}_birth_certificate`),
+      birthCertificateUrl: "", //await uploadImage(data.birthCertificateUrl,`${data.name}_${id}_birth_certificate`),
+      schoolId: data.school,
       phone: data.phone,
       subjectsOffered: data.subjectsOffered ?? [], //an array of subject ids
-      role: "parent",
+      role: "student",
       guardian: data.guardian,
       gender: data.gender, //M|F
-      dob: data.dob,
+      dob: data.dateOfBirth,
       address: data.address,
-      classId: data.classId,
+      classId: data.class,
       isDeactivated: false,
     };
+
     await studentOperation.add(student);
   }
 };
@@ -212,6 +216,7 @@ export const getUserDataConcurrently = async (
  */
 const handleDeactivatedUser = async (): Promise<void> => {
   await signOut(firebaseAuth);
+  typeof window !== 'undefined' && window.localStorage.removeItem("aks_portal_user");
 };
 
 /**
@@ -318,18 +323,18 @@ export const adminLogin = async (
       const userData = await getUserData(result.user.uid, "admin");
 
       // Check if the user is deactivated
-      if (userData && userData.length === 1 && userData[0].isDeactivated) {
+      if (userData && userData.isDeactivated) {
         await handleDeactivatedUser();
         return {
           status: 400,
           message: "Oops! You are not authorized to access this app.",
         };
       }
-
+      typeof window !== 'undefined' && window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
       return {
         status: 200,
         message: "Login successful.",
-        role: userData ? userData[0]?.role : null,
+        role: userData ? userData?.role : null,
         userId: result.user.uid,
       };
     }
@@ -359,6 +364,7 @@ export const fetchAdminData = async (
 ): Promise<Record<string, any> | null> => {
   try {
     const userData = await getUserData(userId, "admin");
+    typeof window !== 'undefined' && window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
     return userData;
   } catch (error: any) {
     console.error("Error fetching admin user data:", error.message);
@@ -373,6 +379,7 @@ export const fetchAdminData = async (
 export const signingOut = async (): Promise<void> => {
   try {
     await signOut(firebaseAuth);
+
     console.log("User logged out successfully.");
     removeSession(); // Ensure this function is defined to handle session removal
   } catch (error: any) {
@@ -387,14 +394,7 @@ export const signingOut = async (): Promise<void> => {
  */
 const removeSession = (): void => {
   // Implementation to remove the session (e.g., clearing cookies, localStorage, etc.)
-};
-
-/**
- * Creates a user session.
- * (Assuming you have a function like this defined elsewhere)
- */
-const createSession = (userId: string): void => {
-  // Implementation to create the session (e.g., setting cookies, localStorage, etc.)
+  typeof window !== 'undefined' && window.localStorage.removeItem("aks_portal_user");
 };
 
 /**
@@ -484,8 +484,8 @@ const getEmailByIdentifier = async (
     "teacherId",
     identifier
   );
-  if (teacherData && teacherData.length === 1) {
-    return teacherData[0].email;
+  if (teacherData) {
+    return teacherData.email;
   }
 
   // Attempt to find in CustomUsers collection using studentId
@@ -493,8 +493,8 @@ const getEmailByIdentifier = async (
     "studentId",
     identifier
   );
-  if (studentData && studentData.length === 1) {
-    return studentData[0].email;
+  if (studentData) {
+    return studentData.email;
   }
 
   // Identifier does not match any user
@@ -543,19 +543,19 @@ export const userSignin = async (data: LoginData): Promise<LoginResponse> => {
 
       // Check in Teachers collection
       userData = await teacherOperation.getDataByUID(result.user.uid);
-      if (userData && userData.length === 1) {
-        role = userData[0].role;
+      if (userData) {
+        role = userData.role;
       } else {
         // Check in CustomUsers collection
         userData = await studentOperation.getDataByUID(result.user.uid);
-        if (userData && userData.length === 1) {
-          role = userData[0].role;
+        if (userData) {
+          role = userData.role;
         }
       }
 
       if (!role) {
         // If role is not found, sign out the user
-        await signOut(firebaseAuth);
+        await handleDeactivatedUser();
         return {
           status: 400,
           message: "User role not found. Please contact support.",
@@ -563,14 +563,14 @@ export const userSignin = async (data: LoginData): Promise<LoginResponse> => {
       }
 
       // Check if the user is deactivated
-      if (userData && userData.length === 1 && userData[0].isDeactivated) {
+      if (userData && userData.isDeactivated) {
         await handleDeactivatedUser();
         return {
           status: 400,
           message: "Oops! You are not authorized to access this app.",
         };
       }
-
+      typeof window !== 'undefined' && window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
       return {
         status: 200,
         message: "Login successful.",
@@ -606,9 +606,26 @@ export const fetchUserData = async (
 ): Promise<Record<string, any> | null> => {
   try {
     const userData = await getUserData(userId, role);
+    typeof window !== 'undefined' && window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
     return userData;
   } catch (error: any) {
     console.error(`Error fetching ${role} user data:`, error.message);
     throw new Error(`Failed to fetch ${role} user data. Please try again.`);
   }
+};
+
+const uploadImage = async (
+  blob: Blob,
+  name: string
+): Promise<{ url: string; path: string }> => {
+  const fileName = `${name}.webp`;
+  const storageRef = ref(storage, `images/${fileName}`);
+
+  await uploadBytes(storageRef, blob);
+  const downloadURL = await getDownloadURL(storageRef);
+
+  return {
+    url: downloadURL,
+    path: `images/${fileName}`,
+  };
 };

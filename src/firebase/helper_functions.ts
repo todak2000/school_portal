@@ -6,31 +6,31 @@ export interface AdminSignupData {
   name: string;
 }
 export interface UserSignupData {
-    email: string;
-    password: string;
-    name: string;
-    role: 'student'| 'parent'| 'admin'|'teacher';
-    schoolId?: string;
-    subjectsTaught?: string[];
-    isSuperAdmin?: boolean;
-    passportUrl?: string;
-    birthCertificateUrl?:string;
-    phone?: string;
-    subjectsOffered?: string[];
-    guardian?: string;
-    gender?:'male'|'female';
-    dob?: string;
-    address?:string;
-    classId?:string;
-  }
+  email: string;
+  password: string;
+  name: string;
+  role: "student" | "parent" | "admin" | "teacher";
+  schoolId?: string;
+  subjectsTaught?: string[];
+  isSuperAdmin?: boolean;
+  passportUrl?: string | Blob;
+  birthCertificateUrl?: string | Blob;
+  phone?: string;
+  subjectsOffered?: string[];
+  guardian?: string;
+  gender?: "male" | "female";
+  dob?: string;
+  address?: string;
+  classId?: string;
+}
 export interface LoginData {
   identifier: string;
   password: string;
 }
 export interface AdminLoginData {
-    email: string;
-    password: string;
-  }
+  email: string;
+  password: string;
+}
 /**
  * Validates the signup data to ensure all required fields are present.
  * @param data - The signup data containing email, password, and name.
@@ -109,11 +109,11 @@ export const validateLoginData = (
  * @returns An object indicating whether the data is valid and an optional message.
  */
 export const validateAdminLoginData = (
-    data: AdminLoginData
-  ): { valid: boolean; message?: string } => {
-    const { email, password } = data;
-    if (!email || !password) {
-      return { valid: false, message: "Email and password are required." };
-    }
-    return { valid: true };
-  };
+  data: AdminLoginData
+): { valid: boolean; message?: string } => {
+  const { email, password } = data;
+  if (!email || !password) {
+    return { valid: false, message: "Email and password are required." };
+  }
+  return { valid: true };
+};

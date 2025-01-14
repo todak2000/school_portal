@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import {
   adminLogin,
   getUserDataConcurrently,
@@ -34,6 +34,11 @@ export const loginUser = createAsyncThunk<
       ? await getUserDataConcurrently(userCredential.userId as string)
       : null;
 
+    // Save user data to local storage
+    if (userData && typeof window !== "undefined") {
+      window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
+    }
+
     return userData;
   } catch (error: any) {
     let message = "An error occurred during login.";
@@ -54,6 +59,8 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
   async (_, thunkAPI) => {
     try {
       await signingOut();
+      // Remove user data from local storage
+      typeof window !== "undefined" && window.localStorage.removeItem("user");
     } catch (error: any) {
       console.log("Logout failed:", error);
       return thunkAPI.rejectWithValue("Failed to logout.");

@@ -68,18 +68,30 @@ export default class CRUDOperation<T> {
     }
   }
 
-  // -- get user details without pagination
+  //  -- get user details without pagination
   async getDataByUID(uid: string) {
     try {
-      const querySnapshot = await getDocs(
-        query(collection(db, this.collectionName), where("id", "==", uid))
-      );
-
-      return !querySnapshot.empty ? querySnapshot.docs[0].data() : null;
+      const docRef = doc(db, this.collectionName, uid);
+      const docSnap = await getDoc(docRef);
+  
+      return docSnap.exists() ? docSnap.data() : null;
     } catch (error: unknown) {
       throw new Error(errMessage);
     }
   }
+  
+
+  // async getDataByUID(uid: string) {
+  //   try {
+  //     const querySnapshot = await getDocs(
+  //       query(collection(db, this.collectionName), where("id", "==", uid))
+  //     );
+
+  //     return !querySnapshot.empty ? querySnapshot.docs[0].data() : null;
+  //   } catch (error: unknown) {
+  //     throw new Error(errMessage);
+  //   }
+  // }
   async getDataByField(
     field: string,
     value: any
