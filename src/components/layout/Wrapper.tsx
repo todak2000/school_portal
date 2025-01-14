@@ -7,25 +7,27 @@ import Footer from "./Footer";
 import Header from "./Header";
 import { usePathname } from "next/navigation";
 import { setModal } from "@/store/slices/modal";
-import { modal } from "@/store";
+
 import Modal from "../modal/modal";
 import { ModalChild } from "../modal";
+import { RootState } from "@/store";
+import useAuthListener from "@/hooks/useAuthListener";
 
-const paths = ["/", "/directory"];
+const paths = ["/", "/directory", '/register', '/admin/onboarding'];
 
 const Wrapper = ({ children }: { children: ReactElement | ReactNode }) => {
   const dispatch = useDispatch();
   const pathname = usePathname();
-
+  useAuthListener();
   const closeModal = () => {
     dispatch(setModal({ open: false, type: "" }));
   };
-  const modall = useSelector(modal);
+  const { open, type, data } = useSelector((state: RootState) => state.modal);
 
   return (
     <>
-      <Modal isOpen={modall.open} onClose={closeModal}>
-        {ModalChild(modall.type, modall.data)}
+      <Modal isOpen={open} onClose={closeModal}>
+        {ModalChild(type, data)}
       </Modal>
       {paths.includes(pathname) ? (
         <>

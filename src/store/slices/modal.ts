@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 

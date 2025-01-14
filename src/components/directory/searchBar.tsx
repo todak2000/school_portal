@@ -4,7 +4,7 @@ import { Search, Plus, ChevronDown } from "lucide-react";
 interface SearchBarProps {
   searchTerm: string;
   selectedLGA: string;
-  lgas: string[];
+  lgas: { name: string; code: string }[];
   setSearchTerm: (term: string) => void;
   setSelectedLGA: (lga: string) => void;
   setCurrentPage: (page: number) => void;
@@ -70,16 +70,16 @@ const SearchBar = React.memo(
                 <div className="py-1">
                   {lgas.map((lga) => (
                     <button
-                      key={lga}
+                      key={lga.name}
                       className={`w-full text-left px-4 py-2 text-sm hover:bg-orange-50
                       ${
-                        selectedLGA === lga
+                        selectedLGA === lga.code
                           ? "bg-orange-100 text-primary"
                           : "text-gray-700"
                       }`}
-                      onClick={() => handleLGASelect(lga)}
+                      onClick={() => handleLGASelect(lga.name)}
                     >
-                      {lga}
+                      {lga.name}
                     </button>
                   ))}
                 </div>

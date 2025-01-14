@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import TanstackProvider from "@/providers/TanstackProvider";
 import Wrapper from "@/components/layout/Wrapper";
-
+import ProviderWrapper from "@/components/layout/ProviderWrapper";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -29,9 +28,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TanstackProvider>
+        <ProviderWrapper>
           <Wrapper>{children}</Wrapper>
-        </TanstackProvider>
+        </ProviderWrapper>
       </body>
     </html>
   );
