@@ -21,7 +21,7 @@ const PasswordField: React.FC<PasswordFieldProps> = React.memo(
       <div className="relative group">
         <button
           type="button"
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
+          className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400  transition-colors ${error?"group-focus-within:text-orange-500":"group-focus-within:text-green-500"}`}
           onClick={togglePasswordVisibility}
         >
           {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
@@ -31,9 +31,7 @@ const PasswordField: React.FC<PasswordFieldProps> = React.memo(
           placeholder={placeholder}
           className={`w-full font-geistMono text-black pr-10 pl-4 py-2 bg-gray-50 border ${
             error ? "border-red-500" : "border-green-500"
-          }  focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all duration-200 ${
-            error ? "animate-pulse" : ""
-          }`}
+          }  focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all duration-200`}
           value={value}
           onChange={(e) => onChange(e, name)}
         />

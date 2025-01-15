@@ -48,7 +48,7 @@ export interface FormErrors {
 }
 
 const getLocalStorage = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     return window.localStorage;
   }
   return null;
@@ -240,8 +240,10 @@ const SignUp = () => {
       });
 
       if (res.status === 200) {
-        push("/");
-        dispatch(setModal({ open: true, type: "login" }));
+        setTimeout(() => {
+          push("/");
+          dispatch(setModal({ open: true, type: "login" }));
+        }, 3000);
       }
     } catch (error: any) {
       console.log("Sign in error:", error);

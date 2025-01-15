@@ -94,7 +94,7 @@ const AdminSignIn = React.memo(() => {
                 <input
                   type={field.type}
                   placeholder={field.placeholder}
-                  className="w-full font-geistMono text-black pr-10 pl-4 py-2 bg-gray-50 border border-orange-200 rounded-none focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
+                  className="w-full font-geistMono text-black pr-10 pl-4 py-2 bg-gray-50 border border-green-500 rounded-none focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
                   value={formData[field.name as keyof typeof formData]}
                   onChange={(e) =>
                     setFormData({

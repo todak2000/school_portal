@@ -60,7 +60,7 @@ push('/admin/onboarding/signin')
     {
       name: "email",
       type: "text",
-      placeholder: "Username or email address",
+      placeholder: "Admin Email address",
       icon: (
         <Mail
           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
@@ -96,7 +96,7 @@ push('/admin/onboarding/signin')
                 <input
                   type={field.type}
                   placeholder={field.placeholder}
-                  className="w-full font-geistMono text-black pr-10 pl-4 py-2 bg-gray-50 border border-orange-200 rounded-none focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
+                  className="w-full font-geistMono text-black pr-10 pl-4 py-2 bg-gray-50 border border-green-500 rounded-none focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
                   value={formData[field.name as keyof typeof formData]}
                   onChange={(e) =>
                     setFormData({
