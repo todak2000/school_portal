@@ -3,7 +3,9 @@ import { Hand } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+
 const UnauthorizedPage = () => {
+ 
   return (
     <div className="w-full h-screen bg-gradient-to-r  via-secondary from-secondary to-green-500 px-4 lg:px-20 2xl:px-[20%] py-10 flex flex-col items-center justify-center">
       <Image

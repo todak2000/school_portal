@@ -3,17 +3,39 @@ import { User } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { setModal } from "@/store/slices/modal";
 import { OnboardingWrapper } from "./wrapper";
+import { resetPasswordEmail } from "@/firebase/onboarding";
+import Alert from "../alert";
+import LoaderSpin from "../loader/LoaderSpin";
 
 const ForgotPassword = React.memo(() => {
   const dispatch = useDispatch();
+  const [alert, setAlert] = useState({ message: "", type: "error" });
+  const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     email: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    setLoading(true);
     e.preventDefault();
     // Handle form submission
-    dispatch(setModal({ open: true, type: "reset" }));
+    try {
+      const res = await resetPasswordEmail(formData.email);
+      setLoading(false);
+      setAlert({
+        message: res.message,
+        type: res.status === 200 ? "success" : "error",
+      });
+    } catch (error) {
+      console.log("Error sending password reset email:", error);
+
+      setAlert({
+        message: "Error sending password reset email.",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogin = () => {
@@ -46,7 +68,12 @@ const ForgotPassword = React.memo(() => {
             Enter your email to reset it
           </p>
         </div>
-
+        {alert.message && (
+          <Alert
+            message={alert.message}
+            type={alert.type as "error" | "success" | "warning"}
+          />
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             {formFields.map((field, index) => (
@@ -81,14 +108,14 @@ const ForgotPassword = React.memo(() => {
             type="submit"
             className="w-full bg-primary text-white py-2 rounded-none hover:bg-orange-700 transform hover:scale-[1.02] transition-all duration-200"
           >
-            Send Reset Code
+            {loading ? <LoaderSpin /> : "Send Reset Code"}
           </button>
         </form>
 
         <p className="text-xs text-gray-200 font-geistMono">
-          Yet to register your child/Ward?{" "}
+          Back to{" "}
           <a
-            href="#"
+            href="/register"
             className="text-orange-600 hover:text-orange-700 font-medium"
           >
             Register

@@ -1,7 +1,9 @@
+'use client'
 import { BookOpenText, GraduationCap, UserRoundPen } from "lucide-react";
 import Countdown from "../countdown";
 import React from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const mainTitle = "Welcome to Akwa Ibom State Schools Portal";
 const subTitle = `Streamlining Educational Registration, Database Management for all
@@ -11,12 +13,16 @@ const govImage =
   "https://vip.akwaibomstate.gov.ng/wp-content/uploads/2023/07/pueiii1.webp";
 
 const Hero = () => {
+  const { push } = useRouter();
   const statistics = [
     { icon: <BookOpenText size={50} />, value: 50, unit: "Schools" },
     { icon: <UserRoundPen size={50} />, value: 100, unit: "Teachers" },
     { icon: <GraduationCap size={50} />, value: 100, unit: "Students" },
   ];
 
+  const handleLogin = () => {
+    push("/register");
+  };
   return (
     <div className="2xl:px-[15%] hero bg-transparent h-auto flex flex-col lg:flex-row justify-center items-center lg:items-end gap-6 p-4 lg:p-0">
       <div className="bg-transparent w-full lg:w-1/2 flex flex-col justify-between gap-4 md:gap-8">
@@ -27,7 +33,11 @@ const Hero = () => {
           {subTitle}
         </p>
         <div className="flex justify-center lg:justify-start">
-          <button className=" bg-primary px-10 py-4 w-max text-white hover:bg-opacity-70">
+          <button
+            onClick={handleLogin}
+            type="button"
+            className=" bg-primary px-10 py-4 w-max text-white hover:bg-opacity-70"
+          >
             Get Started
           </button>
         </div>

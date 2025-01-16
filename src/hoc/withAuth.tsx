@@ -2,6 +2,7 @@
 "use client";
 
 import LoaderSpin from "@/components/loader/LoaderSpin";
+import { signingOut } from "@/firebase/onboarding";
 import { RootState } from "@/store";
 import { setUser } from "@/store/slices/auth";
 import { useRouter } from "next/navigation";
@@ -43,7 +44,9 @@ const withAuth = (
           requiredRole &&
           ((role && role !== requiredRole) || jsonUser.role !== requiredRole)
         ) {
-          router.replace("/unauthorized");
+          signingOut().then(() => {
+            router.replace("/unauthorized");
+          });
         } else if (
           requiredRole &&
           ((role && role === requiredRole) || jsonUser.role === requiredRole)

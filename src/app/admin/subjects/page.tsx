@@ -1,13 +1,14 @@
 "use client";
-import { AdminDashboardPage } from "@/components/admin/dashboard";
+
 import { AdminLayout } from "@/components/admin/layout";
+import { AdminSubjectsPage } from "@/components/admin/subjects";
 import withAuth from "@/hoc/withAuth";
 import React from "react";
 
 const AdminDashboard: React.FC = () => {
   return (
     <AdminLayout>
-      <AdminDashboardPage />
+      <AdminSubjectsPage />
     </AdminLayout>
   );
 };

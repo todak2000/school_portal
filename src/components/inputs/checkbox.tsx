@@ -19,7 +19,7 @@ const Checkbox: React.FC<CheckboxProps> = React.memo(({
         value={value}
         checked={checked}
         onChange={(e) => onChange(value, e.target.checked)}
-        className="form-checkbox h-5 w-5 text-primary"
+        className="form-checkbox h-5 w-5 text-primary custom-checkbox rounded-none"
       />
       <span className=" text-gray-200 font-geistMono">{label}</span>
     </label>

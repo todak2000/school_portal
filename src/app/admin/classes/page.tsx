@@ -1,5 +1,5 @@
 "use client";
-import { AdminDashboardPage } from "@/components/admin/dashboard";
+import { AdminClassPage } from "@/components/admin/classes";
 import { AdminLayout } from "@/components/admin/layout";
 import withAuth from "@/hoc/withAuth";
 import React from "react";
@@ -7,7 +7,7 @@ import React from "react";
 const AdminDashboard: React.FC = () => {
   return (
     <AdminLayout>
-      <AdminDashboardPage />
+      <AdminClassPage />
     </AdminLayout>
   );
 };

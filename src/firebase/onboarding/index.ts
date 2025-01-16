@@ -9,6 +9,7 @@ import {
   signOut,
   UserCredential,
   sendEmailVerification,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 
 import { firebaseAuth, storage } from "..";
@@ -271,6 +272,8 @@ export const adminSignup = async (
       await addAdminDataToDatabase(result.user, name);
       // Send verification email
       await sendVerificationEmail(result.user);
+      // Send reset password to admin email
+      await resetPasswordEmail(email);
       return {
         status: 200,
         userid: result.user.uid,
@@ -319,13 +322,13 @@ export const adminLogin = async (
     if (result.user) {
       // Retrieve admin user data from the database
       const userData = await getUserData(result.user.uid, "admin");
-
+      console.log(userData, "user data-203030");
       // Check if the user is deactivated
-      if (userData && userData.isDeactivated) {
+      if ((userData && userData.isDeactivated) || !userData) {
         await handleDeactivatedUser();
         return {
           status: 400,
-          message: "Oops! You are not authorized to access this app.",
+          message: "Oops! You are not authorized to access this Admin portal",
         };
       }
       typeof window !== "undefined" &&
@@ -567,11 +570,11 @@ export const userSignin = async (data: LoginData): Promise<LoginResponse> => {
       }
 
       // Check if the user is deactivated
-      if (userData && userData.isDeactivated) {
+      if ((userData && userData.isDeactivated) || !userData) {
         await handleDeactivatedUser();
         return {
           status: 400,
-          message: "Oops! You are not authorized to access this app.",
+          message: "Oops! You are not authorized to access",
         };
       }
       typeof window !== "undefined" &&
@@ -637,4 +640,28 @@ const uploadImage = async (
     url: downloadURL,
     path: `images/${fileName}`,
   };
+};
+
+/**
+ * Sends a verification email to the user and handles potential errors.
+ * @param email - User email.
+ * @returns A promise object that resolves when the email is sent.
+ */
+export const resetPasswordEmail = async (
+  email: string
+): Promise<Record<string, any>> => {
+  try {
+    await sendPasswordResetEmail(firebaseAuth, email);
+
+    return {
+      status: 200,
+      message: `Password reset email sent to ${email}`,
+    };
+  } catch (error: any) {
+    console.error("Error sending password reset email:", error.message);
+    return {
+      status: 500,
+      message: "Error sending password reset email.",
+    };
+  }
 };

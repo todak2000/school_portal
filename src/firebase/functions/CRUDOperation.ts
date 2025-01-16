@@ -73,25 +73,13 @@ export default class CRUDOperation<T> {
     try {
       const docRef = doc(db, this.collectionName, uid);
       const docSnap = await getDoc(docRef);
-  
+
       return docSnap.exists() ? docSnap.data() : null;
     } catch (error: unknown) {
       throw new Error(errMessage);
     }
   }
-  
 
-  // async getDataByUID(uid: string) {
-  //   try {
-  //     const querySnapshot = await getDocs(
-  //       query(collection(db, this.collectionName), where("id", "==", uid))
-  //     );
-
-  //     return !querySnapshot.empty ? querySnapshot.docs[0].data() : null;
-  //   } catch (error: unknown) {
-  //     throw new Error(errMessage);
-  //   }
-  // }
   async getDataByField(
     field: string,
     value: any
@@ -120,6 +108,16 @@ export default class CRUDOperation<T> {
         error
       );
       return null;
+    }
+  }
+  async getAllData(): Promise<Record<string, any>[]> {
+    try {
+      const querySnapshot = await getDocs(collection(db, this.collectionName));
+      const data = querySnapshot.docs.map((doc) => doc.data());
+      return data;
+    } catch (error: any) {
+      console.error(`Error fetching data:`, error);
+      return [];
     }
   }
 }

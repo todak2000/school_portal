@@ -117,7 +117,6 @@ const SignIn = React.memo(() => {
         identifier: formData.email,
         password: formData.password,
       });
-      setLoading(false);
       setAlert({
         message: res.message,
         type: res.status === 200 ? "success" : "error",
@@ -130,12 +129,14 @@ const SignIn = React.memo(() => {
       }
     } catch (error: any) {
       console.log("Sign in error:", error);
-      setLoading(false);
+      
       setAlert({
         message: "An unexpected error occurred. Please try again.",
         type: "error",
       });
-    } 
+    } finally{
+      setLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
