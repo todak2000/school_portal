@@ -6,10 +6,10 @@ import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { StatsCard } from "@/components/statsCard";
 import { UserInfo } from "@/components/userInfo";
 import DataTable, { DataTableColumn } from "@/components/table";
-import { schoolsArr } from "@/constants/schools";
+import { studentsArr } from "@/constants/schools";
 
 // Avatar component to display the school logo
-const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
+export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
   // Function to get the initial letters
   const getInitials = (name: string): string => {
     const words = name?.split(" ");
@@ -43,17 +43,21 @@ const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
 const columns: DataTableColumn[] = [
   {
     key: "avatar",
-    label: "Logo",
+    label: "Passport",
     sortable: false,
-    render: (schoolName) => <Avatar schoolName={schoolName} />,
+    render: (studentName) => <Avatar schoolName={studentName} />,
   },
-  { key: "code", label: "School ID", sortable: false },
-  { key: "name", label: "School Name", sortable: true },
-  { key: "lga", label: "L.G.A", sortable: true },
+  { key: "studentId", label: "Student ID", sortable: false },
+  { key: "fullname", label: "Student Name", sortable: false },
+  { key: "email", label: "Email", sortable: false },
+  { key: "schoolId", label: "School", sortable: true },
+  { key: "gender", label: "gender", sortable: true },
+  { key: "dob", label: "Date of Birth", sortable: false },
+  { key: "classId", label: "Class", sortable: true },
   
 ];
 
-const AdminSchoolsPage = React.memo(() => {
+const AdminStudentsPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   const today = useMemo(() => getFormattedDate(), []);
@@ -75,7 +79,7 @@ const AdminSchoolsPage = React.memo(() => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[{ title: "Total Number of Schools", value: schoolsArr?.length }].map(
+        {[{ title: "Total Number of Students", value: studentsArr?.length }].map(
           (stat, index) => (
             <StatsCard key={index} title={stat.title} value={stat.value} />
           )
@@ -84,9 +88,9 @@ const AdminSchoolsPage = React.memo(() => {
 
       {/* Projects Section */}
       <DataTable
-        data={schoolsArr}
+        data={studentsArr}
         columns={columns}
-        editableKeys={["name","lga", "description"]}
+        editableKeys={['fullname', 'phone', 'guardian','gender','dob', 'address', 'schoolId', 'classId']}
         defaultForm={{
           name: "",
           lga: "",
@@ -94,11 +98,12 @@ const AdminSchoolsPage = React.memo(() => {
           description: "",
           avatar: null,
         }}
-        searchableColumns={["name", "lga", "description"]}
-        filterableColumns={["name", "lga"]}
+        isMain={true}
+        searchableColumns={["fullname", "email", "guardian"]}
+        filterableColumns={[ "classId", "schoolId", 'gender']}
       />
     </main>
   );
 });
-AdminSchoolsPage.displayName = "AdminSchoolsPage";
-export { AdminSchoolsPage };
+AdminStudentsPage.displayName = "AdminStudentsPage";
+export { AdminStudentsPage };

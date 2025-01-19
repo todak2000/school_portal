@@ -45,6 +45,7 @@ const AdminSubjectsPage = React.memo(() => {
       {/* Projects Section */}
       <DataTable
         data={sampleSubjects}
+        editableKeys={["name"]}
         columns={columns}
         defaultForm={{ name: "", subjectId: "" }}
         searchableColumns={["name", "subjectId"]}

@@ -16,6 +16,8 @@ export interface DataTableProps<T> {
   selectable?: boolean;
   filterableColumns?: string[];
   searchableColumns?: string[];
+  editableKeys: string[];
+  isMain?: boolean;
 }
 
 type SortConfig = {
@@ -40,6 +42,8 @@ import {
   SortDesc,
 } from "lucide-react";
 import EditDeleteModal from "./editDelete";
+import { useDispatch } from "react-redux";
+import { setModal } from "@/store/slices/modal";
 
 const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   data,
@@ -48,6 +52,8 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   selectable = true,
   filterableColumns = [],
   searchableColumns = [],
+  editableKeys = [],
+  isMain = false,
 }: DataTableProps<T>) {
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,6 +64,8 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState<T | null>(null);
   const [isEditMode, setIsEditMode] = useState<boolean>(true);
+  const dispatch = useDispatch();
+
   // Handle selection
   const handleSelectAll = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,14 +192,40 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   // Modal
 
   const handleOpenModal = (data: any, editMode: boolean) => {
-    setModalData(data);
-    setIsEditMode(editMode);
-    setShowModal(true);
+    if (isMain) {
+      dispatch(
+        setModal({
+          open: true,
+          type: "profile",
+          data: {
+            user: data,
+            onSave: () => null,
+            onCancel: handleCloseModal,
+            onDelete: () => null,
+          },
+        })
+      );
+    } else {
+      setModalData(data);
+      setIsEditMode(editMode);
+      setShowModal(true);
+    }
   };
 
   const handleCloseModal = () => {
-    setShowModal(false);
-    setModalData(null);
+    console.log("hiii");
+    if (isMain) {
+      dispatch(
+        setModal({
+          open: false,
+          type: "",
+        })
+      );
+    } else {
+      setModalData(null);
+      setShowModal(false);
+      setModalData(null);
+    }
   };
 
   const handleEditItem = (updatedItem: T) => {
@@ -388,7 +422,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((item, index) => (
+            {paginatedData?.map((item, index) => (
               <tr
                 key={index}
                 className="border-b hover:bg-orange-50 border-[0.5px] border-gray-300 text-black font-geistMono"
@@ -405,9 +439,12 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
                 )}
                 {columns.map((column, index) => (
                   <td key={index}>
-                    {column.render
+                    {" "}
+                    {column.render && column.key === "avatar"
+                      ? column.render(item?.name || item?.fullname, item)
+                      : column.render && column.key !== "avatar"
                       ? column.render(getNestedValue(item, column.key), item)
-                      : String(getNestedValue(item, column.key) ?? "")}
+                      : String(getNestedValue(item, column.key) ?? "")}{" "}
                   </td>
                 ))}
                 <td>
@@ -425,16 +462,19 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
       </div>
 
       {/* Modal */}
-      <EditDeleteModal
-        showModal={showModal}
-        modalData={modalData}
-        handleCloseModal={handleCloseModal}
-        handleEditItem={handleEditItem}
-        handleDeleteItem={handleDeleteItem}
-        handleCreateItem={handleCreateItem}
-        setModalData={setModalData}
-        isEditMode={isEditMode}
-      />
+      {!isMain && (
+        <EditDeleteModal
+          showModal={showModal}
+          modalData={modalData}
+          handleCloseModal={handleCloseModal}
+          handleEditItem={handleEditItem}
+          handleDeleteItem={handleDeleteItem}
+          handleCreateItem={handleCreateItem}
+          setModalData={setModalData}
+          editableKeys={editableKeys}
+          isEditMode={isEditMode}
+        />
+      )}
     </div>
   );
 });

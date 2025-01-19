@@ -10,6 +10,7 @@ interface EditDeleteModalProps {
   handleCreateItem: (data: any) => void;
   setModalData: React.Dispatch<React.SetStateAction<any>>;
   isEditMode: boolean;
+  editableKeys: string[];
 }
 
 const EditDeleteModal: React.FC<EditDeleteModalProps> = ({
@@ -21,6 +22,7 @@ const EditDeleteModal: React.FC<EditDeleteModalProps> = ({
   handleCreateItem,
   setModalData,
   isEditMode,
+  editableKeys
 }) => {
   if (!showModal || !modalData) return null;
 
@@ -36,11 +38,13 @@ const EditDeleteModal: React.FC<EditDeleteModalProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-4 rounded-lg shadow-lg min-w-[90vw] md:min-w-[35vw] max-w-[50vw]">
+      <div className="bg-white p-4 rounded-lg shadow-lg min-w-[90vw] md:min-w-[35vw] max-w-[50vw] max-h-[60vh] overflow-y-auto">
         <h2 className="text-lg font-bold mb-4 text-secondary">
           {isEditMode ? "Edit/Delete Item" : "Create Item"}
         </h2>
-        {Object.keys(modalData).map((key) => (
+        {/* {Object.keys(modalData).map((key) => ( */}
+        {editableKeys.map((key) => (
+          // 
           <div key={key} className="mb-4">
             <label className="block mb-2 capitalize font-geistMono">{key}</label>
             <input

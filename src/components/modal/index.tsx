@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangePassword } from "../onboarding/changePassword";
 import { ForgotPassword } from "../onboarding/forgotPassword";
 import { ResetPassword } from "../onboarding/resetPassword";
 import { SignIn } from "../onboarding/signin";
+import UserProfileEdit from "../profile";
 
 export const ModalChild = (
   type: string,
-  data?: string | number | unknown | object
+  data?: string | number | unknown | object | Record<string, any>
 ) => {
   switch (type) {
     case "login":
@@ -16,6 +18,8 @@ export const ModalChild = (
       return <ResetPassword />;
     case "change-password":
       return <ChangePassword />;
+    case "profile":
+      return <UserProfileEdit data={data as Record<string, any>} />;
     default:
       return (
         <span>

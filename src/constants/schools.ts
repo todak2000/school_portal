@@ -1,3 +1,6 @@
+import { generateTeacherID } from "@/helpers/generateStudentID";
+import { Timestamp } from "firebase/firestore";
+
 interface LGA {
   name: string;
   code: string;
@@ -467,4 +470,77 @@ export const schoolsArr = [
     description: "lorem ipsum",
     avatar: null,
   },
+];
+
+
+export const studentsArr = [
+  {
+    id: "student1",
+    createdAt: Timestamp.fromDate(new Date()),
+    email: "student1@example.com",
+    studentId: "AKS/UYO/001",
+    fullname: "John Doe",
+    passportUrl: "",
+    birthCertificateUrl: "",
+    schoolId: "CSSS-INS-UR",
+    phone: "08012345678",
+    subjectsOffered: ["MTH", "ENG"],
+    role: "student",
+    guardian: "Jane Doe",
+    gender: "M",
+    dob: "2005-05-12",
+    address: "1234 Elm Street",
+    classId: "JSS1",
+    isDeactivated: false,
+  },
+  {
+    id: "student2",
+    createdAt: Timestamp.fromDate(new Date()),
+    email: "student2@example.com",
+    studentId: "AKS/UYO/002",
+    fullname: "Mary Jane",
+    passportUrl: "",
+    birthCertificateUrl: "",
+    schoolId: "CSSS-IUO-UK",
+    phone: "08023456789",
+    subjectsOffered: ["MTH", "ENG"],
+    role: "student",
+    guardian: "John Smith",
+    gender: "F",
+    dob: "2005-06-15",
+    address: "5678 Maple Avenue",
+    classId: "JSS2",
+    isDeactivated: false,
+  },
+  // Add more students as needed...
+];
+
+export const teachersArr = [
+  {
+    id: "teacher1",
+    createdAt: Timestamp.fromDate(new Date()),
+    email: "teacher1@example.com",
+    fullname: "Alice Johnson",
+    teacherId: generateTeacherID("CSSS-IUO-UK"),
+    schoolId: "CSSS-IUO-UK",
+    subjectsTaught: ["MTH", "ENG"], // Example subjects
+    isAdmin: true,
+    role: "teacher",
+    isSuperAdmin: true,
+    isDeactivated: false,
+  },
+  {
+    id: "teacher2",
+    createdAt: Timestamp.fromDate(new Date()),
+    email: "teacher2@example.com",
+    fullname: "Bob Smith",
+    teacherId: generateTeacherID("CSSS-INS-UR"),
+    schoolId: "CSSS-INS-UR",
+    subjectsTaught: ["ENG"],
+    isAdmin: true,
+    role: "teacher",
+    isSuperAdmin: false,
+    isDeactivated: false,
+  },
+  // Add more teacher objects as needed...
 ];
