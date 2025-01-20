@@ -1,12 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useMemo } from "react";
-import { useSelector } from "react-redux";
+import React, { useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { StatsCard } from "@/components/statsCard";
 import { UserInfo } from "@/components/userInfo";
-import DataTable, { DataTableColumn } from "@/components/table";
+import { DataTableColumn } from "@/components/table";
 import { studentsArr } from "@/constants/schools";
+import { setModal } from "@/store/slices/modal";
+import { generateStudentID } from "@/helpers/generateStudentID";
+import { key } from "@/helpers/uniqueKey";
+import FirebaseDataTable from "@/components/firebaseTable";
+import Collection from "@/firebase/db";
+import { deleteUserDoc, updateUserDoc } from "@/firebase/onboarding";
 
 // Avatar component to display the school logo
 export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -51,18 +58,94 @@ const columns: DataTableColumn[] = [
   { key: "fullname", label: "Student Name", sortable: false },
   { key: "email", label: "Email", sortable: false },
   { key: "schoolId", label: "School", sortable: true },
-  { key: "gender", label: "gender", sortable: true },
-  { key: "dob", label: "Date of Birth", sortable: false },
   { key: "classId", label: "Class", sortable: true },
-  
 ];
 
 const AdminStudentsPage = React.memo(() => {
+  const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
-
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [students, setStudents] =
+    useState<Record<string, string | boolean | string[]>[]>(studentsArr);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
-  //
+  const closeModal = () => {
+    dispatch(
+      setModal({
+        open: false,
+        type: "",
+      })
+    );
+  };
+  const id = `${key()}`;
+  const handleCreateStudent = (
+    data: Record<string, string | boolean | string[]>
+  ) => {
+    // Create a new teacher object
+    const newTeacher = {
+      ...data,
+      id, // Generate a unique ID
+      studentId: generateStudentID(data.schoolId as string),
+      isDeactivated: false,
+    };
+
+    // Update the students state with the new student
+    setStudents((prev: Record<string, string | boolean | string[]>[]) => [
+      ...prev,
+      newTeacher,
+    ]);
+    closeModal();
+  };
+
+  const handleEditStudent = async (
+    data: Record<string, string | boolean | string[]>
+  ) => {
+    // Update the item in the main data
+    try {
+      const res = await updateUserDoc(
+        "student",
+        data.id as string,
+        data,
+        user?.role as "admin"
+      );
+
+      if (res.status === 200) {
+        setStudents((prev: Record<string, string | boolean | string[]>[]) =>
+          prev.map((student) =>
+            student.id === data.id ? { ...student, ...data } : student
+          )
+        );
+        setTimeout(() => {
+          closeModal();
+        }, 2000);
+      }
+      return res;
+    } catch (error: any) {
+      console.log("Update error:", error);
+      return error;
+    }
+  };
+
+  const handleDeleteStudent = async (id: string) => {
+    // Remove the student from the state
+
+    try {
+      const res = await deleteUserDoc("student", id, user?.role as "admin");
+
+      if (res.status === 200) {
+        setStudents((prev: Record<string, string | boolean | string[]>[]) =>
+          prev.filter((student) => student.id !== id)
+        );
+        setTimeout(() => {
+          closeModal();
+        }, 2000);
+      }
+      return res;
+    } catch (error: any) {
+      console.log("Delete error:", error);
+      return error;
+    }
+  };
   return (
     <main className="flex-1 p-6">
       {/* Header */}
@@ -79,7 +162,7 @@ const AdminStudentsPage = React.memo(() => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[{ title: "Total Number of Students", value: studentsArr?.length }].map(
+        {[{ title: "Total Number of Students", value: totalCount }].map(
           (stat, index) => (
             <StatsCard key={index} title={stat.title} value={stat.value} />
           )
@@ -87,20 +170,20 @@ const AdminStudentsPage = React.memo(() => {
       </div>
 
       {/* Projects Section */}
-      <DataTable
-        data={studentsArr}
+      <FirebaseDataTable
+        collectionName={Collection.Students_Parents}
+        data={students}
+        setTotalCount={setTotalCount}
+        setData={setStudents}
         columns={columns}
-        editableKeys={['fullname', 'phone', 'guardian','gender','dob', 'address', 'schoolId', 'classId']}
-        defaultForm={{
-          name: "",
-          lga: "",
-          code: "",
-          description: "",
-          avatar: null,
-        }}
-        isMain={true}
+        defaultSort={{ field: "createdAt", direction: "desc" }}
+        defaultForm={null}
         searchableColumns={["fullname", "email", "guardian"]}
-        filterableColumns={[ "classId", "schoolId", 'gender']}
+        // filterableColumns={["classId", "schoolId",]}
+        onCreate={handleCreateStudent}
+        onDelete={handleDeleteStudent}
+        onEdit={handleEditStudent}
+        role="student"
       />
     </main>
   );

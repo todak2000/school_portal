@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
@@ -7,6 +7,7 @@ import { StatsCard } from "@/components/statsCard";
 import { UserInfo } from "@/components/userInfo";
 import DataTable, { DataTableColumn } from "@/components/table";
 import { schoolsArr } from "@/constants/schools";
+import { generateSchoolCode } from "@/helpers/generateStudentID";
 
 // Avatar component to display the school logo
 const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -50,15 +51,43 @@ const columns: DataTableColumn[] = [
   { key: "code", label: "School ID", sortable: false },
   { key: "name", label: "School Name", sortable: true },
   { key: "lga", label: "L.G.A", sortable: true },
-  
 ];
 
 const AdminSchoolsPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
-
+  const [schools, setSchools] =
+    useState<Record<string, string | null>[]>(schoolsArr);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
-  //
+
+  const handleCreateSchool = (data: Record<string, string | null>) => {
+    // Create a new school object
+    const newSchool = {
+      ...data,
+      code: generateSchoolCode(data?.name as string, data.lga as string),
+      avatar: null,
+    };
+
+    // Update the students state with the new student
+    setSchools((prev: Record<string, string | null>[]) => [...prev, newSchool]);
+  };
+
+  const handleEditSchool = (data: Record<string, string | null>) => {
+    // Update the item in the main data
+    setSchools((prev: Record<string, string | null>[]) =>
+      prev.map((school) =>
+        school.code === data.code ? { ...school, ...data } : school
+      )
+    );
+  };
+
+  const handleDeleteSchool = (code: string) => {
+    // Remove the school from the state
+    setSchools((prev: Record<string, string | null>[]) =>
+      prev.filter((school) => school.code !== code)
+    );
+  };
+
   return (
     <main className="flex-1 p-6">
       {/* Header */}
@@ -75,7 +104,7 @@ const AdminSchoolsPage = React.memo(() => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[{ title: "Total Number of Schools", value: schoolsArr?.length }].map(
+        {[{ title: "Total Number of Schools", value: schools?.length }].map(
           (stat, index) => (
             <StatsCard key={index} title={stat.title} value={stat.value} />
           )
@@ -84,9 +113,9 @@ const AdminSchoolsPage = React.memo(() => {
 
       {/* Projects Section */}
       <DataTable
-        data={schoolsArr}
+        data={schools}
         columns={columns}
-        editableKeys={["name","lga", "description"]}
+        editableKeys={["name", "lga", "description"]}
         defaultForm={{
           name: "",
           lga: "",
@@ -96,6 +125,10 @@ const AdminSchoolsPage = React.memo(() => {
         }}
         searchableColumns={["name", "lga", "description"]}
         filterableColumns={["name", "lga"]}
+        onCreate={handleCreateSchool}
+        onDelete={handleDeleteSchool}
+        onEdit={handleEditSchool}
+        role="school"
       />
     </main>
   );

@@ -2,12 +2,12 @@
 
 "use client";
 import React, { useState, useEffect, ChangeEvent } from "react";
-import { sampleSubjects, schoolsArr } from "@/constants/schools";
+import { sampleClasses, sampleSubjects, schoolsArr } from "@/constants/schools";
 import { InputField } from "../inputs/text";
-import { formDataa, formFields } from "@/constants/form";
+import { teacherFormData, teacherFormFields } from "@/constants/form";
 import { SelectField } from "../inputs/select";
 import { Checkbox } from "../inputs/checkbox";
-import { validateField, validateForm } from "@/helpers/validator";
+import { validateTeacherField, validateTeacherForm } from "@/helpers/validator";
 import LoaderSpin from "../loader/LoaderSpin";
 import Alert from "../alert";
 import { userSignup } from "@/firebase/onboarding";
@@ -23,23 +23,19 @@ export interface School {
   avatar: string | null;
 }
 
-export interface StudentFormData {
+export interface TeacherFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  name: string;
-  guardian: string;
-  gender: "M" | "F";
-  dateOfBirth: string;
-  address: string;
-  class: string;
-  lga: string;
+  fullname: string;
+  isAdmin: boolean;
+  isDeactivated: boolean;
+  isSuperAdmin: boolean;
+  role: "teacher" | "admin" | "student";
   school: string;
-  subjectsOffered: string[];
-  passportUrl: string | Blob;
-  birthCertificateUrl: string | Blob;
-  phone: string;
-  role: "student" | "parent";
+  subjectsTaught: string[];
+  classesTaught: string[];
+  teacherId: string;
 }
 
 export interface FormErrors {
@@ -53,21 +49,20 @@ const getLocalStorage = () => {
   return null;
 };
 
-const SignUp = () => {
+const SignUpTeacher = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [alert, setAlert] = useState<{
     message: string;
     type: "error" | "success" | "warning";
   }>({ message: "", type: "error" });
-  const [formData, setFormData] = useState<StudentFormData>(() => ({
-    ...formDataa,
-    gender: formDataa.gender as "M" | "F",
-    role: "student",
+  const [formData, setFormData] = useState<TeacherFormData>(() => ({
+    ...teacherFormData,
+    role: "teacher" as "teacher" | "admin" | "student",
+    subjectsTaught: [] as string[],
+    classesTaught: [] as string[],
   }));
   const dispatch = useDispatch();
   const { push } = useRouter();
-  const [availableSchools, setAvailableSchools] =
-    useState<School[]>(schoolsArr);
   const [errors, setErrors] = useState<FormErrors>({});
 
   // Visibility state for password fields
@@ -79,20 +74,6 @@ const SignUp = () => {
   if (storage) {
     // Use localStorage here
   }
-
-  // Update available schools based on selected LGA
-  useEffect(() => {
-    if (formData.lga) {
-      const filteredSchools = schoolsArr.filter(
-        (school) => school.lga === formData.lga
-      );
-      setAvailableSchools(filteredSchools);
-      setFormData((prev) => ({ ...prev, school: "" }));
-    } else {
-      setAvailableSchools([]);
-      setFormData((prev) => ({ ...prev, school: "" }));
-    }
-  }, [formData.lga]);
 
   // Handle input changes with validation
   const handleChange = (
@@ -106,13 +87,18 @@ const SignUp = () => {
         ...prev,
         [name]: value,
       }));
-      validateField(name as keyof StudentFormData, value, setErrors, formData);
+      validateTeacherField(
+        name as keyof TeacherFormData,
+        value,
+        setErrors,
+        formData
+      );
     }
   };
 
   // Handle Subjects Offered Change
   const handleSubjectChange = (value: string, checked: boolean) => {
-    let updatedSubjects = [...formData.subjectsOffered];
+    let updatedSubjects = [...formData.subjectsTaught];
     if (checked) {
       updatedSubjects.push(value);
     } else {
@@ -120,21 +106,56 @@ const SignUp = () => {
     }
     setFormData((prev) => ({
       ...prev,
-      subjectsOffered: updatedSubjects,
+      subjectsTaught: updatedSubjects,
     }));
-    validateField("subjectsOffered", updatedSubjects, setErrors, formData);
+    validateTeacherField(
+      "subjectsTaught",
+      updatedSubjects,
+      setErrors,
+      formData
+    );
+  };
+
+  // Handle Classes Offered Change
+  const handleClassChange = (value: string, checked: boolean) => {
+    let updatedClasses = [...formData.classesTaught];
+    if (checked) {
+      updatedClasses.push(value);
+    } else {
+      updatedClasses = updatedClasses.filter((subject) => subject !== value);
+    }
+    setFormData((prev) => ({
+      ...prev,
+      classesTaught: updatedClasses,
+    }));
+    validateTeacherField("classesTaught", updatedClasses, setErrors, formData);
   };
 
   // Remove subject from badges
   const removeSubject = (subject: string) => {
-    const updatedSubjects = formData.subjectsOffered.filter(
+    const updatedSubjects = formData.subjectsTaught.filter(
       (s) => s !== subject
     );
     setFormData((prev) => ({
       ...prev,
-      subjectsOffered: updatedSubjects,
+      subjectsTaught: updatedSubjects,
     }));
-    validateField("subjectsOffered", updatedSubjects, setErrors, formData);
+    validateTeacherField(
+      "subjectsTaught",
+      updatedSubjects,
+      setErrors,
+      formData
+    );
+  };
+
+  // Remove Classes from badges
+  const removeClasses = (classs: string) => {
+    const updatedClasses = formData.classesTaught.filter((s) => s !== classs);
+    setFormData((prev) => ({
+      ...prev,
+      classesTaught: updatedClasses,
+    }));
+    validateTeacherField("classesTaught", updatedClasses, setErrors, formData);
   };
 
   // Handle form submission
@@ -142,7 +163,7 @@ const SignUp = () => {
     setLoading(true);
     e.preventDefault();
 
-    const isValid = validateForm(setErrors, formData);
+    const isValid = validateTeacherForm(setErrors, formData);
     if (!isValid) {
       console.log("Validation failed:", errors);
       setAlert({
@@ -192,13 +213,13 @@ const SignUp = () => {
         <div className="card bg-gradient-to-r via-secondary from-secondary to-green-500 shadow-xl">
           <div className="card-body">
             <h2 className="card-title text-2xl font-bold mb-6 font-geistMono">
-              Student Registration Form
+              Teacher Registration Form
             </h2>
 
             <form className="space-y-6">
               {/* Map through formFields to render inputs */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {formFields
+                {teacherFormFields
                   .slice(0, 4)
                   .map((field) =>
                     field.type === "input" ? (
@@ -238,7 +259,7 @@ const SignUp = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {formFields.slice(4, 12).map((field) =>
+                {teacherFormFields.slice(4, 12).map((field) =>
                   field.type === "input" ? (
                     <InputField
                       key={field.name}
@@ -265,8 +286,8 @@ const SignUp = () => {
                       name={field.name}
                       options={
                         field.name === "school"
-                          ? availableSchools.length > 0
-                            ? availableSchools.map((school) => ({
+                          ? schoolsArr.length > 0
+                            ? schoolsArr.map((school) => ({
                                 label: school.name,
                                 value: school.code,
                               }))
@@ -289,11 +310,6 @@ const SignUp = () => {
                       onChange={handleChange}
                       required={field.required}
                       multiple={false}
-                      disabled={
-                        field.name === "school" && formData["lga"] !== ""
-                          ? false
-                          : field.disabled
-                      }
                       error={errors[field.name]}
                     />
                   ) : null
@@ -304,7 +320,7 @@ const SignUp = () => {
               <div className="form-control">
                 <label className="label">
                   <span className="label-text font-geistMono">
-                    Subjects Offered*
+                    Subjects Taught*
                   </span>
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -314,21 +330,21 @@ const SignUp = () => {
                       key={subject.subjectId}
                       label={subject.name}
                       value={subject.subjectId}
-                      checked={formData.subjectsOffered.includes(
+                      checked={formData.subjectsTaught.includes(
                         subject.subjectId
                       )}
                       onChange={handleSubjectChange}
                     />
                   ))}
                 </div>
-                {errors.subjectsOffered && (
+                {errors.subjectsTaught && (
                   <p className="text-red-500 text-sm mt-1">
-                    {errors.subjectsOffered}
+                    {errors.subjectsTaught}
                   </p>
                 )}
                 {/* Display selected subjects as badges */}
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.subjectsOffered.map((subjectId) => {
+                  {formData.subjectsTaught.map((subjectId) => {
                     const subject = sampleSubjects.find(
                       (subj) => subj.subjectId === subjectId
                     );
@@ -342,6 +358,57 @@ const SignUp = () => {
                           <button
                             type="button"
                             onClick={() => removeSubject(subjectId)}
+                            className="ml-1 text-primary"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      )
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Classes Taugh as Checkboxes */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-geistMono">
+                    Classes Taught*
+                  </span>
+                </label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {sampleClasses.map((c) => (
+                    <Checkbox
+                      disabled={false}
+                      key={c.classId}
+                      label={c.name}
+                      value={c.classId}
+                      checked={formData.classesTaught.includes(c.classId)}
+                      onChange={handleClassChange}
+                    />
+                  ))}
+                </div>
+                {errors.classesTaught && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.classesTaught}
+                  </p>
+                )}
+                {/* Display selected subjects as badges */}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.classesTaught.map((cId) => {
+                    const subject = sampleClasses.find(
+                      (subj) => subj.classId === cId
+                    );
+                    return (
+                      subject && (
+                        <span
+                          key={cId}
+                          className="badge bg-white text-gray-500 texxt-xs py-4 px-3 flex items-center space-x-1"
+                        >
+                          <span>{subject.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeClasses(cId)}
                             className="ml-1 text-primary"
                           >
                             ×
@@ -378,4 +445,4 @@ const SignUp = () => {
   );
 };
 
-export { SignUp };
+export { SignUpTeacher };

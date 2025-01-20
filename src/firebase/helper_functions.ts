@@ -3,12 +3,14 @@
 export interface AdminSignupData {
   email: string;
   password: string;
-  name: string;
+  name?: string;
+  fullname?:string
 }
 export interface UserSignupData {
   email: string;
   password: string;
-  name: string;
+  name?: string;
+  fullname?: string;
   role: "student" | "parent" | "admin" | "teacher";
   schoolId?: string;
   subjectsTaught?: string[];
@@ -18,7 +20,7 @@ export interface UserSignupData {
   phone?: string;
   subjectsOffered?: string[];
   guardian?: string;
-  gender?: "male" | "female";
+  gender?: "M" | "F";
   dob?: string;
   address?: string;
   classId?: string;
@@ -39,8 +41,9 @@ export interface AdminLoginData {
 export const validateSignupData = (
   data: AdminSignupData
 ): { valid: boolean; message?: string } => {
-  const { email, password, name } = data;
-  if (!email || !password || !name) {
+  const { email, password } = data;
+  const n = data.name? data?.name: data?.fullname
+  if (!email || !password || !n) {
     return { valid: false, message: "Email, password, and name are required." };
   }
   return { valid: true };

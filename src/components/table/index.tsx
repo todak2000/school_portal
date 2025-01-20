@@ -12,12 +12,16 @@ export type DataTableColumn = {
 export interface DataTableProps<T> {
   data: T[];
   columns: DataTableColumn[];
-  defaultForm: Record<string, any>;
+  defaultForm: Record<string, any> | null;
   selectable?: boolean;
+  role: string;
   filterableColumns?: string[];
   searchableColumns?: string[];
   editableKeys: string[];
   isMain?: boolean;
+  onCreate: (data: any) => void;
+  onEdit: (data: any) => void;
+  onDelete: (data: any) => void;
 }
 
 type SortConfig = {
@@ -31,7 +35,7 @@ const getNestedValue = (obj: any, path: string) => {
 };
 
 // DataTable.tsx
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Filter,
   Search,
@@ -54,9 +58,14 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   searchableColumns = [],
   editableKeys = [],
   isMain = false,
+  role,
+  onCreate,
+  onEdit,
+  onDelete,
 }: DataTableProps<T>) {
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [alert, setAlert] = useState({ message: "", type: "error" });
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,7 +74,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   const [modalData, setModalData] = useState<T | null>(null);
   const [isEditMode, setIsEditMode] = useState<boolean>(true);
   const dispatch = useDispatch();
-
+  
   // Handle selection
   const handleSelectAll = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,7 +172,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
 
     return processed;
   }, [data, searchTerm, sortConfig, filters, searchableColumns]);
-
+  
   // Pagination
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -171,7 +180,6 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   }, [processedData, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(processedData.length / itemsPerPage);
-
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -198,10 +206,12 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
           open: true,
           type: "profile",
           data: {
-            user: data,
-            onSave: () => null,
+            user: editMode ? data : { role },
+            editMode,
+            onCreate,
+            onEdit,
             onCancel: handleCloseModal,
-            onDelete: () => null,
+            onDelete,
           },
         })
       );
@@ -213,7 +223,6 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   };
 
   const handleCloseModal = () => {
-    console.log("hiii");
     if (isMain) {
       dispatch(
         setModal({
@@ -230,28 +239,60 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
 
   const handleEditItem = (updatedItem: T) => {
     // Update the item in the main data
-    const updatedData = data.map((item) =>
-      item === modalData ? updatedItem : item
-    );
+    onEdit(updatedItem);
     // Update the state with the new data
-    setSelectedItems(updatedData);
-    handleCloseModal();
+    // setSelectedItems(updatedData);
+    setAlert({
+      message: "Successful",
+      type:  "success",
+    })
+    setTimeout(() => {
+      handleCloseModal();
+    }, 2000);
   };
 
   const handleCreateItem = (data: any) => {
     // Perform create action here
+    onCreate(data);
     console.log("Created Data:", data);
-    handleCloseModal();
+    setAlert({
+      message: "Successful",
+      type:  "success",
+    })
+    setTimeout(() => {
+      handleCloseModal();
+    }, 2000);
+    
   };
 
-  const handleDeleteItem = () => {
-    // Remove the item from the main data
-    const updatedData = data.filter((item) => item !== modalData);
+  const handleDeleteItem = (data: any) => {
     // Update the state with the new data
-    setSelectedItems(updatedData);
-    handleCloseModal();
+    if (role === "school") {
+      onDelete(data.code);
+    } else if (role === "class") {
+      onDelete(data.classId);
+    } else if (role === "subject") {
+      onDelete(data.subjectId);
+    }
+    setAlert({
+      message: "Successful",
+      type:  "success",
+    })
+    // setSelectedItems(updatedData);
+    setTimeout(() => {
+      handleCloseModal();
+    }, 2000);
   };
 
+  useEffect(() => {
+    if (alert.message !== "") {
+      const timer = setTimeout(() => {
+        setAlert({ message: "", type: "error" });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [alert]);
+  
   return (
     <div className="w-full min-w-[85vw] md:min-w-[80vw] md:max-w-[85vw] bg-white border-none">
       {/* Header */}
@@ -306,7 +347,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
                   disabled={currentPage !== 1}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="input w-[150px] md:w-full input-bordered pl-10 bg-orange-100 border-none rounded-none"
+                  className="input w-[150px] md:w-full input-bordered pl-10 bg-orange-100 border-none rounded-none focus:outline-none focus:text-black"
                 />
               </div>
             )}
@@ -468,6 +509,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
           modalData={modalData}
           handleCloseModal={handleCloseModal}
           handleEditItem={handleEditItem}
+          alert={alert}
           handleDeleteItem={handleDeleteItem}
           handleCreateItem={handleCreateItem}
           setModalData={setModalData}
@@ -478,5 +520,4 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
     </div>
   );
 });
-
 export default React.memo(DataTable);

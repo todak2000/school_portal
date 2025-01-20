@@ -1,9 +1,10 @@
 import React, { ChangeEvent } from "react";
 import { StudentFormData } from "../onboarding/signup";
+import { TeacherFormData } from "../onboarding/signupTeacher";
 
 export interface SelectFieldProps {
     label: string;
-    name: keyof StudentFormData;
+    name: keyof StudentFormData | keyof TeacherFormData;
     options: { label: string; value: string }[];
     value: string | number | string[];
     onChange: (e: ChangeEvent<HTMLSelectElement>) => void;

@@ -93,10 +93,11 @@ export const addUserDataToDatabase = async (
       id: user.uid,
       createdAt: Timestamp.fromDate(new Date()),
       email: user.email,
-      fullname: data.name,
-      teacherId: generateTeacherID(data.school),
-      schoolId: data.school,
+      fullname: data.fullname,
+      teacherId: generateTeacherID(data.school?data.school:data.schoolId),
+      schoolId: data.school?data.school:data.schoolId,
       subjectsTaught: data.subjectsTaught ?? [], //an array of subject ids
+      classesTaught: data.classesTaught ?? [],
       isAdmin: true,
       role: "teacher",
       isSuperAdmin: data.isSuperAdmin ?? false,
@@ -269,7 +270,7 @@ export const adminSignup = async (
 
     if (result.user) {
       // Add admin-specific data to the database
-      await addAdminDataToDatabase(result.user, name);
+      await addAdminDataToDatabase(result.user, name as string);
       // Send verification email
       await sendVerificationEmail(result.user);
       // Send reset password to admin email
@@ -421,7 +422,7 @@ export const userSignup = async (
     };
   }
 
-  const { email, password, name, role } = data;
+  const { email, password, role } = data;
 
   // Ensure the role is valid
   if (!["teacher", "student", "parent"].includes(role)) {
@@ -455,7 +456,7 @@ export const userSignup = async (
       message: "Signup failed. Please try again.",
     };
   } catch (error: any) {
-    console.error("Email/password signup Error:", error.message);
+    console.error("Email/password signup Error:", error);
     const errorResponse = mapAuthError(error, email);
     return {
       status: errorResponse.status,
@@ -662,6 +663,78 @@ export const resetPasswordEmail = async (
     return {
       status: 500,
       message: "Error sending password reset email.",
+    };
+  }
+};
+
+export const updateUserDoc = async (
+  type: "student" | "admin" | "teacher",
+  id: string,
+  data: any,
+  role: "admin"
+): Promise<Record<string, any>> => {
+  if (role !== "admin") {
+    return {
+      status: 400,
+      message: "Oops! You are not authorized to complete this action",
+    };
+  }
+  try {
+    if (type === "student") {
+      await studentOperation.updateOptimized(id, data);
+    } else if (type === "admin") {
+      await adminOperation.updateOptimized(id, data);
+    } else if (type === "teacher") {
+      await teacherOperation.updateOptimized(id, data);
+    }
+
+    return {
+      status: 200,
+      message: `Updates was successful!`,
+    };
+  } catch (error: any) {
+    console.error("Updated Error:", error.message);
+    return {
+      status: 500,
+      message: "Updates was unsuccessful!",
+    };
+  }
+};
+//
+/**
+ * Sends a verification email to the user and handles potential errors.
+ * @param email - User email.
+ * @returns A promise object that resolves when the email is sent.
+ */
+export const deleteUserDoc = async (
+  type: "student" | "admin" | "teacher",
+  id: string,
+  role: "admin"
+): Promise<Record<string, any>> => {
+  if (role !== "admin") {
+    return {
+      status: 400,
+      message: "Oops! You are not authorized to complete this action",
+    };
+  }
+  try {
+    if (type === "student") {
+      await studentOperation.deleteDocument(id);
+    } else if (type === "admin") {
+      await adminOperation.deleteDocument(id);
+    } else if (type === "teacher") {
+      await teacherOperation.deleteDocument(id);
+    }
+
+    return {
+      status: 200,
+      message: `Updates was successful!`,
+    };
+  } catch (error: any) {
+    console.error("Updated Error:", error.message);
+    return {
+      status: 500,
+      message: "Updates was unsuccessful!",
     };
   }
 };

@@ -1,5 +1,6 @@
 import { StudentFormData } from "@/components/onboarding/signup";
 import { lgas, sampleClasses, schoolsArr } from "./schools";
+import { TeacherFormData } from "@/components/onboarding/signupTeacher";
 
 export const formDataa = {
     email: "",
@@ -68,8 +69,8 @@ export const formFields = [
       label: "Gender",
       name: "gender" as keyof StudentFormData,
       options: [
-        { label: "Male", value: "male" },
-        { label: "Female", value: "female" },
+        { label: "Male", value: "M" },
+        { label: "Female", value: "F" },
       ],
       required: true,
     },
@@ -124,5 +125,69 @@ export const formFields = [
         })),
       ],
       required: true,
+    },
+  ];
+
+  export const teacherFormData = {
+    email: "",
+    fullname: "",
+    id: "",
+    password:"",
+    confirmPassword:"",
+    isAdmin: true,
+    isDeactivated: false,
+    isSuperAdmin: false,
+    role: "teacher",
+    school: "",
+    subjectsTaught: [],
+    teacherId: ""
+  };
+  
+  export const teacherFormFields = [
+    {
+      type: "input",
+      label: "Email",
+      inputType: "email",
+      name: "email" as keyof TeacherFormData,
+      required: true,
+    },
+    {
+      type: "input",
+      label: "Password",
+      inputType: "password",
+      name: "password" as keyof TeacherFormData,
+      required: true,
+      toggleVisibility: true,
+    },
+    {
+      type: "input",
+      label: "Confirm Password",
+      inputType: "password",
+      name: "confirmPassword" as keyof TeacherFormData,
+      required: true,
+      toggleVisibility: true,
+    },
+    
+    {
+      type: "input",
+      label: "Full Name",
+      inputType: "text",
+      name: "fullname" as keyof TeacherFormData,
+      required: true,
+    },
+    
+    {
+      type: "select",
+      label: "School",
+      name: "school" as keyof TeacherFormData,
+      options:
+        schoolsArr.length > 0
+          ? schoolsArr.map((school) => ({
+              label: school.name,
+              value: school.code,
+            }))
+          : [{ label: "Please select LGA first*", value: "" }],
+      required: true,
+      disabled: !formDataa.lga,
     },
   ];

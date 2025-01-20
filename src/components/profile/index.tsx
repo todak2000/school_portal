@@ -1,13 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { PenOff, Trash2, UserRoundPen } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar } from "../admin/students";
-import { FileUpload } from "../inputs/upload";
 import { Checkbox } from "../inputs/checkbox";
 import { sampleClasses, sampleSubjects, schoolsArr } from "@/constants/schools";
 import InputField from "./input";
+import Alert from "../alert";
+import LoaderSpin from "../loader/LoaderSpin";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 
 // Base interface for common user properties
 interface BaseUser {
@@ -31,6 +35,7 @@ interface TeacherUser extends BaseUser {
   teacherId: string;
   schoolId: string;
   subjectsTaught: string[];
+  classesTaught: string[];
   isAdmin: boolean;
   isSuperAdmin?: boolean;
 }
@@ -50,21 +55,37 @@ interface StudentUser extends BaseUser {
   classId?: string;
 }
 
-
 const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
-  const { user, onSave, onCancel, onDelete } = data;
-  const [isEditable, setIsEditable] = useState(false);
+  const { user, onCancel, onDelete, onEdit, editMode } = data;
+  const { user: loggedUser } = useSelector((state: RootState) => state.auth);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isEditable, setIsEditable] = useState(!editMode);
+  const [alert, setAlert] = useState<{
+    message: string;
+    type: "error" | "success" | "warning";
+  }>({ message: "", type: "error" });
 
-  const [formData, setFormData] = useState({
-    ...user,
-    subjectsOffered: user.subjectsOffered || [],
+  const [formData, setFormData] = useState(() => {
+    if (user.role === "teacher") {
+      return {
+        ...user,
+        subjectsTaught: user?.subjectsTaught || [],
+      };
+    } else {
+      return {
+        ...user,
+        subjectsOffered: user?.subjectsOffered || [],
+      };
+    }
   });
-  const [passportUrl, setPassportUrl] = useState<string>(
-    (user as StudentUser).passportUrl ?? ""
-  );
-  const [birthCertificateUrl, setBirthCertificateUrl] = useState<string>(
-    (user as StudentUser).birthCertificateUrl ?? ""
-  );
+
+  //   const [passportUrl, setPassportUrl] = useState<string>(
+  //     (user as StudentUser)?.passportUrl ?? ""
+  //   );
+  const passportUrl = (user as StudentUser)?.passportUrl ?? "";
+  //   const [birthCertificateUrl, setBirthCertificateUrl] = useState<string>(
+  //     (user as StudentUser)?.birthCertificateUrl ?? ""
+  //   );
 
   // Generate fields based on user role
   const getFieldsForRole = () => {
@@ -185,16 +206,37 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData); // Log form data on submit
-    onSave(formData);
+    setLoading(true);
+
+    const res = editMode
+      ? await onEdit(formData)
+      : () =>
+          void (
+            //await onCreate(formData);
+            setLoading(false)
+          );
+    res &&
+      setAlert({
+        message: res.message,
+        type: res.status === 200 ? "success" : "error",
+      });
   };
 
   const handleEditClick = () => {
     setIsEditable(!isEditable);
   };
 
+  const handleDelete = (id: string) => {
+    setLoading(true);
+    const res = onDelete(id);
+    setLoading(false);
+    setAlert({
+      message: res.message,
+      type: res.status === 200 ? "success" : "error",
+    });
+  };
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -209,73 +251,7 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
     }));
   };
 
-  const deletePreviewImage = (type: "passport" | "birthCertificate") => {
-    if (type === "passport") {
-      setPassportUrl("");
-      setFormData((prev: typeof formData) => ({
-        ...prev,
-        passportUrl: "", // Clear the blob
-      }));
-    } else {
-      setBirthCertificateUrl("");
-      setFormData((prev: typeof formData) => ({
-        ...prev,
-        birthCertificateUrl: "", // Clear the blob
-      }));
-    }
-  };
-  const handleFileUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "passport" | "birthCertificate"
-  ) => {
-    const files = e.target.files;
-    if (files && files[0]) {
-      const file = files[0];
-      const fakeUrl = URL.createObjectURL(file);
-
-      const img = new Image();
-      img.src = fakeUrl;
-
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width, height;
-
-        if (type === "passport") {
-          width = 300; // Optimal passport width
-          height = 300; // Optimal passport height (1:1 ratio)
-        } else {
-          width = 400; // Optimal birth certificate width
-          height = 300; // Optimal birth certificate height (4:3 ratio)
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx?.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob((webpBlob) => {
-          if (webpBlob) {
-            const webpUrl = URL.createObjectURL(webpBlob);
-            if (type === "passport") {
-              setPassportUrl(webpUrl);
-              setFormData((prev: typeof formData) => ({
-                ...prev,
-                passportUrl: webpBlob,
-              }));
-            } else {
-              setBirthCertificateUrl(webpUrl);
-              setFormData((prev: typeof formData) => ({
-                ...prev,
-                birthCertificateUrl: webpBlob,
-              }));
-            }
-          }
-        }, "image/webp");
-      };
-    }
-  };
-
-  const handleSubjectChange = (subjectId: string) => {
+  const handleSubjectChange = (subjectId: string, form?: string) => {
     if (user.role === "student") {
       setFormData((prev: typeof formData) => ({
         ...prev,
@@ -287,77 +263,104 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
             )
           : [...(prev as StudentUser).subjectsOffered, subjectId],
       }));
-    } else if (user.role === "teacher") {
+    } else if (user.role === "teacher" && form === "subjectsTaught") {
       setFormData((prev: typeof formData) => ({
         ...prev,
-        subjectsTaught: (prev as TeacherUser).subjectsTaught.includes(subjectId)
-          ? (prev as TeacherUser).subjectsTaught.filter(
+        subjectsTaught: (prev as TeacherUser)?.subjectsTaught?.includes(
+          subjectId
+        )
+          ? (prev as TeacherUser)?.subjectsTaught?.filter(
               (id) => id !== subjectId
             )
-          : [...(prev as TeacherUser).subjectsTaught, subjectId],
+          : [...(prev as TeacherUser)?.subjectsTaught, subjectId],
+      }));
+    } else if (user.role === "teacher" && form === "classesTaught") {
+      setFormData((prev: typeof formData) => ({
+        ...prev,
+        classesTaught: (prev as TeacherUser)?.classesTaught?.includes(subjectId)
+          ? (prev as TeacherUser)?.classesTaught?.filter(
+              (id) => id !== subjectId
+            )
+          : [...(prev as TeacherUser)?.classesTaught, subjectId],
       }));
     }
   };
 
+  useEffect(() => {
+    if (alert.message !== "") {
+      const timer = setTimeout(() => {
+        setAlert({ message: "", type: "error" });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [alert]);
   return (
     <div className="bg-gradient-to-r via-secondary from-secondary to-green-500 font-geistMono p-6 shadow-lg max-w-2xl mx-auto max-h-[80vh] overflow-y-auto scrollbar-hide">
-      <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
-        {user.role === "student" && passportUrl !== "" ? (
-          <div className="w-16 h-16 rounded-full">
-            <img
-              src={passportUrl}
-              alt="Profile"
-              width={100}
-              height={100}
-              className="rounded-full border-white border-2"
-            />
-          </div>
-        ) : (
-          <Avatar schoolName={formData?.fullname} />
-        )}
-        <div className="flex-1">
-          <h2 className="text-2xl font-semibold text-center md:text-left">
-            {formData?.fullname}
-          </h2>
-          <p className="text-center md:text-left">
-            {user.role === "student"
-              ? (user as StudentUser).studentId
-              : user.role === "teacher"
-              ? (user as TeacherUser).teacherId
-              : "Admin"}
-          </p>
-
-          {(user.role === "student" || user.role === "teacher") && (
-            <p className="text-center md:text-left text-orange-400">
-              {
-                schoolsArr.find(
-                  (school) =>
-                    school.code ===
-                    (formData as StudentUser | TeacherUser).schoolId
-                )?.name
-              }
-            </p>
-          )}
-        </div>
-        <button
-          onClick={handleEditClick}
-          className={`btn btn-outline hover:border-orange-500 hover:bg-orange-500   rounded-none  gap-2 ${
-            isEditable ? "text-white bg-orange-400" : "text-white border-white"
-          }`}
-        >
-          {isEditable ? (
-            <span className="flex flex-row items-center justify-center gap-3">
-              <PenOff /> Cancel Edit
-            </span>
+      {editMode ? (
+        <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
+          {user?.role === "student" && passportUrl !== "" ? (
+            <div className="w-16 h-16 rounded-full">
+              <img
+                src={passportUrl}
+                alt="Profile"
+                width={100}
+                height={100}
+                className="rounded-full border-white border-2"
+              />
+            </div>
           ) : (
-            <span className="flex flex-row items-center justify-center gap-3">
-              <UserRoundPen /> Edit
-            </span>
+            <Avatar schoolName={formData?.fullname} />
           )}
-        </button>
-      </div>
+          <div className="flex-1">
+            <h2 className="text-2xl font-semibold text-center md:text-left">
+              {formData?.fullname}
+            </h2>
+            <p className="text-center md:text-left">
+              {user?.role === "student"
+                ? (user as StudentUser)?.studentId
+                : user?.role === "teacher"
+                ? (user as TeacherUser)?.teacherId
+                : "Admin"}
+            </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+            {(user?.role === "student" || user?.role === "teacher") && (
+              <p className="text-center md:text-left text-orange-400">
+                {
+                  schoolsArr.find(
+                    (school) =>
+                      school.code ===
+                      (formData as StudentUser | TeacherUser).schoolId
+                  )?.name
+                }
+              </p>
+            )}
+          </div>
+          <button
+            onClick={handleEditClick}
+            className={`btn btn-outline hover:border-orange-500 hover:bg-orange-500   rounded-none  gap-2 ${
+              isEditable
+                ? "text-white bg-orange-400"
+                : "text-white border-white"
+            }`}
+          >
+            {isEditable ? (
+              <span className="flex flex-row items-center justify-center gap-3">
+                <PenOff /> Cancel Edit
+              </span>
+            ) : (
+              <span className="flex flex-row items-center justify-center gap-3">
+                <UserRoundPen /> Edit
+              </span>
+            )}
+          </button>
+        </div>
+      ) : (
+        <h2 className="text-2xl capitalize font-semibold text-orange-500 text-center md:text-left">
+          Create {user.role}
+        </h2>
+      )}
+
+      <form className="space-y-6">
         <div className="space-y-4">
           {getFieldsForRole().map((field) => (
             <InputField
@@ -371,7 +374,7 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
               options={field.options || []}
             />
           ))}
-          {(user.role === "student" || user.role === "teacher") && (
+          {(user?.role === "student" || user?.role === "teacher") && (
             <div className="form-control">
               <div className="label">
                 <span className="label-text font-medium">
@@ -389,55 +392,87 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
                     disabled={!isEditable}
                     checked={
                       user.role === "student"
-                        ? (formData as StudentUser).subjectsOffered.includes(
+                        ? (formData as StudentUser)?.subjectsOffered?.includes(
                             subject.subjectId
                           )
-                        : (formData as TeacherUser).subjectsTaught.includes(
+                        : (formData as TeacherUser)?.subjectsTaught?.includes(
                             subject.subjectId
                           )
                     }
-                    onChange={() => handleSubjectChange(subject.subjectId)}
+                    onChange={() =>
+                      handleSubjectChange(
+                        subject?.subjectId,
+                        user.role === "student"
+                          ? "subjectsOffered"
+                          : "subjectsTaught"
+                      )
+                    }
                   />
                 ))}
               </div>
             </div>
           )}
-
-          {user.role === "student" && isEditable && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FileUpload
-                label="Passport Photo"
-                deletePreviewUrl={deletePreviewImage}
-                name="passportUrl"
-                onFileChange={handleFileUpload}
-                previewUrl={passportUrl}
-                required
-                error=""
-              />
-              <FileUpload
-                label="Birth Certificate"
-                deletePreviewUrl={deletePreviewImage}
-                name="birthCertificateUrl"
-                onFileChange={handleFileUpload}
-                previewUrl={birthCertificateUrl}
-                required
-                error=""
-              />
+          {user?.role === "teacher" && (
+            <div className="form-control">
+              <div className="label">
+                <span className="label-text font-medium">Classes Taught</span>
+              </div>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {sampleClasses.map((c) => (
+                  <Checkbox
+                    key={c.classId}
+                    label={c.name}
+                    value={c.classId}
+                    disabled={!isEditable}
+                    checked={(formData as TeacherUser)?.classesTaught?.includes(
+                      c.classId
+                    )}
+                    onChange={() =>
+                      handleSubjectChange(c.classId, "classesTaught")
+                    }
+                  />
+                ))}
+              </div>
             </div>
           )}
-          
         </div>
-
+        {alert.message && (
+          <Alert
+            message={alert.message}
+            type={alert.type as "error" | "success" | "warning"}
+          />
+        )}
         <div className="flex justify-between pt-4">
-          <button
-            type="button"
-            onClick={onDelete}
-            disabled
-            className="btn rounded-none border-error disabled:bg-white disabled:border-gray-300 disabled:text-gray-300 btn-outline gap-2"
-          >
-            <Trash2 />
-            Delete user
-          </button>
+          {editMode && (
+            <button
+              type="button"
+              onClick={() => {
+                loggedUser &&
+                  loggedUser.isSuperAdmin &&
+                  loggedUser.role === "admin" &&
+                  handleDelete(user.id);
+              }}
+              disabled={
+                !(
+                  loggedUser &&
+                  loggedUser.isSuperAdmin &&
+                  loggedUser.role === "admin"
+                ) || loading
+              }
+              className="btn rounded-none bg-red-500 text-white border-error disabled:bg-white disabled:border-gray-300 disabled:text-gray-300 btn-outline gap-2 flex flex-row items-center justify-center"
+            >
+              {" "}
+              {loading ? (
+                <LoaderSpin />
+              ) : (
+                <>
+                  <Trash2 />
+                  Delete user
+                </>
+              )}
+            </button>
+          )}
+
           <div className="flex gap-2">
             <button
               type="button"
@@ -448,10 +483,16 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
             </button>
             {isEditable && (
               <button
-                type="submit"
-                className="btn bg-primary rounded-none border-none text-white"
+                type="button"
+                onClick={handleSubmit}
+                disabled={loading}
+                className="btn bg-primary rounded-none border-none text-white flex flex-row items-center justify-center"
               >
-                Save changes
+                {loading ? (
+                  <LoaderSpin />
+                ) : (
+                  <>{editMode ? "Save changes" : "Create"}</>
+                )}
               </button>
             )}
           </div>

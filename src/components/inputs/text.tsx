@@ -1,11 +1,12 @@
 import React, { ChangeEvent } from "react";
 import { StudentFormData } from "../onboarding/signup";
 import { Eye, EyeOff } from "lucide-react";
+import { TeacherFormData } from "../onboarding/signupTeacher";
 
 export interface InputFieldProps {
     label: string;
     type: string;
-    name: keyof StudentFormData;
+    name: keyof StudentFormData| keyof TeacherFormData;
     value: string | number | string[];
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
     required?: boolean;

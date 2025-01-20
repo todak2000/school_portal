@@ -1,17 +1,16 @@
 import { generateTeacherID } from "@/helpers/generateStudentID";
-import { Timestamp } from "firebase/firestore";
 
 interface LGA {
   name: string;
   code: string;
 }
 
-interface Subject {
+export interface Subject {
   name: string;
   subjectId: string;
 }
 
-interface Class {
+export interface Class {
   name: string;
   classId: string;
 }
@@ -476,7 +475,7 @@ export const schoolsArr = [
 export const studentsArr = [
   {
     id: "student1",
-    createdAt: Timestamp.fromDate(new Date()),
+    // createdAt: Timestamp.fromDate(new Date()),
     email: "student1@example.com",
     studentId: "AKS/UYO/001",
     fullname: "John Doe",
@@ -495,7 +494,7 @@ export const studentsArr = [
   },
   {
     id: "student2",
-    createdAt: Timestamp.fromDate(new Date()),
+    // createdAt: Timestamp.fromDate(new Date()),
     email: "student2@example.com",
     studentId: "AKS/UYO/002",
     fullname: "Mary Jane",
@@ -518,7 +517,7 @@ export const studentsArr = [
 export const teachersArr = [
   {
     id: "teacher1",
-    createdAt: Timestamp.fromDate(new Date()),
+    // createdAt: Timestamp.fromDate(new Date()),
     email: "teacher1@example.com",
     fullname: "Alice Johnson",
     teacherId: generateTeacherID("CSSS-IUO-UK"),
@@ -531,7 +530,7 @@ export const teachersArr = [
   },
   {
     id: "teacher2",
-    createdAt: Timestamp.fromDate(new Date()),
+    // createdAt: Timestamp.fromDate(new Date()),
     email: "teacher2@example.com",
     fullname: "Bob Smith",
     teacherId: generateTeacherID("CSSS-INS-UR"),
