@@ -90,6 +90,11 @@ const sidebarItems = [
   },
   {
     icon: GraduationCap,
+    label: "Sessions",
+    route: "/admin/sessions",
+  },
+  {
+    icon: GraduationCap,
     label: "Classes",
     route: "/admin/classes",
   },

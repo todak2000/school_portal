@@ -7,7 +7,6 @@ import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { StatsCard } from "@/components/statsCard";
 import { UserInfo } from "@/components/userInfo";
 import { DataTableColumn } from "@/components/table";
-import { studentsArr } from "@/constants/schools";
 import { setModal } from "@/store/slices/modal";
 import { generateStudentID } from "@/helpers/generateStudentID";
 import { key } from "@/helpers/uniqueKey";
@@ -66,7 +65,7 @@ const AdminStudentsPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [students, setStudents] =
-    useState<Record<string, string | boolean | string[]>[]>(studentsArr);
+    useState<Record<string, string | boolean | string[]>[]>([]);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
   const closeModal = () => {
@@ -91,8 +90,8 @@ const AdminStudentsPage = React.memo(() => {
 
     // Update the students state with the new student
     setStudents((prev: Record<string, string | boolean | string[]>[]) => [
-      ...prev,
       newTeacher,
+      ...prev
     ]);
     closeModal();
   };
@@ -179,7 +178,6 @@ const AdminStudentsPage = React.memo(() => {
         defaultSort={{ field: "createdAt", direction: "desc" }}
         defaultForm={null}
         searchableColumns={["fullname", "email", "guardian"]}
-        // filterableColumns={["classId", "schoolId",]}
         onCreate={handleCreateStudent}
         onDelete={handleDeleteStudent}
         onEdit={handleEditStudent}
