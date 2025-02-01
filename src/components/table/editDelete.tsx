@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import InputField from "../profile/input";
+import InputField, { getLabel } from "../profile/input";
 import { lgas } from "@/constants/schools";
 import Alert from "../alert";
 
@@ -61,7 +61,7 @@ const EditDeleteModal: React.FC<EditDeleteModalProps> = ({
           .map((key) => (
             <div key={key} className="mb-4">
               <label className="block mb-2 capitalize font-geistMono">
-                {key}
+                {getLabel(key)}
               </label>
               {key === "lga" ? (
                 <InputField
@@ -86,7 +86,19 @@ const EditDeleteModal: React.FC<EditDeleteModalProps> = ({
                 <InputField
                   key={key}
                   label=""
-                  type="text"
+                  placeholder={key === "session" ? "e.g. 2024/2025" : undefined}
+                  type={
+                    [
+                      "firstTermStart",
+                      "firstTermEnd",
+                      "secondTermStart",
+                      "secondTermEnd",
+                      "thirdTermStart",
+                      "thirdTermEnd",
+                    ].includes(key)
+                      ? "date"
+                      : "text"
+                  }
                   value={modalData[key as keyof typeof modalData]}
                   name={key}
                   isEditable={

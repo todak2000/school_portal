@@ -294,6 +294,7 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
       return () => clearTimeout(timer);
     }
   }, [alert]);
+ 
   return (
     <div className="bg-gradient-to-r via-secondary from-secondary to-green-500 font-geistMono p-6 shadow-lg max-w-2xl mx-auto max-h-[80vh] overflow-y-auto scrollbar-hide">
       {editMode ? (
@@ -335,6 +336,7 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
               </p>
             )}
           </div>
+          {formData.isSuperAdmin &&
           <button
             onClick={handleEditClick}
             className={`btn btn-outline hover:border-orange-500 hover:bg-orange-500   rounded-none  gap-2 ${
@@ -352,7 +354,7 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
                 <UserRoundPen /> Edit
               </span>
             )}
-          </button>
+          </button>}
         </div>
       ) : (
         <h2 className="text-2xl capitalize font-semibold text-orange-500 text-center md:text-left">
@@ -443,7 +445,9 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
           />
         )}
         <div className="flex justify-between pt-4">
-          {editMode && (
+          {editMode && loggedUser &&
+                  loggedUser.isSuperAdmin &&
+                  loggedUser.role === "admin" && (
             <button
               type="button"
               onClick={() => {

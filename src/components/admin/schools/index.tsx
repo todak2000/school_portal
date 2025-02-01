@@ -8,19 +8,12 @@ import { UserInfo } from "@/components/userInfo";
 import DataTable, { DataTableColumn } from "@/components/table";
 import { schoolsArr } from "@/constants/schools";
 import { generateSchoolCode } from "@/helpers/generateStudentID";
+import { getInitials } from "@/helpers/getInitials";
 
 // Avatar component to display the school logo
 const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
   // Function to get the initial letters
-  const getInitials = (name: string): string => {
-    const words = name?.split(" ");
-    const initials = words
-      ?.slice(0, 3)
-      ?.map((word) => word?.charAt(0))
-      ?.join("");
-    return initials?.toUpperCase();
-  };
-
+  
   // Function to generate a random orange color
   const randomOrangeColor = (): string => {
     const colors = ["bg-orange-500", "bg-orange-600", "bg-orange-700"]; // Tailwind CSS classes for orange shades
@@ -69,7 +62,7 @@ const AdminSchoolsPage = React.memo(() => {
     };
 
     // Update the students state with the new student
-    setSchools((prev: Record<string, string | null>[]) => [...prev, newSchool]);
+    setSchools((prev: Record<string, string | null>[]) => [newSchool,...prev]);
   };
 
   const handleEditSchool = (data: Record<string, string | null>) => {

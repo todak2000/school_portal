@@ -17,11 +17,13 @@ const AdminSubjectsPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [subjects, setSubjects] = useState<Subject[]>(sampleSubjects);
   const today = useMemo(() => getFormattedDate(), []);
+
   const currentTime = useMemo(() => getFormattedTime(), []);
   const handleCreateSubject = (data: Subject) => {
     // Update the classes state with the new class
-    setSubjects((prev: Subject[]) => [...prev, data]);
+    setSubjects((prev: Subject[]) => [data,...prev]);
   };
+  
 
   const handleEditSubject = (data: Subject) => {
     // Update the item in the main data
@@ -60,7 +62,6 @@ const AdminSubjectsPage = React.memo(() => {
           )
         )}
       </div>
-
       {/* Projects Section */}
       <DataTable
         data={subjects}

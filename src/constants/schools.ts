@@ -1,5 +1,4 @@
-import { generateTeacherID } from "@/helpers/generateStudentID";
-
+import { Timestamp } from "firebase/firestore";
 interface LGA {
   name: string;
   code: string;
@@ -471,75 +470,79 @@ export const schoolsArr = [
   },
 ];
 
+export type Term = {
+  start: Timestamp;
+  end: Timestamp;
+  sessionState: "completed" | "ongoing" | "not started";
+};
 
-export const studentsArr = [
-  {
-    id: "student1",
-    // createdAt: Timestamp.fromDate(new Date()),
-    email: "student1@example.com",
-    studentId: "AKS/UYO/001",
-    fullname: "John Doe",
-    passportUrl: "",
-    birthCertificateUrl: "",
-    schoolId: "CSSS-INS-UR",
-    phone: "08012345678",
-    subjectsOffered: ["MTH", "ENG"],
-    role: "student",
-    guardian: "Jane Doe",
-    gender: "M",
-    dob: "2005-05-12",
-    address: "1234 Elm Street",
-    classId: "JSS1",
-    isDeactivated: false,
-  },
-  {
-    id: "student2",
-    // createdAt: Timestamp.fromDate(new Date()),
-    email: "student2@example.com",
-    studentId: "AKS/UYO/002",
-    fullname: "Mary Jane",
-    passportUrl: "",
-    birthCertificateUrl: "",
-    schoolId: "CSSS-IUO-UK",
-    phone: "08023456789",
-    subjectsOffered: ["MTH", "ENG"],
-    role: "student",
-    guardian: "John Smith",
-    gender: "F",
-    dob: "2005-06-15",
-    address: "5678 Maple Avenue",
-    classId: "JSS2",
-    isDeactivated: false,
-  },
-  // Add more students as needed...
-];
+export type Session = {
+  session: string;
+  year: string;
+  firstTerm: Term;
+  secondTerm: Term;
+  thirdTerm: Term;
+};
 
-export const teachersArr = [
+export const getSessionTimestamp = (
+  year: number,
+  month: number,
+  day: number
+): Timestamp => {
+  return Timestamp.fromDate(new Date(year, month - 1, day));
+};
+
+export const formatDateString = (dateString: string): string => {
+  const date = new Date(dateString);
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+  };
+  return date.toLocaleDateString("en-US", options);
+};
+
+export const convertToFirebaseTimestamp = (dateString: string): Timestamp => {
+  const date = new Date(dateString);
+  return Timestamp.fromDate(date);
+};
+
+export const sessionsArr: Session[] = [
   {
-    id: "teacher1",
-    // createdAt: Timestamp.fromDate(new Date()),
-    email: "teacher1@example.com",
-    fullname: "Alice Johnson",
-    teacherId: generateTeacherID("CSSS-IUO-UK"),
-    schoolId: "CSSS-IUO-UK",
-    subjectsTaught: ["MTH", "ENG"], // Example subjects
-    isAdmin: true,
-    role: "teacher",
-    isSuperAdmin: true,
-    isDeactivated: false,
+    session: "2024/2025",
+    year: "2025",
+    firstTerm: {
+      start: getSessionTimestamp(2024, 9, 1), // September 1, 2023
+      end: getSessionTimestamp(2024, 12, 31), // December 31, 2023
+      sessionState: "ongoing",
+    },
+    secondTerm: {
+      start: getSessionTimestamp(2025, 1, 1), // January 1, 2024
+      end: getSessionTimestamp(2025, 3, 31), // March 31, 2024
+      sessionState: "not started",
+    },
+    thirdTerm: {
+      start: getSessionTimestamp(2025, 5, 1), // May 1, 2024
+      end: getSessionTimestamp(2025, 7, 31), // July 31, 2024
+      sessionState: "not started",
+    },
   },
   {
-    id: "teacher2",
-    // createdAt: Timestamp.fromDate(new Date()),
-    email: "teacher2@example.com",
-    fullname: "Bob Smith",
-    teacherId: generateTeacherID("CSSS-INS-UR"),
-    schoolId: "CSSS-INS-UR",
-    subjectsTaught: ["ENG"],
-    isAdmin: true,
-    role: "teacher",
-    isSuperAdmin: false,
-    isDeactivated: false,
+    session: "2023/2024",
+    year: "2024",
+    firstTerm: {
+      start: getSessionTimestamp(2023, 9, 1), // September 1, 2023
+      end: getSessionTimestamp(2023, 12, 31), // December 31, 2023
+      sessionState: "completed",
+    },
+    secondTerm: {
+      start: getSessionTimestamp(2024, 1, 1), // January 1, 2024
+      end: getSessionTimestamp(2024, 3, 31), // March 31, 2024
+      sessionState: "completed",
+    },
+    thirdTerm: {
+      start: getSessionTimestamp(2024, 5, 1), // May 1, 2024
+      end: getSessionTimestamp(2024, 7, 31), // July 31, 2024
+      sessionState: "completed",
+    },
   },
-  // Add more teacher objects as needed...
 ];

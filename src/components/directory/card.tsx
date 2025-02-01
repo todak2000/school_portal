@@ -4,7 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import CountUp from "react-countup";
 
-interface DirectoryCardProps {
+export interface DirectoryCardProps {
   data: {
     name: string;
     lga: string;

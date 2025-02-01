@@ -27,7 +27,7 @@ const AdminClassPage = React.memo(() => {
     };
 
     // Update the classes state with the new class
-    setClasses((prev: Class[]) => [...prev, newSchool]);
+    setClasses((prev: Class[]) => [newSchool,...prev]);
   };
 
   const handleEditClass = (data: Class) => {

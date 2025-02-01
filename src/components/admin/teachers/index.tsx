@@ -7,7 +7,6 @@ import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { StatsCard } from "@/components/statsCard";
 import { UserInfo } from "@/components/userInfo";
 import { DataTableColumn } from "@/components/table";
-import { teachersArr } from "@/constants/schools";
 import { setModal } from "@/store/slices/modal";
 import { key } from "@/helpers/uniqueKey";
 import { generateTeacherID } from "@/helpers/generateStudentID";
@@ -65,8 +64,9 @@ const AdminTeachersPage = React.memo(() => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [teachers, setTeachers] =
-    useState<Record<string, string | boolean | string[]>[]>(teachersArr);
+  const [teachers, setTeachers] = useState<
+    Record<string, string | boolean | string[]>[]
+  >([]);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
 
@@ -79,11 +79,13 @@ const AdminTeachersPage = React.memo(() => {
     );
   };
 
+  
+
   const handleCreateTeacher = async (
     data: Record<string, string | boolean | string[]>
   ) => {
     // Create a new teacher object
-    const id = `${key()}`
+    const id = `${key()}`;
     const newTeacher = {
       ...data,
       id, // Generate a unique ID
@@ -93,22 +95,20 @@ const AdminTeachersPage = React.memo(() => {
       isDeactivated: false,
     };
 
-    console.log(newTeacher, "teacher data");
-
     try {
       const res = await userSignup({
         ...newTeacher,
         name: data.fullname as string,
         email: data.email as string, // Ensure email is included
-        password: 'Zxcvb@12345', // Ensure password is included
+        password: "Zxcvb@12345", // Ensure password is included
         role: "teacher", // Set the role appropriately
       });
 
       if (res.status === 200) {
         setTeachers(
           (prevTeachers: Record<string, string | boolean | string[]>[]) => [
-            ...prevTeachers,
             newTeacher,
+            ...prevTeachers,
           ]
         );
         setTimeout(() => {
@@ -122,7 +122,7 @@ const AdminTeachersPage = React.memo(() => {
     }
   };
 
-  const handleEditTeacher = async(
+  const handleEditTeacher = async (
     data: Record<string, string | boolean | string[]>
   ) => {
     // Update the item in the main data
@@ -135,10 +135,11 @@ const AdminTeachersPage = React.memo(() => {
       );
 
       if (res.status === 200) {
-        setTeachers((prevTeachers: Record<string, string | boolean | string[]>[]) =>
-          prevTeachers.map((teacher) =>
-            teacher.id === data.id ? { ...teacher, ...data } : teacher
-          )
+        setTeachers(
+          (prevTeachers: Record<string, string | boolean | string[]>[]) =>
+            prevTeachers.map((teacher) =>
+              teacher.id === data.id ? { ...teacher, ...data } : teacher
+            )
         );
         setTimeout(() => {
           closeModal();
@@ -192,12 +193,10 @@ const AdminTeachersPage = React.memo(() => {
         defaultForm={null}
         role="teacher"
         searchableColumns={["fullname"]}
-        // filterableColumns={["classId", "schoolId", "isSuperAdmin"]}
         onCreate={handleCreateTeacher}
         onDelete={handleDeleteTeacher}
         onEdit={handleEditTeacher}
       />
-      
     </main>
   );
 });

@@ -44,6 +44,7 @@ import {
   Plus,
   SortAsc,
   SortDesc,
+  FileSliders,
 } from "lucide-react";
 import EditDeleteModal from "./editDelete";
 import { useDispatch } from "react-redux";
@@ -63,6 +64,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   onEdit,
   onDelete,
 }: DataTableProps<T>) {
+
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [alert, setAlert] = useState({ message: "", type: "error" });
@@ -74,7 +76,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   const [modalData, setModalData] = useState<T | null>(null);
   const [isEditMode, setIsEditMode] = useState<boolean>(true);
   const dispatch = useDispatch();
-  
+
   // Handle selection
   const handleSelectAll = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,7 +174,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
 
     return processed;
   }, [data, searchTerm, sortConfig, filters, searchableColumns]);
-  
+
   // Pagination
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -199,6 +201,11 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   };
   // Modal
 
+
+  const handleSchool = (id: string) => {
+    window.open(`/admin/school/${id}`, '_blank');
+  };
+  
   const handleOpenModal = (data: any, editMode: boolean) => {
     if (isMain) {
       dispatch(
@@ -244,8 +251,8 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
     // setSelectedItems(updatedData);
     setAlert({
       message: "Successful",
-      type:  "success",
-    })
+      type: "success",
+    });
     setTimeout(() => {
       handleCloseModal();
     }, 2000);
@@ -257,12 +264,11 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
     console.log("Created Data:", data);
     setAlert({
       message: "Successful",
-      type:  "success",
-    })
+      type: "success",
+    });
     setTimeout(() => {
       handleCloseModal();
     }, 2000);
-    
   };
 
   const handleDeleteItem = (data: any) => {
@@ -276,8 +282,8 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
     }
     setAlert({
       message: "Successful",
-      type:  "success",
-    })
+      type: "success",
+    });
     // setSelectedItems(updatedData);
     setTimeout(() => {
       handleCloseModal();
@@ -292,7 +298,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
       return () => clearTimeout(timer);
     }
   }, [alert]);
-  
+
   return (
     <div className="w-full min-w-[85vw] md:min-w-[80vw] md:max-w-[85vw] bg-white border-none">
       {/* Header */}
@@ -489,12 +495,23 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
                   </td>
                 ))}
                 <td>
-                  <button
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => handleOpenModal(item, true)}
-                  >
-                    <MoreHorizontal size={16} />
-                  </button>
+                  <span className="flex flex-row items-center justify-center gap-1">
+                    <button
+                      disabled={role === "session"}
+                      className="btn btn-ghost btn-sm disabled:bg-transparent"
+                      onClick={() => handleOpenModal(item, true)}
+                    >
+                      <MoreHorizontal size={16} />
+                    </button>
+                    {role === "school" && (
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => handleSchool(item.code)}
+                      >
+                        <FileSliders size={16} className="text-orange-600" />
+                      </button>
+                    )}
+                  </span>
                 </td>
               </tr>
             ))}

@@ -25,6 +25,27 @@
   scrollbar-width: none; /* Firefox */
 }
 
+.table-zebra tr:nth-child(even) {
+  background-color: #ffedd5 !important; /* orange-300 */
+}
+
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinner {
+  -moz-appearance: textfield;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 1in;
+  }
+}
+
 /* Custom checkbox styles */
 .custom-checkbox {
   appearance: none;
@@ -50,4 +71,3 @@
   transform: scale(0); /* Initial scale */
   transition: transform 0.2s ease-in-out;
 }
-

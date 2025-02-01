@@ -69,10 +69,10 @@ export default class CRUDOperation<T> {
       // Start with base collection
       let baseQuery = collection(db, this.collectionName);
       // If there's a search term and searchable columns
-
+      
       if (searchTerm && searchableColumns && searchableColumns?.length > 0) {
         const searchTermLower = searchTerm.toLowerCase();
-
+        console.log(searchTerm, searchableColumns);
         // Get all documents first (this is necessary for contains search)
         const querySnapshot = await getDocs(
           collection(db, this.collectionName)
@@ -136,6 +136,149 @@ export default class CRUDOperation<T> {
         orderBy(sortField, sortDirection),
         limit(pageSize)
       ) as CollectionReference<DocumentData, DocumentData>;
+      
+      // Apply any filters
+      Object.entries(filters).forEach(([field, value]) => {
+    
+        if (value) {
+          baseQuery = query(
+            baseQuery,
+            where(field, "==", value)
+          ) as CollectionReference<DocumentData, DocumentData>;
+        }
+      });
+      // If not first page, use startAfter with cached document
+      if (pageNumber > 1) {
+        const lastDoc = this.cachedLastDocs.get(pageNumber - 1);
+        if (lastDoc) {
+          baseQuery = query(
+            baseQuery,
+            startAfter(lastDoc)
+          ) as CollectionReference<DocumentData, DocumentData>;
+        } else {
+          // If last doc not cached, fetch all previous pages
+          const previousPageDoc = await this.fetchPreviousPage(
+            pageSize,
+            pageNumber - 1,
+            sortField,
+            sortDirection,
+            filters
+          );
+          if (previousPageDoc) {
+            baseQuery = query(
+              baseQuery,
+              startAfter(previousPageDoc)
+            ) as CollectionReference<DocumentData, DocumentData>;
+          }
+        }
+      }
+
+      const querySnapshot = await getDocs(baseQuery);
+      const items = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as unknown as T[];
+      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+      if (lastDoc) {
+        this.cachedLastDocs.set(pageNumber, lastDoc);
+      }
+
+      return {
+        items,
+        lastDoc: lastDoc || null,
+        totalCount: await this.getTotalCount(),
+        totalOverallCount: await this.getTotalCount(),
+      };
+    } catch (error) {
+      console.error("Error fetching paginated data:", error);
+      return { items: [], lastDoc: null, totalCount: 0, totalOverallCount: 0 };
+    }
+  }
+
+  async getSingleFieldPaginatedData<T extends Record<string, any>>(
+    pageSize: number,
+    pageNumber: number,
+    sortField: string = "createdAt",
+    sortDirection: "asc" | "desc" = "desc",
+    filters: Record<string, any> = {},
+    field: string,
+    value: string,
+    searchTerm?: string,
+    searchableColumns?: string[]
+  ): Promise<PaginatedResult<T>> {
+    try {
+      // Start with base collection
+      let baseQuery = query(
+        collection(db, this.collectionName),
+        where(field, "==", value)
+      );
+      const querySnapshott = await getDocs(baseQuery);
+      // If there's a search term and searchable columns
+
+      if (searchTerm && searchableColumns && searchableColumns?.length > 0) {
+        const searchTermLower = searchTerm.toLowerCase();
+
+        // Get all documents first (this is necessary for contains search)
+        const querySnapshot = await getDocs(baseQuery);
+
+        // Filter documents that match the search term
+        const matchedDocs = querySnapshot.docs.filter((doc) => {
+          const data = doc.data();
+          // Check each searchable column
+          return searchableColumns.some((column) => {
+            const value = data[column];
+            // Handle different types of values
+            if (typeof value === "string") {
+              return value.toLowerCase().includes(searchTermLower);
+            } else if (typeof value === "number") {
+              return value.toString().includes(searchTermLower);
+            } else if (Array.isArray(value)) {
+              // Search through array values
+              return value.some((item) =>
+                String(item).toLowerCase().includes(searchTermLower)
+              );
+            }
+            return false;
+          });
+        });
+
+        // Apply sorting
+        const sortedDocs = matchedDocs.sort((a, b) => {
+          const aValue = a.get(sortField);
+          const bValue = b.get(sortField);
+
+          if (sortDirection === "asc") {
+            return aValue < bValue ? -1 : 1;
+          } else {
+            return bValue < aValue ? -1 : 1;
+          }
+        });
+
+        // Apply pagination
+        const startIndex = (pageNumber - 1) * pageSize;
+        const paginatedDocs = sortedDocs.slice(
+          startIndex,
+          startIndex + pageSize
+        );
+
+        const items = paginatedDocs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as unknown as T[];
+
+        return {
+          items,
+          lastDoc: paginatedDocs[paginatedDocs.length - 1] || null,
+          totalCount: matchedDocs.length,
+          totalOverallCount: querySnapshott.docs.length,
+        };
+      }
+      // If no search term, proceed with regular query
+      baseQuery = query(
+        baseQuery,
+        orderBy(sortField, sortDirection),
+        limit(pageSize)
+      ) as CollectionReference<DocumentData, DocumentData>;
 
       // Apply any filters
       Object.entries(filters).forEach(([field, value]) => {
@@ -188,7 +331,7 @@ export default class CRUDOperation<T> {
         items,
         lastDoc: lastDoc || null,
         totalCount: await this.getTotalCount(),
-        totalOverallCount: await this.getTotalCount(),
+        totalOverallCount: querySnapshott.docs.length,
       };
     } catch (error) {
       console.error("Error fetching paginated data:", error);
@@ -493,5 +636,112 @@ export default class CRUDOperation<T> {
         failedIds,
       };
     }
+  }
+
+  // qsdswadfsd-----
+  async getPaginatedFilterData<T extends Record<string, any>>(
+    pageSize: number,
+    pageNumber: number,
+    sortField: string = "createdAt",
+    sortDirection: "asc" | "desc" = "desc",
+    filters: { key: string; value: any }[] = []
+  ): Promise<PaginatedResult<T>> {
+    console.log(filters, "filters");
+    try {
+      let baseQuery = query(
+        collection(db, this.collectionName),
+        orderBy(sortField, sortDirection)
+      );
+
+      // Apply filters
+      filters.forEach((filter) => {
+        if (filter.value !== null && filter.value !== "") {
+          baseQuery = query(baseQuery, where(filter.key, "==", filter.value));
+        }
+      });
+
+      // Pagination logic for both previous and next
+      if (pageNumber > 1) {
+        const lastDoc = this.cachedLastDocs.get(pageNumber - 1);
+        if (lastDoc) {
+          baseQuery = query(baseQuery, startAfter(lastDoc), limit(pageSize));
+        } else {
+          // Fetch previous pages to get the correct starting point
+          const previousPageDoc = await this.fetchPreviousFilterPage(
+            pageSize,
+            pageNumber - 1,
+            sortField,
+            sortDirection,
+            filters
+          );
+
+          if (previousPageDoc) {
+            baseQuery = query(
+              baseQuery,
+              startAfter(previousPageDoc),
+              limit(pageSize)
+            );
+          }
+        }
+      } else {
+        // First page
+        baseQuery = query(baseQuery, limit(pageSize));
+      }
+
+      const querySnapshot = await getDocs(baseQuery);
+      const items = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as unknown as T[];
+
+      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+      if (lastDoc) {
+        this.cachedLastDocs.set(pageNumber, lastDoc);
+      }
+
+      return {
+        items,
+        lastDoc: lastDoc || null,
+        totalCount: items.length,
+        totalOverallCount: await this.getTotalCount(),
+      };
+    } catch (error) {
+      console.error("Error fetching paginated data:", error);
+      return { items: [], lastDoc: null, totalCount: 0, totalOverallCount: 0 };
+    }
+  }
+
+  private async fetchPreviousFilterPage(
+    pageSize: number,
+    targetPage: number,
+    sortField: string,
+    sortDirection: "asc" | "desc",
+    filters: { key: string; value: any }[]
+  ): Promise<DocumentSnapshot | null> {
+    let baseQuery = query(
+      collection(db, this.collectionName),
+      orderBy(sortField, sortDirection),
+      limit(pageSize * targetPage)
+    );
+
+    // Apply filters
+    filters.forEach((filter) => {
+      if (filter.value !== null && filter.value !== "") {
+        baseQuery = query(baseQuery, where(filter.key, "==", filter.value));
+      }
+    });
+
+    const querySnapshot = await getDocs(baseQuery);
+    const docs = querySnapshot.docs;
+
+    // Cache intermediate pages
+    for (let i = 1; i <= targetPage; i++) {
+      const pageLastDoc = docs[i * pageSize - 1];
+      if (pageLastDoc) {
+        this.cachedLastDocs.set(i, pageLastDoc);
+      }
+    }
+
+    return docs[docs.length - 1] || null;
   }
 }

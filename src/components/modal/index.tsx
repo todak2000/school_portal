@@ -4,6 +4,7 @@ import { ForgotPassword } from "../onboarding/forgotPassword";
 import { ResetPassword } from "../onboarding/resetPassword";
 import { SignIn } from "../onboarding/signin";
 import UserProfileEdit from "../profile";
+import { CreateResult } from "../studentResult/createResult";
 
 export const ModalChild = (
   type: string,
@@ -20,6 +21,8 @@ export const ModalChild = (
       return <ChangePassword />;
     case "profile":
       return <UserProfileEdit data={data as Record<string, any>} />;
+    case "create-result":
+      return <CreateResult schoolId={(data as Record<string, any>).schoolId} />;
     default:
       return (
         <span>
