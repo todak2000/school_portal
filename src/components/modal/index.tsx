@@ -22,13 +22,7 @@ export const ModalChild = (
     case "profile":
       return <UserProfileEdit data={data as Record<string, any>} />;
     case "create-result":
-      return (
-        <CreateResult
-          classLevel={(data as Record<string, any>).classLevel}
-          subject={(data as Record<string, any>).subject}
-          schoolId={(data as Record<string, any>).schoolId}
-        />
-      );
+      return <CreateResult schoolId={(data as Record<string, any>).schoolId} />;
     default:
       return (
         <span>
