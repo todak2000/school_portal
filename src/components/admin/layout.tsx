@@ -180,7 +180,7 @@ const AdminLayout = React.memo(
           <aside className="w-64 bg-white h-screen p-4 hidden md:block">
             <div className="space-y-2">
               {sidebarItems.map((item, index) => (
-                <SidebarButton
+                <SidebarButton 
                   key={index}
                   icon={item.icon}
                   label={item.label}

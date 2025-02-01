@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -6,6 +7,8 @@ import { useParams } from "next/navigation";
 import { getInitials } from "@/helpers/getInitials";
 import Image from "next/image";
 import LoaderSpin from "../loader/LoaderSpin";
+import { getGradeDescription } from "@/helpers/gradeRemarks";
+import { Printer } from "lucide-react";
 
 // Constants
 const SCHOOL_INFO = {
@@ -34,7 +37,24 @@ type StudentScores = {
   };
 };
 
-
+const getGradeColor = (grade: string): string => {
+  switch (grade) {
+    case "A":
+      return "#4ade80";
+    case "B":
+      return "#4ade80";
+    case "C":
+      return "#4ade80";
+    case "D":
+      return "#facc15";
+    case "E":
+      return "#facc15";
+    case "F":
+      return "#f87171";
+    default:
+      return "black";
+  }
+};
 // Reusable Components
 const SchoolHeader = () => (
   <>
@@ -59,9 +79,10 @@ const SchoolHeader = () => (
 const StudentInfo = ({
   name,
   schoolId,
-  studentId,
+  // studentId,
   classLevel,
   position,
+  assignedStudentId,
   totalStudents,
   termAverage,
 }: {
@@ -70,10 +91,11 @@ const StudentInfo = ({
   studentId: string;
   classLevel: string;
   position: number;
+  assignedStudentId: string;
   totalStudents: number;
   termAverage: number;
 }) => (
-  <div className="flex items-start justify-between mb-8 border-t pt-8 border-t-orange-500">
+  <div className="flex flex-col gap-6 md:gap-0 md:flex-row items-start justify-between mb-8 border-t pt-8 border-t-orange-500">
     <div className="flex items-start gap-4">
       <div className="relative">
         <div className="w-16 h-16 bg-secondary font-geistMono rounded-full flex items-center justify-center text-white text-2xl font-semibold">
@@ -83,7 +105,7 @@ const StudentInfo = ({
       </div>
 
       <div className="space-y-1">
-        <h2 className="text-xl font-semibold font-geistMono text-black">
+        <h2 className="text-sm font-semibold font-geistMono text-black">
           {name}
         </h2>
         <div className="grid grid-rows-2 gap-x-1 gap-y-1 text-sm">
@@ -91,13 +113,15 @@ const StudentInfo = ({
             <span className="text-gray-700 font-geistMono">{schoolId}</span>
           </div>
           <div>
-            <span className="text-gray-700 font-geistMono">{studentId}</span>
+            <span className="text-gray-700 font-geistMono">
+              {assignedStudentId ?? ""}
+            </span>
           </div>
         </div>
       </div>
     </div>
 
-    <div className="grid grid-cols-1 text-sm">
+    <div className="grid grid-cols-2 md:grid-cols-1 text-xs">
       <InfoRow label="Class" value={classLevel} />
       <InfoRow label="Session" value={TERM_INFO.session} />
       <InfoRow label="Position" value={`${position} of ${totalStudents}`} />
@@ -127,7 +151,7 @@ const ResultsTable = ({ results }: { results: StudentScores[] }) => {
     <div className="overflow-x-auto">
       <table className="table table-zebra w-full">
         <thead>
-          <tr className="text-orange-400 font-geistMono border-none bg-orange-100 rounded-none">
+          <tr className="text-white font-geistMono border-none bg-orange-500 rounded-none">
             {tableHeaders.map((header) => (
               <th key={header}>{header}</th>
             ))}
@@ -145,7 +169,14 @@ const ResultsTable = ({ results }: { results: StudentScores[] }) => {
               <td>{result.scores.exam}</td>
               <td>{result.scores.total}</td>
               <td>{result.scores.grade}</td>
-              <td>{result.scores.remarks}</td>
+              <td>
+                <span
+                  className="text-xs w-full flex flex-row text-center items-center justify-centerfont-geistMono"
+                  style={{ color: getGradeColor(result.scores.grade) }}
+                >
+                  {getGradeDescription(result.scores.grade)}
+                </span>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -158,6 +189,9 @@ const ResultsTable = ({ results }: { results: StudentScores[] }) => {
 export const StudentResultView = () => {
   const { id: studentId } = useParams<{ id: string }>();
 
+  const handlePrint = () => {
+    window && window.print();
+  };
   const { data: termResult, isLoading } = useQuery<TermResult | any>({
     queryKey: ["termResult", studentId, TERM_INFO.term, TERM_INFO.session],
     queryFn: () =>
@@ -178,7 +212,10 @@ export const StudentResultView = () => {
   }
 
   return (
-    <div className="bg-white rounded-none shadow-sm p-6 max-w-2xl w-full">
+    <div
+      id="result"
+      className="bg-white rounded-none shadow-sm p-6 md:min-w-[595px] max-w-2xl w-full min-h-[842px] max-h-[900px] relative"
+    >
       <SchoolHeader />
       <StudentInfo {...termResult} />
 
@@ -189,8 +226,13 @@ export const StudentResultView = () => {
       </div>
 
       <ResultsTable results={termResult.results} />
+      <button
+        className="btn bg-orange-300 text-white border-none absolute top-2 right-4"
+        onClick={handlePrint}
+      >
+        <Printer />
+      </button>
     </div>
-    
   );
 };
 

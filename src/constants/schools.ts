@@ -473,7 +473,7 @@ export const schoolsArr = [
 export type Term = {
   start: Timestamp;
   end: Timestamp;
-  sessionState: 'completed'|'ongoing'|'not started';
+  sessionState: "completed" | "ongoing" | "not started";
 };
 
 export type Session = {
@@ -494,8 +494,11 @@ export const getSessionTimestamp = (
 
 export const formatDateString = (dateString: string): string => {
   const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short' };
-  return date.toLocaleDateString('en-US', options);
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+  };
+  return date.toLocaleDateString("en-US", options);
 };
 
 export const convertToFirebaseTimestamp = (dateString: string): Timestamp => {
@@ -504,24 +507,23 @@ export const convertToFirebaseTimestamp = (dateString: string): Timestamp => {
 };
 
 export const sessionsArr: Session[] = [
-  
   {
     session: "2024/2025",
     year: "2025",
     firstTerm: {
       start: getSessionTimestamp(2024, 9, 1), // September 1, 2023
       end: getSessionTimestamp(2024, 12, 31), // December 31, 2023
-      sessionState: 'completed',
+      sessionState: "ongoing",
     },
     secondTerm: {
       start: getSessionTimestamp(2025, 1, 1), // January 1, 2024
       end: getSessionTimestamp(2025, 3, 31), // March 31, 2024
-      sessionState: 'ongoing',
+      sessionState: "not started",
     },
     thirdTerm: {
       start: getSessionTimestamp(2025, 5, 1), // May 1, 2024
       end: getSessionTimestamp(2025, 7, 31), // July 31, 2024
-      sessionState: 'not started',
+      sessionState: "not started",
     },
   },
   {
@@ -530,17 +532,17 @@ export const sessionsArr: Session[] = [
     firstTerm: {
       start: getSessionTimestamp(2023, 9, 1), // September 1, 2023
       end: getSessionTimestamp(2023, 12, 31), // December 31, 2023
-      sessionState: 'completed',
+      sessionState: "completed",
     },
     secondTerm: {
       start: getSessionTimestamp(2024, 1, 1), // January 1, 2024
       end: getSessionTimestamp(2024, 3, 31), // March 31, 2024
-      sessionState: 'completed',
+      sessionState: "completed",
     },
     thirdTerm: {
       start: getSessionTimestamp(2024, 5, 1), // May 1, 2024
       end: getSessionTimestamp(2024, 7, 31), // July 31, 2024
-      sessionState: 'completed',
+      sessionState: "completed",
     },
   },
 ];

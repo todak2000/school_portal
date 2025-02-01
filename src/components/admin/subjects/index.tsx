@@ -1,13 +1,12 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { StatsCard } from "@/components/statsCard";
 import { UserInfo } from "@/components/userInfo";
 import DataTable, { DataTableColumn } from "@/components/table";
 import { sampleSubjects, Subject } from "@/constants/schools";
-import { setModal } from "@/store/slices/modal";
 
 const columns: DataTableColumn[] = [
   { key: "name", label: "Subject Name", sortable: true },
@@ -18,25 +17,13 @@ const AdminSubjectsPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [subjects, setSubjects] = useState<Subject[]>(sampleSubjects);
   const today = useMemo(() => getFormattedDate(), []);
-  const dispatch = useDispatch()
+
   const currentTime = useMemo(() => getFormattedTime(), []);
   const handleCreateSubject = (data: Subject) => {
     // Update the classes state with the new class
     setSubjects((prev: Subject[]) => [data,...prev]);
   };
-  const createResultModal = () => {
-    dispatch(
-      setModal({
-        open: true,
-        type: "create-result",
-        data:{
-          classLevel: "SSS2",
-          subject:"MTH",
-          schoolId:"QISS-EK"
-        }
-      })
-    );
-  };
+  
 
   const handleEditSubject = (data: Subject) => {
     // Update the item in the main data
@@ -75,7 +62,6 @@ const AdminSubjectsPage = React.memo(() => {
           )
         )}
       </div>
-<button className="bg-red-500 text-white p-3" type="button" onClick={createResultModal}>Create Result</button>
       {/* Projects Section */}
       <DataTable
         data={subjects}

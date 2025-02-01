@@ -57,6 +57,7 @@ import { useDispatch } from "react-redux";
 import { setModal } from "@/store/slices/modal";
 import CRUDOperation from "@/firebase/functions/CRUDOperation";
 import LoaderSpin from "../loader/LoaderSpin";
+import Collection from "@/firebase/db";
 
 interface PaginationState {
   currentPage: number;
@@ -86,6 +87,7 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
   collectionName,
   defaultSort = { field: "createdAt", direction: "desc" },
 }: DataTableProps<T>) {
+
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchDebounceTimeout, setSearchDebounceTimeout] =
@@ -104,7 +106,13 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
   const dispatch = useDispatch();
 
   const handleStudentResult = (id: string) => {
-    window.open(`/admin/student/${id}`, '_blank');
+    const r =
+      role === "admin"
+        ? role
+        : role === "student"
+        ? "students"
+        : "school_admin";
+    window.open(`/${r}/student/${id}`, "_blank");
   };
 
   const fetchData = useCallback(async () => {
@@ -122,8 +130,6 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
         filterData !== "" ? filterData : searchTerm,
         searchableColumns
       );
-   
-
 
       setData(result.items);
       setTotalCount(result.totalOverallCount);
@@ -516,12 +522,13 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
                       >
                         <UserPen size={16} className="text-orange-400" />
                       </button>
+                      {collectionName ===Collection.Students_Parents &&
                       <button
                         className="btn btn-ghost btn-sm"
                         onClick={() => handleStudentResult(item.id)}
                       >
                         <FileSliders size={16} className="text-orange-600" />
-                      </button>
+                      </button>}
                     </span>
                   </td>
                 </tr>

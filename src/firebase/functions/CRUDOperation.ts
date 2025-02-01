@@ -69,7 +69,7 @@ export default class CRUDOperation<T> {
       // Start with base collection
       let baseQuery = collection(db, this.collectionName);
       // If there's a search term and searchable columns
-      console.log(searchTerm, searchableColumns);
+      
       if (searchTerm && searchableColumns && searchableColumns?.length > 0) {
         const searchTermLower = searchTerm.toLowerCase();
         console.log(searchTerm, searchableColumns);
@@ -136,9 +136,10 @@ export default class CRUDOperation<T> {
         orderBy(sortField, sortDirection),
         limit(pageSize)
       ) as CollectionReference<DocumentData, DocumentData>;
-
+      
       // Apply any filters
       Object.entries(filters).forEach(([field, value]) => {
+    
         if (value) {
           baseQuery = query(
             baseQuery,
@@ -146,7 +147,6 @@ export default class CRUDOperation<T> {
           ) as CollectionReference<DocumentData, DocumentData>;
         }
       });
-
       // If not first page, use startAfter with cached document
       if (pageNumber > 1) {
         const lastDoc = this.cachedLastDocs.get(pageNumber - 1);
@@ -178,7 +178,6 @@ export default class CRUDOperation<T> {
         id: doc.id,
         ...doc.data(),
       })) as unknown as T[];
-
       const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
       if (lastDoc) {
         this.cachedLastDocs.set(pageNumber, lastDoc);

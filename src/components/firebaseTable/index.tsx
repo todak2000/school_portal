@@ -27,7 +27,7 @@ export interface DataTableProps<T> {
   defaultSort: any;
 }
 
-type SortConfig = {
+export type SortConfig = {
   key: string;
   direction: "asc" | "desc";
 } | null;
@@ -55,7 +55,7 @@ import { setModal } from "@/store/slices/modal";
 import CRUDOperation from "@/firebase/functions/CRUDOperation";
 import LoaderSpin from "../loader/LoaderSpin";
 
-interface PaginationState {
+export interface PaginationState {
   currentPage: number;
   totalPages: number;
   itemsPerPage: number;
