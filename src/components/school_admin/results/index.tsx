@@ -14,6 +14,7 @@ import {
   sessionsArr,
 } from "@/constants/schools";
 import { getOngoingSession } from "@/helpers/ongoingSession";
+import { ROLE } from "@/constants";
 
 const termss = [
   { value: 1, label: "First Term" },
@@ -54,7 +55,7 @@ const SchoolAdminResultPage = React.memo(() => {
         </h1>
 
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />

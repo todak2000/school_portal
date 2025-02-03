@@ -12,6 +12,7 @@ import FirebaseSchoolDataTable from "@/components/firebaseTable/schoolTable";
 import { DirectoryCard } from "@/components/directory/card";
 import { schoolsArr } from "@/constants/schools";
 import { Ban, Check } from "lucide-react";
+import { ROLE } from "@/constants";
 
 // Avatar component to display the school logo
 export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -86,7 +87,7 @@ const SchoolAdminTeachersPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />

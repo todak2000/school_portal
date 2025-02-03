@@ -8,6 +8,7 @@ import { UserInfo } from "@/components/userInfo";
 import DataTable, { DataTableColumn } from "@/components/table";
 import { Class, sampleClasses } from "@/constants/schools";
 import { generateClassId } from "@/helpers/generateStudentID";
+import { ROLE } from "@/constants";
 
 const columns: DataTableColumn[] = [
   { key: "name", label: "Class Name", sortable: true },
@@ -54,7 +55,7 @@ const AdminClassPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />

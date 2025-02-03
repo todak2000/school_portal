@@ -126,12 +126,14 @@ const ResetPassword: React.FC = React.memo(() => {
           </div>
 
           <div className="flex items-center">
-            <label
+            <button
+              type="button"
+              aria-label="remember password"
               onClick={handleLogin}
               className="hover:text-orange-700 text-xs cursor-pointer text-primary font-geistMono"
             >
               Remembered your password? Login
-            </label>
+            </button>
           </div>
 
           <button

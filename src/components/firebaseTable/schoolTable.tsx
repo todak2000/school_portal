@@ -58,6 +58,7 @@ import { setModal } from "@/store/slices/modal";
 import CRUDOperation from "@/firebase/functions/CRUDOperation";
 import LoaderSpin from "../loader/LoaderSpin";
 import Collection from "@/firebase/db";
+import { ROLE } from "@/constants";
 
 interface PaginationState {
   currentPage: number;
@@ -106,9 +107,9 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
 
   const handleStudentResult = (id: string) => {
     const r =
-      role === "admin"
+      role === ROLE.admin
         ? role
-        : role === "student"
+        : role === ROLE.student
         ? "students"
         : "school_admin";
     window.open(`/${r}/student/${id}`, "_blank");
@@ -373,7 +374,7 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
               <Download size={16} />
               Export
             </button>
-            {role === "admin" && (
+            {role === ROLE.admin && (
               <button
                 onClick={() => handleOpenModal(defaultForm, false)}
                 className="btn bg-primary border-none rounded-none text-white gap-2 hover:opacity-80"

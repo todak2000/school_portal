@@ -1,6 +1,7 @@
 "use client";
 import { AdminDashboardPage } from "@/components/admin/dashboard";
 import { AdminLayout } from "@/components/admin/layout";
+import { ROLE } from "@/constants";
 import withAuth from "@/hoc/withAuth";
 import React from "react";
 
@@ -12,4 +13,4 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-export default withAuth(AdminDashboard, { requiredRole: "admin" });
+export default withAuth(AdminDashboard, { requiredRole: ROLE.admin });

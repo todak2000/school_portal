@@ -7,6 +7,7 @@ import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { UserInfo } from "@/components/userInfo";
 import { StatsCard } from "@/components/statsCard";
 import { sampleClasses, sampleSubjects, schoolsArr } from "@/constants/schools";
+import { ROLE } from "@/constants";
 
 interface ProjectCardProps {
   logo: string;
@@ -62,7 +63,7 @@ const AdminDashboardPage = React.memo(() => {
         </h1>
 
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />
@@ -140,9 +141,9 @@ const AdminDashboardPage = React.memo(() => {
 
           <div className="h-64 flex items-end justify-between gap-2">
             {/* Placeholder for chart bars */}
-            {Array.from({ length: 9 }).map((_, i) => (
+            {Array.from({ length: 9 }).map((_) => (
               <div
-                key={i}
+                key={_ as string}
                 className="w-full bg-blue-100 rounded-t-lg"
                 style={{ height: `${Math.random() * 100}%` }}
               />

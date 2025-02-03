@@ -13,6 +13,7 @@ import { generateTeacherID } from "@/helpers/generateStudentID";
 import FirebaseDataTable from "@/components/firebaseTable";
 import Collection from "@/firebase/db";
 import { updateUserDoc, userSignup } from "@/firebase/onboarding";
+import { ROLE } from "@/constants";
 
 // Avatar component to display the school logo
 export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -82,7 +83,7 @@ const AdminTeachersPage = React.memo(() => {
   
 
   const handleCreateTeacher = async (
-    data: Record<string, string | boolean | string[]>
+    data: TeacherData
   ) => {
     // Create a new teacher object
     const id = `${key()}`;
@@ -101,7 +102,7 @@ const AdminTeachersPage = React.memo(() => {
         name: data.fullname as string,
         email: data.email as string, // Ensure email is included
         password: "Zxcvb@12345", // Ensure password is included
-        role: "teacher", // Set the role appropriately
+        role: ROLE.teacher as "teacher", // Set the role appropriately
       });
 
       if (res.status === 200) {
@@ -123,15 +124,15 @@ const AdminTeachersPage = React.memo(() => {
   };
 
   const handleEditTeacher = async (
-    data: Record<string, string | boolean | string[]>
+    data: TeacherData
   ) => {
     // Update the item in the main data
     try {
       const res = await updateUserDoc(
-        "teacher",
+        ROLE.teacher as "teacher",
         data.id as string,
         data,
-        user?.role as "admin"
+        user?.role as "teacher"
       );
 
       if (res.status === 200) {
@@ -167,7 +168,7 @@ const AdminTeachersPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />
@@ -191,7 +192,7 @@ const AdminTeachersPage = React.memo(() => {
         columns={columns}
         defaultSort={{ field: "createdAt", direction: "desc" }}
         defaultForm={null}
-        role="teacher"
+        role={ROLE.teacher}
         searchableColumns={["fullname"]}
         onCreate={handleCreateTeacher}
         onDelete={handleDeleteTeacher}

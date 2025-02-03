@@ -10,6 +10,7 @@ import { userSignin } from "@/firebase/onboarding";
 import { useRouter } from "next/navigation";
 import Alert from "../alert";
 import LoaderSpin from "../loader/LoaderSpin";
+import { ROLE } from "@/constants";
 
 interface FormData {
   email: string;
@@ -115,13 +116,12 @@ const SignIn = React.memo(() => {
         identifier: formData.email,
         password: formData.password,
       });
-      console.log(res, ";res--");
       setAlert({
         message: res.message,
         type: res.status === 200 ? "success" : "error",
       });
       if (res.status === 200) {
-        res.role === "teacher"
+        res.role === ROLE.teacher
           ? push("/school_admin/dashboard")
           : push("/student/dashboard");
       }

@@ -11,6 +11,7 @@ import LoaderSpin from "../loader/LoaderSpin";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import Image from "next/image";
+import { ROLE } from "@/constants";
 
 export type UserRole = "admin" | "teacher" | "student";
 
@@ -85,7 +86,7 @@ const ProfileHeader = ({
   handleEditClick,
 }: any) => (
   <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
-    {user?.role === "student" && passportUrl ? (
+    {user?.role === ROLE.student && passportUrl ? (
       <div className="w-16 h-16 rounded-full">
         <Image
           src={passportUrl}
@@ -103,13 +104,13 @@ const ProfileHeader = ({
         {formData?.fullname}
       </h2>
       <p className="text-center md:text-left">
-        {user?.role === "student"
+        {user?.role === ROLE.student
           ? (user as StudentUser)?.studentId
-          : user?.role === "teacher"
+          : user?.role === ROLE.teacher
           ? (user as TeacherUser)?.teacherId
           : "Admin"}
       </p>
-      {(user?.role === "student" || user?.role === "teacher") && (
+      {(user?.role === ROLE.student || user?.role === ROLE.teacher) && (
         <p className="text-center md:text-left text-orange-400">
           {
             schoolsArr.find(
@@ -160,11 +161,11 @@ const SubjectClassSelection = ({
   handleSubjectChange,
 }: any) => (
   <>
-    {(user?.role === "student" || user?.role === "teacher") && (
+    {(user?.role === ROLE.student || user?.role === ROLE.teacher) && (
       <div className="form-control">
         <div className="label">
-          <span className="label-text font-medium">
-            {user.role === "student" ? "Subjects Offered" : "Subjects Taught"}
+          <span className="label-text font-medium font-geistMono">
+            {user.role === ROLE.student ? "Subjects Offered" : "Subjects Taught"}
           </span>
         </div>
         <CheckboxGroup
@@ -172,7 +173,7 @@ const SubjectClassSelection = ({
           itemKey="subjectId"
           itemLabel="name"
           checked={
-            user.role === "student"
+            user.role === ROLE.student
               ? (formData as StudentUser)?.subjectsOffered
               : (formData as TeacherUser)?.subjectsTaught
           }
@@ -180,17 +181,17 @@ const SubjectClassSelection = ({
           onChange={(id: string) =>
             handleSubjectChange(
               id,
-              user.role === "student" ? "subjectsOffered" : "subjectsTaught"
+              user.role === ROLE.student ? "subjectsOffered" : "subjectsTaught"
             )
           }
         />
       </div>
     )}
 
-    {user?.role === "teacher" && (
+    {user?.role === ROLE.teacher && (
       <div className="form-control">
         <div className="label">
-          <span className="label-text font-medium">Classes Taught</span>
+          <span className="label-text font-medium font-geistMono">Classes Taught</span>
         </div>
         <CheckboxGroup
           items={sampleClasses}
@@ -234,9 +235,9 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
   const [loading, setLoading] = useState(false);
   const [isEditable, setIsEditable] = useState(!editMode);
   const { alert, setAlert } = useAlert();
-
+  console.log(user, "seree");
   const initialFormData =
-    loggedUser?.role === "teacher"
+    loggedUser?.role === ROLE.teacher
       ? { ...user, subjectsTaught: user?.subjectsTaught || [] }
       : { ...user, subjectsOffered: user?.subjectsOffered || [] };
 
@@ -369,13 +370,13 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
         : [...arr, subjectId];
 
     setFormData((prev: typeof formData) => {
-      if (user.role === "student") {
+      if (user.role === ROLE.student) {
         return {
           ...prev,
           subjectsOffered: updateArray((prev as StudentUser).subjectsOffered),
         };
       }
-      if (user.role === "teacher") {
+      if (user.role === ROLE.teacher) {
         return {
           ...prev,
           [form === "subjectsTaught" ? "subjectsTaught" : "classesTaught"]:
@@ -405,10 +406,17 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
       setLoading(false);
     }
   };
-  const isAdmin = loggedUser?.isSuperAdmin && loggedUser?.role === "admin";
+  const isStudent = loggedUser?.role === ROLE.student;
+  const isAdmin = loggedUser?.isSuperAdmin && loggedUser?.role === ROLE.admin;
   return (
-    <div className="bg-gradient-to-r via-secondary from-secondary to-green-500 font-geistMono p-6 shadow-lg max-w-2xl mx-auto max-h-[80vh] overflow-y-auto scrollbar-hide">
-      {editMode ? (
+    <div
+      className={`${
+        loggedUser?.role === ROLE.student
+          ? "bg-gray-50 max-h-[70vh] "
+          : "max-h-[80vh] shadow-lg bg-gradient-to-r via-secondary from-secondary to-green-500"
+      } "font-geistMono p-6  max-w-2xl mx-auto overflow-y-auto scrollbar-hide"`}
+    >
+      {editMode || isStudent ? (
         <ProfileHeader
           user={user}
           isAdmin={isAdmin}
@@ -424,12 +432,14 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
       )}
 
       <form className="space-y-6">
-        <div className="space-y-4">
+        <div
+          className={`${isStudent ? "grid md:grid-cols-2 gap-4" : ""} "space-y-4"`}
+        >
           {getRoleSpecificFields().map((field) => (
             <InputField
               key={field.key}
               {...field}
-              isEditable={isEditable}
+              isEditable={isStudent ? false : isEditable}
               onChange={handleChange}
             />
           ))}
@@ -437,14 +447,16 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
           <SubjectClassSelection
             user={user}
             formData={formData}
-            isEditable={isEditable}
+            isEditable={isStudent ? false : isEditable}
             handleSubjectChange={handleSubjectChange}
           />
         </div>
 
         {alert.message && <Alert message={alert.message} type={alert.type} />}
 
-        <div className="flex justify-between pt-4">
+        <div
+          className={`${isStudent ? "hidden" : "flex"} "justify-between pt-4"`}
+        >
           {editMode &&
             loggedUser?.isSuperAdmin &&
             loggedUser?.role === "admin" && (
@@ -496,4 +508,4 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
   );
 };
 
-export default React.memo(UserProfileEdit);
+export default UserProfileEdit;

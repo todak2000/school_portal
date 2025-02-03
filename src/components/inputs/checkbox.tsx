@@ -1,4 +1,6 @@
+import { RootState } from "@/store";
 import React from "react";
+import { useSelector } from "react-redux";
 
 interface CheckboxProps {
   label: string;
@@ -9,8 +11,12 @@ interface CheckboxProps {
 }
 
 const Checkbox: React.FC<CheckboxProps> = React.memo(
-  ({ label, value, checked, disabled = false, onChange }) => (
-    <label className="flex items-center space-x-2">
+  ({ label, value, checked, disabled = false, onChange }) => 
+    
+    {
+      const { user } = useSelector((state: RootState) => state.auth);
+
+      return (    <label className="flex items-center space-x-2">
       <input
         type="checkbox"
         value={value}
@@ -19,9 +25,9 @@ const Checkbox: React.FC<CheckboxProps> = React.memo(
         onChange={(e) => onChange(value, e.target.checked)}
         className="form-checkbox h-5 w-5 text-primary custom-checkbox rounded-none"
       />
-      <span className=" text-gray-200 font-geistMono">{label}</span>
+      <span className={`${user?.role ==='student'? "text-gray-500":"text-gray-200"} font-geistMono`}>{label}</span>
     </label>
-  )
+  )}
 );
 Checkbox.displayName = "Checkbox";
 export { Checkbox };

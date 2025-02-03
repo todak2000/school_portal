@@ -34,7 +34,7 @@ interface InputProps {
   type: string;
   value: string;
   name: string;
-  placeholder?: string | undefined;
+  placeholder?: string;
   isEditable?: boolean;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -59,14 +59,14 @@ const InputField = ({
     return (
       <div className="form-control">
         <label className="label">
-          <span className="label-text">{getLabel(label)}</span>
+          <span className="label-text font-geistMono">{getLabel(label)}</span>
         </label>
         <select
           name={name}
           value={value || ""}
           onChange={onChange}
           disabled={disabled || !isEditable}
-          className="select rounded-none select-bordered w-full focus:border-orange-500 text-black bg-orange-100 focus:outline-none disabled:bg-green-100 disabled:font-bold disabled:text-secondary disabled:border-none disabled:rounded-none"
+          className="select font-geistMono rounded-none select-bordered w-full focus:border-orange-500 text-black bg-orange-100 focus:outline-none disabled:bg-green-100 disabled:font-bold disabled:text-secondary disabled:border-none disabled:rounded-none"
         >
           <option value="">Select {label}</option>
           {options.map((opt) => (
@@ -82,7 +82,7 @@ const InputField = ({
   return (
     <div className="form-control">
       <label className="label">
-        <span className="label-text">{label}</span>
+        <span className="label-text font-geistMono">{label}</span>
       </label>
       <input
         type={type}
@@ -91,7 +91,7 @@ const InputField = ({
         onChange={onChange}
         placeholder={type === "date" ? "Select Date" : placeholder}
         disabled={disabled || !isEditable}
-        className="input input-bordered rounded-none w-full focus:border-orange-500 text-black bg-orange-100 focus:outline-none disabled:bg-green-100 disabled:font-bold disabled:text-secondary disabled:border-none disabled:rounded-none"
+        className="input text-sm font-geistMono input-bordered rounded-none w-full focus:border-orange-500 text-black bg-orange-100 focus:outline-none disabled:bg-green-100 disabled:font-bold disabled:text-secondary disabled:border-none disabled:rounded-none"
       />
     </div>
   );

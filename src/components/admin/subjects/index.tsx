@@ -7,6 +7,7 @@ import { StatsCard } from "@/components/statsCard";
 import { UserInfo } from "@/components/userInfo";
 import DataTable, { DataTableColumn } from "@/components/table";
 import { sampleSubjects, Subject } from "@/constants/schools";
+import { ROLE } from "@/constants";
 
 const columns: DataTableColumn[] = [
   { key: "name", label: "Subject Name", sortable: true },
@@ -48,7 +49,7 @@ const AdminSubjectsPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student as 'student'}
           name={today}
           editTime={currentTime}
         />

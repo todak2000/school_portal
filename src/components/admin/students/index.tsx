@@ -13,6 +13,7 @@ import { key } from "@/helpers/uniqueKey";
 import FirebaseDataTable from "@/components/firebaseTable";
 import Collection from "@/firebase/db";
 import { deleteUserDoc, updateUserDoc } from "@/firebase/onboarding";
+import { ROLE } from "@/constants";
 
 // Avatar component to display the school logo
 export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -79,9 +80,7 @@ const AdminStudentsPage = React.memo(() => {
     );
   };
   const id = `${key()}`;
-  const handleCreateStudent = (
-    data: Record<string, string | boolean | string[]>
-  ) => {
+  const handleCreateStudent = (data: StudentData) => {
     // Create a new teacher object
     const newTeacher = {
       ...data,
@@ -96,12 +95,12 @@ const AdminStudentsPage = React.memo(() => {
   };
 
   const handleEditStudent = async (
-    data: Record<string, string | boolean | string[]>
+    data: StudentData
   ) => {
     // Update the item in the main data
     try {
       const res = await updateUserDoc(
-        "student",
+        'student',
         data.id as string,
         data,
         user?.role as "admin"
@@ -126,9 +125,8 @@ const AdminStudentsPage = React.memo(() => {
 
   const handleDeleteStudent = async (id: string) => {
     // Remove the student from the state
-
     try {
-      const res = await deleteUserDoc("student", id, user?.role as "admin");
+      const res = await deleteUserDoc(ROLE.student as 'student', id, user?.role as "admin");
 
       if (res.status === 200) {
         setStudents((prev: StudentData[]) =>
@@ -152,7 +150,7 @@ const AdminStudentsPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />
@@ -180,7 +178,7 @@ const AdminStudentsPage = React.memo(() => {
         onCreate={handleCreateStudent}
         onDelete={handleDeleteStudent}
         onEdit={handleEditStudent}
-        role="student"
+        role={ROLE.student}
       />
     </main>
   );
