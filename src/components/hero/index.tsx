@@ -49,9 +49,9 @@ const Hero = () => {
           className="lg:hidden w-full lg:w-1/2 object-cover mt-6 lg:mt-0"
         />
         <div className="flex flex-wrap justify-center lg:justify-start items-center w-full gap-3 mb-6">
-          {statistics.map((stat, index) => (
+          {statistics.map((stat) => (
             <Countdown
-              key={index}
+              key={stat.unit}
               icon={stat.icon}
               value={stat.value}
               unit={stat.unit}

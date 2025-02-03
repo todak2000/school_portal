@@ -60,13 +60,13 @@ const columns: DataTableColumn[] = [
   { key: "isSuperAdmin", label: "School Admin", sortable: true },
 ];
 
+type TeacherData = Record<string, string | boolean | string[]>;
+
 const AdminTeachersPage = React.memo(() => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [teachers, setTeachers] = useState<
-    Record<string, string | boolean | string[]>[]
-  >([]);
+  const [teachers, setTeachers] = useState<TeacherData[]>([]);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
 
@@ -176,8 +176,8 @@ const AdminTeachersPage = React.memo(() => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[{ title: "Total Number of Teachers", value: totalCount }].map(
-          (stat, index) => (
-            <StatsCard key={index} title={stat.title} value={stat.value} />
+          (stat) => (
+            <StatsCard key={stat.title} title={stat.title} value={stat.value} />
           )
         )}
       </div>

@@ -60,12 +60,14 @@ const columns: DataTableColumn[] = [
   { key: "classId", label: "Class", sortable: true },
 ];
 
+// Define a type alias for student data
+type StudentData = Record<string, string | boolean | string[]>;
+
 const AdminStudentsPage = React.memo(() => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [students, setStudents] =
-    useState<Record<string, string | boolean | string[]>[]>([]);
+  const [students, setStudents] = useState<StudentData[]>([]);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
   const closeModal = () => {
@@ -89,10 +91,7 @@ const AdminStudentsPage = React.memo(() => {
     };
 
     // Update the students state with the new student
-    setStudents((prev: Record<string, string | boolean | string[]>[]) => [
-      newTeacher,
-      ...prev
-    ]);
+    setStudents((prev: StudentData[]) => [newTeacher, ...prev]);
     closeModal();
   };
 
@@ -109,7 +108,7 @@ const AdminStudentsPage = React.memo(() => {
       );
 
       if (res.status === 200) {
-        setStudents((prev: Record<string, string | boolean | string[]>[]) =>
+        setStudents((prev: StudentData[]) =>
           prev.map((student) =>
             student.id === data.id ? { ...student, ...data } : student
           )
@@ -132,7 +131,7 @@ const AdminStudentsPage = React.memo(() => {
       const res = await deleteUserDoc("student", id, user?.role as "admin");
 
       if (res.status === 200) {
-        setStudents((prev: Record<string, string | boolean | string[]>[]) =>
+        setStudents((prev: StudentData[]) =>
           prev.filter((student) => student.id !== id)
         );
         setTimeout(() => {
@@ -162,8 +161,8 @@ const AdminStudentsPage = React.memo(() => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[{ title: "Total Number of Students", value: totalCount }].map(
-          (stat, index) => (
-            <StatsCard key={index} title={stat.title} value={stat.value} />
+          (stat) => (
+            <StatsCard key={stat.title} title={stat.title} value={stat.value} />
           )
         )}
       </div>

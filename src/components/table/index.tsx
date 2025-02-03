@@ -64,7 +64,6 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   onEdit,
   onDelete,
 }: DataTableProps<T>) {
-
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [alert, setAlert] = useState({ message: "", type: "error" });
@@ -201,11 +200,10 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   };
   // Modal
 
-
   const handleSchool = (id: string) => {
-    window.open(`/admin/school/${id}`, '_blank');
+    window.open(`/admin/school/${id}`, "_blank");
   };
-  
+
   const handleOpenModal = (data: any, editMode: boolean) => {
     if (isMain) {
       dispatch(
@@ -248,7 +246,6 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
     // Update the item in the main data
     onEdit(updatedItem);
     // Update the state with the new data
-    // setSelectedItems(updatedData);
     setAlert({
       message: "Successful",
       type: "success",
@@ -284,7 +281,6 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
       message: "Successful",
       type: "success",
     });
-    // setSelectedItems(updatedData);
     setTimeout(() => {
       handleCloseModal();
     }, 2000);
@@ -316,14 +312,14 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
                   Filter
                 </button>
                 <div className="dropdown-content menu p-2 bg-gray-100 scrollbar-hide  w-max z-[1000] h-48 overflow-auto">
-                  {filterableColumns.map((column, index) => (
-                    <div key={index} className="p-2 ">
+                  {filterableColumns.map((column) => (
+                    <div key={column} className="p-2 ">
                       <div className="font-medium mb-2">
-                        {columns.find((c) => c.key === column)?.label || column}
+                        {columns.find((c) => c.key === column)?.label ?? column}
                       </div>
-                      {getUniqueValues(column).map((value, index) => (
+                      {getUniqueValues(column).map((value) => (
                         <label
-                          key={index}
+                          key={value}
                           className="flex items-center gap-2 p-1 text-black font-geistMono text-xs my-2"
                         >
                           <input
@@ -446,9 +442,9 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
                   />
                 </th>
               )}
-              {columns.map((column, index) => (
+              {columns.map((column) => (
                 <th
-                  key={index}
+                  key={column.label}
                   className={column.sortable ? "cursor-pointer" : ""}
                   onClick={
                     column.sortable ? () => handleSort(column.key) : undefined
@@ -484,16 +480,17 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
                     />
                   </td>
                 )}
-                {columns.map((column, index) => (
-                  <td key={index}>
-                    {" "}
-                    {column.render && column.key === "avatar"
+                {columns.map((column) => {
+                  // Extracted rendering logic
+                  const renderedValue =
+                    column.render && column.key === "avatar"
                       ? column.render(item?.name || item?.fullname, item)
                       : column.render && column.key !== "avatar"
                       ? column.render(getNestedValue(item, column.key), item)
-                      : String(getNestedValue(item, column.key) ?? "")}{" "}
-                  </td>
-                ))}
+                      : String(getNestedValue(item, column.key) ?? "");
+
+                  return <td key={column.label}>{renderedValue}</td>;
+                })}
                 <td>
                   <span className="flex flex-row items-center justify-center gap-1">
                     <button

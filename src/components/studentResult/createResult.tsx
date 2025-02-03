@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ResultService, Term } from "@/firebase/results";
 import {
   sampleClasses,
@@ -79,18 +79,6 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
 
   const [state, setState] = useState(initialState);
   const { formData, students, scores, showTable, loader, alert } = state;
-
-  // useEffect(() => {
-  //   if (alert.message) {
-  //     const timer = setTimeout(() => {
-  //       setState((prev) => ({
-  //         ...prev,
-  //         alert: { message: "", type: "error" },
-  //       }));
-  //     }, 2000);
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [alert.message]);
 
   const updateState = (updates: Partial<typeof state>) => {
     setState((prev) => ({ ...prev, ...updates }));

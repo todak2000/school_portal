@@ -89,8 +89,8 @@ const SchoolAdminStudentsPage = React.memo(() => {
               name: string;
               lga: string;
               description: string;
-              avatar?: string | null | undefined;
-              headerImage?: string | undefined;
+              avatar?: string | null;
+              headerImage?: string;
             }
           }
         />
@@ -99,8 +99,8 @@ const SchoolAdminStudentsPage = React.memo(() => {
             title: `Current Number of Students at ${user?.schoolId}`,
             value: totalCount,
           },
-        ].map((stat, index) => (
-          <StatsCard key={index} title={stat.title} value={stat.value} />
+        ].map((stat) => (
+          <StatsCard key={stat.title} title={stat.title} value={stat.value} />
         ))}
       </div>
 

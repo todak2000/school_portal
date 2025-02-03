@@ -47,35 +47,32 @@ const Header = () => {
     <div className="navbar bg-white shadow-sm lg:px-20 2xl:px-[20%]">
       <div className="navbar-start lg:hidden">
         <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn btn-ghost">
+          <button type="button" className="btn btn-ghost">
             <Menu className="h-5 w-5 text-primary" />
-          </div>
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content bg-white rounded-box z-[1] mt-3 w-52 p-2 shadow"
-          >
-            {mobileNavItems.map((item, index) => (
-              <li key={index}>
+          </button>
+          <ul className="menu menu-sm dropdown-content bg-white rounded-box z-[1] mt-3 w-52 p-2 shadow">
+            {mobileNavItems.map((item) => (
+              <li key={item.name}>
                 {item.onClick ? (
-                  <button
+                  <input
+                    type="button"
                     onClick={() => item.onClick(scrollToFooter)}
                     className="text-gray-700 hover:text-primary"
-                  >
-                    {item.name}
-                  </button>
+                    value={item.name}
+                  />
                 ) : (
-                  <button
+                  <input
+                    type="button"
                     onClick={() =>
                       item.name.toLowerCase() === "register"
-                        ? handleRegistration
+                        ? handleRegistration()
                         : handleOnboarding(
                             item.name.toLowerCase() as "login" | "register"
                           )
                     }
                     className="text-gray-700 font-geistSans hover:text-primary"
-                  >
-                    {item.name}
-                  </button>
+                    value={item.name}
+                  />
                 )}
               </li>
             ))}
@@ -102,15 +99,15 @@ const Header = () => {
 
       <div className="hidden lg:flex items-center gap-4 w-full navbar-end">
         <ul className="menu menu-horizontal px-1">
-          {navItems.map((item, index) => (
-            <li key={index}>
+          {navItems.map((item) => (
+            <li key={item.name}>
               {item.onClick ? (
-                <button
+                <input
+                  type="button"
                   onClick={() => item.onClick(scrollToFooter)}
                   className="text-gray-700 font-geistSans  hover:text-primary"
-                >
-                  {item.name}
-                </button>
+                  value={item.name}
+                />
               ) : (
                 <Link
                   href={item.href}
@@ -123,18 +120,18 @@ const Header = () => {
           ))}
         </ul>
 
-        <button
+        <input
+          type="button"
           onClick={() => handleOnboarding("login")}
-          className="text-gray-700 hover:text-primary font-geistSans"
-        >
-          Login
-        </button>
-        <button
+          className="text-gray-700 cursor-pointer hover:text-primary font-geistSans"
+          value="Login"
+        />
+        <input
+          type="button"
           onClick={handleRegistration}
-          className="bg-secondary text-white px-4 py-2 hover:bg-primary transition-colors font-geistSans font-bold"
-        >
-          Register
-        </button>
+          className="bg-secondary cursor-pointer text-white px-4 py-2 hover:bg-primary transition-colors font-geistSans font-bold"
+          value="Register"
+        />
       </div>
     </div>
   );

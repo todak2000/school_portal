@@ -87,7 +87,6 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
   collectionName,
   defaultSort = { field: "createdAt", direction: "desc" },
 }: DataTableProps<T>) {
-
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchDebounceTimeout, setSearchDebounceTimeout] =
@@ -300,6 +299,15 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
     }
   }, [alert]);
 
+  const renderValue = (item: T, column: DataTableColumn) => {
+    if (column.render) {
+      return column.key === "avatar"
+        ? column.render(item?.name || item?.fullname, item)
+        : column.render(getNestedValue(item, column.key), item);
+    }
+    return String(getNestedValue(item, column.key) ?? "");
+  };
+
   return (
     <div className="w-full min-w-[85vw] md:min-w-[80vw] md:max-w-[85vw] bg-white border-none">
       {/* Header */}
@@ -318,15 +326,15 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
                     Filter
                   </button>
                   <div className="dropdown-content menu p-2 bg-gray-100 scrollbar-hide  w-max z-[1000] h-48 overflow-auto">
-                    {filterableColumns.map((column, index) => (
-                      <div key={index} className="p-2 ">
+                    {filterableColumns.map((column) => (
+                      <div key={column} className="p-2 ">
                         <div className="font-medium mb-2">
-                          {columns.find((c) => c.key === column)?.label ||
+                          {columns.find((c) => c.key === column)?.label ??
                             column}
                         </div>
-                        {getUniqueValues(column).map((value, index) => (
+                        {getUniqueValues(column).map((value) => (
                           <label
-                            key={index}
+                            key={value}
                             className="flex items-center gap-2 p-1 text-black font-geistMono text-xs my-2"
                           >
                             <input
@@ -452,9 +460,9 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
                   />
                 </th>
               )}
-              {columns.map((column, index) => (
+              {columns.map((column) => (
                 <th
-                  key={index}
+                  key={column.label}
                   className={column.sortable ? "cursor-pointer" : ""}
                   onClick={
                     column.sortable ? () => handleSort(column.key) : undefined
@@ -504,15 +512,8 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
                       />
                     </td>
                   )}
-                  {columns.map((column, index) => (
-                    <td key={index}>
-                      {" "}
-                      {column.render && column.key === "avatar"
-                        ? column.render(item?.name || item?.fullname, item)
-                        : column.render && column.key !== "avatar"
-                        ? column.render(getNestedValue(item, column.key), item)
-                        : String(getNestedValue(item, column.key) ?? "")}{" "}
-                    </td>
+                  {columns.map((column) => (
+                    <td key={column.label}>{renderValue(item, column)}</td>
                   ))}
                   <td>
                     <span className="flex flex-row items-center justify-center gap-1">
@@ -522,13 +523,14 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
                       >
                         <UserPen size={16} className="text-orange-400" />
                       </button>
-                      {collectionName ===Collection.Students_Parents &&
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => handleStudentResult(item.id)}
-                      >
-                        <FileSliders size={16} className="text-orange-600" />
-                      </button>}
+                      {collectionName === Collection.Students_Parents && (
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleStudentResult(item.id)}
+                        >
+                          <FileSliders size={16} className="text-orange-600" />
+                        </button>
+                      )}
                     </span>
                   </td>
                 </tr>

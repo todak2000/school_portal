@@ -14,6 +14,7 @@ import { userSignup } from "@/firebase/onboarding";
 import { setModal } from "@/store/slices/modal";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
+import { StringOrNumber } from "./signup";
 
 export interface School {
   name: string;
@@ -231,10 +232,7 @@ const SignUpTeacher = () => {
                         value={
                           Array.isArray(formData[field.name])
                             ? (formData[field.name] as string[]).join(", ")
-                            : (formData[field.name] as
-                                | "string"
-                                | "number"
-                                | string[])
+                            : (formData[field.name] as StringOrNumber)
                         }
                         onChange={handleChange}
                         required={field.required}
@@ -269,10 +267,7 @@ const SignUpTeacher = () => {
                       value={
                         Array.isArray(formData[field.name])
                           ? (formData[field.name] as string[]).join(", ")
-                          : (formData[field.name] as
-                              | "string"
-                              | "number"
-                              | string[])
+                          : (formData[field.name] as StringOrNumber)
                       }
                       onChange={handleChange}
                       required={field.required}
@@ -318,7 +313,7 @@ const SignUpTeacher = () => {
 
               {/* Subjects Offered as Checkboxes */}
               <div className="form-control">
-                <label className="label">
+                <label className="label" htmlFor="subjectsTaught">
                   <span className="label-text font-geistMono">
                     Subjects Taught*
                   </span>
@@ -371,7 +366,7 @@ const SignUpTeacher = () => {
 
               {/* Classes Taugh as Checkboxes */}
               <div className="form-control">
-                <label className="label">
+                <label className="label" htmlFor="classesTaught">
                   <span className="label-text font-geistMono">
                     Classes Taught*
                   </span>

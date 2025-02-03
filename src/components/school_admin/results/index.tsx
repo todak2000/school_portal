@@ -28,9 +28,9 @@ const SchoolAdminResultPage = React.memo(() => {
   const currentTime = useMemo(() => getFormattedTime(), []);
   const [classId, setClassId] = useState<string>("");
   const [subjectId, setSubjectId] = useState<string>("");
-  const [session, setSession] = useState<string>(current?.session || "");
+  const [session, setSession] = useState<string>(current?.session ?? "");
   const [term, setTerm] = useState<string>(
-    current?.ongoingTerm?.toString() || ""
+    current?.ongoingTerm?.toString() ?? ""
   );
 
   const dispatch = useDispatch();
@@ -85,7 +85,7 @@ const SchoolAdminResultPage = React.memo(() => {
       {/* Projects Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-3 mb-6">
         <div className="form-control w-full">
-          <label className="label">
+          <label className="label" htmlFor="session">
             <span className="label-text font-bold text-primary font-sans">Session</span>
           </label>
           <select
@@ -102,7 +102,7 @@ const SchoolAdminResultPage = React.memo(() => {
           </select>
         </div>
         <div className="form-control w-full">
-          <label className="label">
+          <label className="label" htmlFor="term">
             <span className="label-text font-bold text-primary font-sans">Term</span>
           </label>
           <select
@@ -119,7 +119,7 @@ const SchoolAdminResultPage = React.memo(() => {
           </select>
         </div>
         <div className="form-control w-full">
-          <label className="label">
+          <label className="label" htmlFor="classId">
             <span className="label-text font-bold text-primary font-sans">Class</span>
           </label>
           <select
@@ -137,7 +137,7 @@ const SchoolAdminResultPage = React.memo(() => {
         </div>
 
         <div className="form-control w-full">
-          <label className="label">
+          <label className="label" htmlFor="subjectId">
             <span className="label-text font-bold text-primary font-sans">Subject</span>
           </label>
           <select

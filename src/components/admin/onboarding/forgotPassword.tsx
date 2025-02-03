@@ -49,8 +49,8 @@ const ForgotPassword = React.memo(() => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-            {formFields.map((field, index) => (
-              <div key={index} className="relative group">
+            {formFields.map((field) => (
+              <div key={field.name} className="relative group">
                 {field.icon}
                 <input
                   type={field.type}
@@ -69,12 +69,14 @@ const ForgotPassword = React.memo(() => {
           </div>
 
           <div className="flex items-center">
-            <label
+            <button
+              type="button"
+              aria-label="have an account"
               onClick={handleLogin}
               className="hover:text-orange-700 text-xs cursor-pointer text-primary font-geistMono"
             >
               Have an account? Login
-            </label>
+            </button>
           </div>
 
           <button

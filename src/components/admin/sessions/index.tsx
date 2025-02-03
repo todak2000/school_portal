@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 "use client";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -20,38 +20,45 @@ import {
 import { Check, Clock7, Hourglass } from "lucide-react";
 
 const TermComponent = ({ term }: { term: Term }) => {
-  return (
-    <div className="space-y-2">
-      {term.sessionState === "ongoing" ? (
-        <span className="flex flex-row items-center gap-2">
-          <span className="font-medium  capitalize text-xs font-geistMono">
-            {getFormattedCustomDate(term.start)}
-          </span>
-          <span className="font-medium capitalize font-geistMono">-</span>
-          <span className="font-medium capitalize font-geistMono text-xs">
-            {getFormattedCustomDate(term.end)}
-          </span>
-          <div className="flex items-center text-yellow-700 rounded-full text-sm w-max">
-            <Hourglass size={14} className="stroke-2" />
-          </div>
+  // Extracted rendering logic for session state
+  let sessionStateContent;
+
+  if (term.sessionState === "ongoing") {
+    sessionStateContent = (
+      <span className="flex flex-row items-center gap-2">
+        <span className="font-medium  capitalize text-xs font-geistMono">
+          {getFormattedCustomDate(term.start)}
         </span>
-      ) : term.sessionState === "completed" ? (
-        <div className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm w-max">
-          <Check size={14} className="stroke-2" />
-          <span className="font-medium capitalize font-geistMono text-xs">
-            Completed
-          </span>
+        <span className="font-medium capitalize font-geistMono">-</span>
+        <span className="font-medium capitalize font-geistMono text-xs">
+          {getFormattedCustomDate(term.end)}
+        </span>
+        <div className="flex items-center text-yellow-700 rounded-full text-sm w-max">
+          <Hourglass size={14} className="stroke-2" />
         </div>
-      ) : (
-        <div className="flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm w-max">
-          <Clock7 size={14} className="stroke-2" />
-          <span className="font-medium capitalize font-geistMono text-xs">
-            Not Started
-          </span>
-        </div>
-      )}
-    </div>
-  );
+      </span>
+    );
+  } else if (term.sessionState === "completed") {
+    sessionStateContent = (
+      <div className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm w-max">
+        <Check size={14} className="stroke-2" />
+        <span className="font-medium capitalize font-geistMono text-xs">
+          Completed
+        </span>
+      </div>
+    );
+  } else {
+    sessionStateContent = (
+      <div className="flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm w-max">
+        <Clock7 size={14} className="stroke-2" />
+        <span className="font-medium capitalize font-geistMono text-xs">
+          Not Started
+        </span>
+      </div>
+    );
+  }
+
+  return <div className="space-y-2">{sessionStateContent}</div>;
 };
 
 const columns: DataTableColumn[] = [
@@ -103,7 +110,7 @@ const AdminSessionPage = React.memo(() => {
     };
 
     // Update the classes state with the new class
-    setSessions((prev: Session[]) => [newSession,...prev]);
+    setSessions((prev: Session[]) => [newSession, ...prev]);
   };
 
   const handleEditSession = (data: Session) => {
@@ -140,8 +147,8 @@ const AdminSessionPage = React.memo(() => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { title: "Total Number of School Sessions", value: sessions?.length },
-        ].map((stat, index) => (
-          <StatsCard key={index} title={stat.title} value={stat.value} />
+        ].map((stat) => (
+          <StatsCard key={stat.title} title={stat.title} value={stat.value} />
         ))}
       </div>
 

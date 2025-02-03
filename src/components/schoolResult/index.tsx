@@ -18,7 +18,6 @@ const SchoolResultPage = () => {
   const { id } = params;
 
   const [selectedClass, setSelectedClass] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState("");
   const [data, setData] = useState<
     Record<string, string | boolean | string[]>[]
   >([]);
@@ -66,8 +65,6 @@ const SchoolResultPage = () => {
             data={school}
             selectedClass={selectedClass}
             setSelectedClass={setSelectedClass}
-            setSelectedSubject={setSelectedSubject}
-            selectedSubject={selectedSubject}
             totalCount={totalCount}
           />
           <div className="my-4 md:hidden block">
