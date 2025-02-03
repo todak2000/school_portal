@@ -57,8 +57,8 @@ const AdminSubjectsPage = React.memo(() => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[{ title: "Total Number of Subjects", value: subjects?.length }].map(
-          (stat, index) => (
-            <StatsCard key={index} title={stat.title} value={stat.value} />
+          (stat) => (
+            <StatsCard key={stat.title} title={stat.title} value={stat.value} />
           )
         )}
       </div>

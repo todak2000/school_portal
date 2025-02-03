@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { signingOut } from "@/firebase/onboarding";
@@ -16,10 +17,12 @@ import {
   BookOpenCheck,
 } from "lucide-react";
 
-import React, { ReactElement, ReactNode, useCallback, useState } from "react";
+import React, { ReactElement, ReactNode, useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
+import { setModal } from "@/store/slices/modal";
+import { useDispatch } from "react-redux";
 
 interface NavButtonProps {
   icon: LucideIcon;
@@ -96,7 +99,7 @@ const SchoolAdminLayout = React.memo(
   ({ children }: { children: ReactElement | ReactNode }) => {
     const { push } = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+const dispatch = useDispatch()
     const handleLogOut = useCallback(async () => {
       await signingOut();
       push("/admin/onboarding/signin");
@@ -106,6 +109,9 @@ const SchoolAdminLayout = React.memo(
       setIsSidebarOpen(!isSidebarOpen);
     };
 
+    useEffect(() => {
+      dispatch(setModal({ open: false, type: "" }));
+    }, [])
     return (
       <div className="min-h-screen md:h-screen bg-gray-50 overflow-y-hidden">
         {/* Navbar */}
@@ -156,9 +162,9 @@ const SchoolAdminLayout = React.memo(
           {/* Sidebar */}
           <aside className="w-64 bg-white h-screen p-4 hidden md:block">
             <div className="space-y-2">
-              {sidebarItems.map((item, index) => (
+              {sidebarItems.map((item) => (
                 <SidebarButton
-                  key={index}
+                  key={item.label}
                   icon={item.icon}
                   label={item.label}
                   route={item.route}
@@ -180,9 +186,9 @@ const SchoolAdminLayout = React.memo(
                   onClick={toggleSidebar}
                 />
                 <div className="space-y-2 p-4 h-screen">
-                  {sidebarItems.map((item, index) => (
+                  {sidebarItems.map((item) => (
                     <SidebarButton
-                      key={index}
+                      key={item.label}
                       icon={item.icon}
                       label={item.label}
                       route={item.route}

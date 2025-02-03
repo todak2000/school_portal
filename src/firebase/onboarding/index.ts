@@ -32,6 +32,7 @@ import {
   generateTeacherID,
 } from "@/helpers/generateStudentID";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { UserRole } from "@/components/profile";
 
 const adminOperation = new CRUDOperation(Collection.Admins);
 const teacherOperation = new CRUDOperation(Collection.Teachers);
@@ -94,8 +95,8 @@ export const addUserDataToDatabase = async (
       createdAt: Timestamp.fromDate(new Date()),
       email: user.email,
       fullname: data.fullname,
-      teacherId: generateTeacherID(data.school?data.school:data.schoolId),
-      schoolId: data.school?data.school:data.schoolId,
+      teacherId: generateTeacherID(data.school ? data.school : data.schoolId),
+      schoolId: data.school ? data.school : data.schoolId,
       subjectsTaught: data.subjectsTaught ?? [], //an array of subject ids
       classesTaught: data.classesTaught ?? [],
       isAdmin: true,
@@ -159,9 +160,10 @@ export const signInFirebaseUser = async (
  * @param role - user role .
  * @returns A promise that resolves to the user data array.
  */
+
 export const getUserData = async (
   userId: string,
-  role: "admin" | "teacher" | "student"
+  role: UserRole
 ): Promise<Record<string, any> | null> => {
   switch (role) {
     case "admin":
@@ -258,7 +260,7 @@ export const adminSignup = async (
   if (!validation.valid) {
     return {
       status: 400,
-      message: validation.message || "Invalid signup data.",
+      message: validation.message ?? "Invalid signup data.",
     };
   }
 
@@ -310,7 +312,7 @@ export const adminLogin = async (
   if (!validation.valid) {
     return {
       status: 400,
-      message: validation.message || "Invalid login data.",
+      message: validation.message ?? "Invalid login data.",
     };
   }
 
@@ -323,9 +325,8 @@ export const adminLogin = async (
     if (result.user) {
       // Retrieve admin user data from the database
       const userData = await getUserData(result.user.uid, "admin");
-      console.log(userData, "user data-203030");
       // Check if the user is deactivated
-      if ((userData && userData.isDeactivated) || !userData) {
+      if (userData?.isDeactivated || !userData) {
         await handleDeactivatedUser();
         return {
           status: 400,
@@ -418,7 +419,7 @@ export const userSignup = async (
   if (!validation.valid) {
     return {
       status: 400,
-      message: validation.message || "Invalid signup data.",
+      message: validation.message ?? "Invalid signup data.",
     };
   }
 
@@ -514,13 +515,14 @@ const getEmailByIdentifier = async (
  * @param data - The login data containing email and password.
  * @returns A promise that resolves to the login response.
  */
+
 export const userSignin = async (data: LoginData): Promise<LoginResponse> => {
   // Validate the login data
   const validation = validateLoginData(data);
   if (!validation.valid) {
     return {
       status: 400,
-      message: validation.message || "Invalid login data.",
+      message: validation.message ?? "Invalid login data.",
     };
   }
 
@@ -528,8 +530,7 @@ export const userSignin = async (data: LoginData): Promise<LoginResponse> => {
 
   try {
     // Retrieve email based on the identifier
-    const email = await getEmailByIdentifier(identifier as string);
-
+    const email = await getEmailByIdentifier(identifier);
     if (!email) {
       return {
         status: 400,
@@ -543,52 +544,8 @@ export const userSignin = async (data: LoginData): Promise<LoginResponse> => {
       email,
       password
     );
-
     if (result.user) {
-      // Determine the user's role by checking different collections
-      let userData: DocumentData | null = null;
-      let role: string | undefined;
-
-      // Check in Teachers collection
-      userData = await teacherOperation.getDataByUID(result.user.uid);
-      if (userData) {
-        role = userData.role;
-      } else {
-        // Check in CustomUsers collection
-        userData = await studentOperation.getDataByUID(result.user.uid);
-        if (userData) {
-          role = userData.role;
-        }
-      }
-
-      if (!role) {
-        // If role is not found, sign out the user
-        await handleDeactivatedUser();
-        return {
-          status: 400,
-          message: "User role not found. Please contact support.",
-        };
-      }
-
-      // Check if the user is deactivated
-      if ((userData && userData.isDeactivated) || !userData) {
-        await handleDeactivatedUser();
-        return {
-          status: 400,
-          message: "Oops! You are not authorized to access",
-        };
-      }
-      typeof window !== "undefined" &&
-        window.localStorage.setItem(
-          "aks_portal_user",
-          JSON.stringify(userData)
-        );
-      return {
-        status: 200,
-        message: "Login successful.",
-        role: role,
-        userId: result.user.uid,
-      };
+      return await handleUserRole(result.user.uid);
     }
 
     // If user sign-in failed without throwing an error
@@ -606,6 +563,52 @@ export const userSignin = async (data: LoginData): Promise<LoginResponse> => {
   }
 };
 
+// New helper function to handle user role determination
+const handleUserRole = async (userId: string): Promise<LoginResponse> => {
+  let userData: DocumentData | null = null;
+  let role: string | undefined;
+
+  // Check in Teachers collection
+  userData = await teacherOperation.getDataByUID(userId);
+  if (userData) {
+    role = userData.role;
+  } else {
+    // Check in CustomUsers collection
+    userData = await studentOperation.getDataByUID(userId);
+    if (userData) {
+      role = userData.role;
+    }
+  }
+
+  if (!role) {
+    // If role is not found, sign out the user
+    await handleDeactivatedUser();
+    return {
+      status: 400,
+      message: "User role not found. Please contact support.",
+    };
+  }
+
+  // Check if the user is deactivated
+  if (userData?.isDeactivated || !userData) {
+    await handleDeactivatedUser();
+    return {
+      status: 400,
+      message: "Oops! You are not authorized to access",
+    };
+  }
+
+  typeof window !== "undefined" &&
+    window.localStorage.setItem("aks_portal_user", JSON.stringify(userData));
+
+  return {
+    status: 200,
+    message: "Login successful.",
+    role: role,
+    userId: userId,
+  };
+};
+
 /**
  * Fetches user data by user ID based on their role.
  * @param userId - The Firebase user ID.
@@ -614,7 +617,7 @@ export const userSignin = async (data: LoginData): Promise<LoginResponse> => {
  */
 export const fetchUserData = async (
   userId: string,
-  role: "admin" | "teacher" | "student"
+  role: UserRole
 ): Promise<Record<string, any> | null> => {
   try {
     const userData = await getUserData(userId, role);

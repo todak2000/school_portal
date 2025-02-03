@@ -8,7 +8,7 @@ import { CreateResult } from "../studentResult/createResult";
 
 export const ModalChild = (
   type: string,
-  data?: string | number | unknown | object | Record<string, any>
+  data?: string | number | object | null | Record<string, any>
 ) => {
   switch (type) {
     case "login":

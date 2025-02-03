@@ -92,7 +92,6 @@ const ResultsTable = ({
       );
 
       setData(result.items);
-      //   setTotalCount(result.totalOverallCount);
       setPaginationState((prev) => ({
         ...prev,
         totalPages: Math.ceil(result.totalCount / prev.itemsPerPage),
@@ -149,7 +148,7 @@ const ResultsTable = ({
   if (isError) {
     return (
       <div className="flex items-center justify-center p-4 pt-10 w-1/2 mx-auto">
-        <Alert message={(error as Error).message as string} type="error" />
+        <Alert message={error.message as string} type="error" />
       </div>
     );
   }

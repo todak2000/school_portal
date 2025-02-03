@@ -7,17 +7,16 @@ const Alert = ({
   message: string;
   type?: "error" | "success" | "warning";
 }) => {
+  // Extracted class name based on type
+  const alertClass =
+    type === "success"
+      ? "alert-success"
+      : type === "warning"
+      ? "alert-warning"
+      : "alert-error";
+
   return (
-    <div
-      role="alert"
-      className={`alert ${
-        type === "success"
-          ? "alert-success"
-          : type === "warning"
-          ? "alert-warning"
-          : "alert-error"
-      }`}
-    >
+    <div role="alert" className={`alert ${alertClass}`}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="h-6 w-6 shrink-0 stroke-current"
@@ -31,7 +30,7 @@ const Alert = ({
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <span className='text-xs font-geistMono'>{message}!</span>
+      <span className="text-xs font-geistMono">{message}!</span>
     </div>
   );
 };

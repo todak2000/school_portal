@@ -81,9 +81,9 @@ const DirectoryCard = React.memo(({ data }: DirectoryCardProps) => {
           </p>
 
           <div className="flex flex-wrap gap-2 mt-3">
-            {[lga].map((tag, index) => (
+            {[lga].map((tag) => (
               <span
-                key={index}
+                key={tag}
                 className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-primary"
               >
                 {tag}

@@ -15,7 +15,6 @@ interface ProjectCardProps {
   logo: string;
   title: string;
   description: string;
-  progress: number;
   dueDate: string;
   team: string[];
 }
@@ -40,9 +39,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     </div>
     <div className="flex justify-between items-center mt-4">
       <div className="flex -space-x-2">
-        {team.map((member, index) => (
+        {team.map((member) => (
           <div
-            key={index}
+            key={member}
             className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white"
           />
         ))}
@@ -64,8 +63,7 @@ const SchoolAdminDashboardPage = React.memo(() => {
   //
   //
   useEffect(() => {
-    user &&
-      user.schoolId &&
+      user?.schoolId &&
       getTeacherAndStudentCountsPerSchool(user?.schoolId)
         .then((data) => {
           setData(data);
@@ -98,8 +96,8 @@ const SchoolAdminDashboardPage = React.memo(() => {
               name: string;
               lga: string;
               description: string;
-              avatar?: string | null | undefined;
-              headerImage?: string | undefined;
+              avatar?: string | null;
+              headerImage?: string;
             }
           }
         />
@@ -114,9 +112,9 @@ const SchoolAdminDashboardPage = React.memo(() => {
             value: data.teacherCount,
             route: "/school_admin/subjects",
           },
-        ].map((stat, index) => (
+        ].map((stat) => (
           <StatsCard
-            key={index}
+            key={stat.title}
             title={stat.title}
             value={stat.value}
             route={stat.route}
@@ -148,7 +146,6 @@ const SchoolAdminDashboardPage = React.memo(() => {
             logo="JS"
             title="Journey Scarves"
             description="Rebranding and Website Design"
-            progress={75}
             dueDate="Aug, 17 2024"
             team={["1", "2", "3", "4"]}
           />
@@ -157,7 +154,6 @@ const SchoolAdminDashboardPage = React.memo(() => {
             logo="E"
             title="Edifier"
             description="Web Design & Development"
-            progress={51}
             dueDate="Aug, 17 2024"
             team={["1", "2"]}
           />

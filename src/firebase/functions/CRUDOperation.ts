@@ -15,7 +15,6 @@ import {
   startAfter,
   CollectionReference,
   DocumentData,
-  updateDoc,
   deleteDoc,
 } from "firebase/firestore";
 
@@ -33,8 +32,8 @@ interface PaginatedResult<T> {
 
 export default class CRUDOperation<T> {
   // -- collection name
-  private collectionName: string;
-  private cachedLastDocs: Map<number, DocumentSnapshot>;
+  private readonly collectionName: string;
+  private readonly cachedLastDocs: Map<number, DocumentSnapshot>;
   private totalDocuments: number;
 
   constructor(collectionName: string) {
@@ -69,7 +68,7 @@ export default class CRUDOperation<T> {
       // Start with base collection
       let baseQuery = collection(db, this.collectionName);
       // If there's a search term and searchable columns
-      
+
       if (searchTerm && searchableColumns && searchableColumns?.length > 0) {
         const searchTermLower = searchTerm.toLowerCase();
         console.log(searchTerm, searchableColumns);
@@ -136,10 +135,9 @@ export default class CRUDOperation<T> {
         orderBy(sortField, sortDirection),
         limit(pageSize)
       ) as CollectionReference<DocumentData, DocumentData>;
-      
+
       // Apply any filters
       Object.entries(filters).forEach(([field, value]) => {
-    
         if (value) {
           baseQuery = query(
             baseQuery,

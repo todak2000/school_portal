@@ -12,7 +12,6 @@ interface ProjectCardProps {
   logo: string;
   title: string;
   description: string;
-  progress: number;
   dueDate: string;
   team: string[];
 }
@@ -21,7 +20,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   logo,
   title,
   description,
-  // progress,
   dueDate,
   team,
 }) => (
@@ -37,9 +35,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     </div>
     <div className="flex justify-between items-center mt-4">
       <div className="flex -space-x-2">
-        {team.map((member, index) => (
+        {team.map((member) => (
           <div
-            key={index}
+            key={member}
             className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white"
           />
         ))}
@@ -79,8 +77,8 @@ const AdminDashboardPage = React.memo(() => {
           { title: "Students", value: "339", route:'/admin/students' },
           { title: "Teachers", value: "147", route:'/admin/teachers' },
           { title: "Admins", value: sampleClasses?.length, route:'/admin/admins' },
-        ].map((stat, index) => (
-          <StatsCard key={index} title={stat.title} value={stat.value} route={stat.route} />
+        ].map((stat) => (
+          <StatsCard key={stat.title} title={stat.title} value={stat.value} route={stat.route} />
         ))}
       </div>
 
@@ -108,7 +106,6 @@ const AdminDashboardPage = React.memo(() => {
             logo="JS"
             title="Journey Scarves"
             description="Rebranding and Website Design"
-            progress={75}
             dueDate="Aug, 17 2024"
             team={["1", "2", "3", "4"]}
           />
@@ -117,7 +114,7 @@ const AdminDashboardPage = React.memo(() => {
             logo="E"
             title="Edifier"
             description="Web Design & Development"
-            progress={51}
+         
             dueDate="Aug, 17 2024"
             team={["1", "2"]}
           />

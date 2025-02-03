@@ -36,7 +36,7 @@ const SignIn = React.memo(() => {
   const validateEmail = (email: string): string | undefined => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const customFormatRegex = /^AKS\/.+\/.+$/;
-    
+
     if (!email) {
       return "Email is required.";
     } else if (!emailRegex.test(email) && !customFormatRegex.test(email)) {
@@ -44,14 +44,13 @@ const SignIn = React.memo(() => {
     }
     return undefined;
   };
-  
 
   const validatePassword = (password: string): string | undefined => {
     const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
     const numberRegex = /\d/;
     const uppercaseRegex = /[A-Z]/;
     const lowercaseRegex = /[a-z]/;
-  
+
     if (!password) {
       return "Password is required.";
     } else if (password.length < 6) {
@@ -67,7 +66,6 @@ const SignIn = React.memo(() => {
     }
     return undefined;
   };
-  
 
   // Handle input changes with validation
   const handleChange = (
@@ -117,6 +115,7 @@ const SignIn = React.memo(() => {
         identifier: formData.email,
         password: formData.password,
       });
+      console.log(res, ";res--");
       setAlert({
         message: res.message,
         type: res.status === 200 ? "success" : "error",
@@ -125,16 +124,15 @@ const SignIn = React.memo(() => {
         res.role === "teacher"
           ? push("/school_admin/dashboard")
           : push("/student/dashboard");
-          dispatch(setModal({ open: false, type: "" }));
       }
     } catch (error: any) {
       console.log("Sign in error:", error);
-      
+
       setAlert({
         message: "An unexpected error occurred. Please try again.",
         type: "error",
       });
-    } finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -142,6 +140,15 @@ const SignIn = React.memo(() => {
   const handleForgotPassword = () => {
     dispatch(setModal({ open: true, type: "forgot" }));
   };
+  // Extracted variables for nested ternary operations
+  const emailIconClass = formData.email
+    ? errors.email
+      ? "text-red-500 top-1/3"
+      : "text-green-500 top-1/2"
+    : "group-focus-within:text-green-500";
+
+  const buttonDisabled =
+    loading || Object.values(errors).some((error) => error);
 
   const formFields = [
     {
@@ -150,13 +157,7 @@ const SignIn = React.memo(() => {
       placeholder: "Username or Email address",
       icon: (
         <Mail
-          className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors ${
-            formData.email
-              ? errors.email
-                ? "text-red-500 top-1/3"
-                : "text-green-500 top-1/2"
-              : "group-focus-within:text-green-500"
-          }`}
+          className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors ${emailIconClass}`}
           size={20}
         />
       ),
@@ -171,6 +172,16 @@ const SignIn = React.memo(() => {
       return () => clearTimeout(timer);
     }
   }, [alert]);
+
+  const getInputClassName = (fieldName: string) => {
+    return `w-full font-geistMono text-black pr-10 pl-4 py-2 bg-gray-50 border ${
+      errors[fieldName as keyof typeof formData]
+        ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+        : formData[fieldName as keyof typeof formData]
+        ? "border-green-500"
+        : "border-green-200 focus:border-green-500"
+    } rounded-none focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 border-green-500 transition-all`;
+  };
 
   return (
     <OnboardingWrapper>
@@ -192,19 +203,15 @@ const SignIn = React.memo(() => {
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-            {formFields.map((field, index) => (
-              <div key={index} className="relative group">
+            {formFields.map((field) => (
+              <div key={field.name} className="relative group">
                 {field.icon}
                 <input
                   type={field.type}
                   placeholder={field.placeholder}
-                  className={`w-full font-geistMono text-black pr-10 pl-4 py-2 bg-gray-50 border  ${
-                    errors[field.name as keyof FormData]
-                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                      : formData[field.name as keyof FormData]
-                      ? "border-green-500"
-                      : "border-green-200 focus:border-green-500"
-                  } rounded-none focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 border-green-500 transition-all`}
+                  className={`w-full font-geistMono text-black pr-10 pl-4 py-2 bg-gray-50 border  ${getInputClassName(
+                    field.name as keyof FormData
+                  )} rounded-none focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 border-green-500 transition-all`}
                   value={formData[field.name as keyof FormData]}
                   onChange={(e) =>
                     handleChange(e, field.name as keyof FormData)
@@ -230,22 +237,22 @@ const SignIn = React.memo(() => {
           </div>
 
           <div className="flex items-center">
-            <label
+            <button
+              type="button"
+              aria-label="forgot password"
               onClick={handleForgotPassword}
               className="hover:text-orange-700 text-xs cursor-pointer text-primary font-geistMono"
             >
               Forgot Password
-            </label>
+            </button>
           </div>
 
           <button
             type="submit"
             className={`w-full bg-primary text-white py-2 rounded-none hover:bg-orange-700 transform hover:scale-[1.02] transition-all duration-200 ${
-              loading || Object.values(errors).some((error) => error)
-                ? "opacity-50 cursor-not-allowed"
-                : ""
+              buttonDisabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
-            disabled={loading || Object.values(errors).some((error) => error)}
+            disabled={buttonDisabled}
           >
             {loading ? <LoaderSpin /> : "Login"}
           </button>

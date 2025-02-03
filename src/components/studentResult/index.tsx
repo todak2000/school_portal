@@ -79,7 +79,6 @@ const SchoolHeader = () => (
 const StudentInfo = ({
   name,
   schoolId,
-  // studentId,
   classLevel,
   position,
   assignedStudentId,
@@ -88,7 +87,6 @@ const StudentInfo = ({
 }: {
   name: string;
   schoolId: string;
-  studentId: string;
   classLevel: string;
   position: number;
   assignedStudentId: string;

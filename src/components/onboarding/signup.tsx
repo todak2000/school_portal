@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 import React, { useState, useEffect, ChangeEvent } from "react";
 import { sampleSubjects, schoolsArr } from "@/constants/schools";
@@ -15,6 +15,8 @@ import { setModal } from "@/store/slices/modal";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 
+// Types moved to separate file for cleaner organization
+export type StringOrNumber = "string" | "number" | string[];
 export interface School {
   name: string;
   lga: string;
@@ -46,19 +48,158 @@ export interface FormErrors {
   [key: string]: string;
 }
 
-const getLocalStorage = () => {
-  if (typeof window !== "undefined") {
-    return window.localStorage;
-  }
-  return null;
-};
-
-const SignUp = () => {
-  const [loading, setLoading] = useState<boolean>(false);
+// Separated alert management into a custom hook
+const useAlert = () => {
   const [alert, setAlert] = useState<{
     message: string;
     type: "error" | "success" | "warning";
   }>({ message: "", type: "error" });
+
+  useEffect(() => {
+    if (alert.message) {
+      const timer = setTimeout(() => {
+        setAlert({ message: "", type: "error" });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [alert]);
+
+  return { alert, setAlert };
+};
+
+// Separated form field rendering logic
+const FormFields = ({ 
+  formData, 
+  handleChange, 
+  errors, 
+  availableSchools, 
+  showPassword, 
+  showConfirmPassword,
+  setShowPassword,
+  setShowConfirmPassword 
+}: any) => {
+  const renderInputField = (field: any) => (
+    <InputField
+      key={field.name}
+      label={field.label}
+      type={field.inputType || "text"}
+      name={field.name}
+      value={Array.isArray(formData[field.name])
+        ? formData[field.name].join(", ")
+        : formData[field.name]}
+      onChange={handleChange}
+      required={field.required}
+      error={errors[field.name]}
+      disabled={field.disabled}
+      toggleVisibility={field.toggleVisibility}
+      showPassword={field.name === "password" ? showPassword : showConfirmPassword}
+      onToggleVisibility={
+        field.name === "password"
+          ? () => setShowPassword(!showPassword)
+          : field.name === "confirmPassword"
+          ? () => setShowConfirmPassword(!showConfirmPassword)
+          : undefined
+      }
+    />
+  );
+
+  const renderSelectField = (field: any) => (
+    <SelectField
+      key={field.name}
+      label={field.label}
+      name={field.name}
+      options={
+        field.name === "school"
+          ? getSchoolOptions(availableSchools)
+          : field.options || []
+      }
+      value={typeof formData[field.name] === "number"
+        ? String(formData[field.name])
+        : formData[field.name]}
+      onChange={handleChange}
+      required={field.required}
+      multiple={false}
+      disabled={field.name === "school" && formData["lga"] !== ""
+        ? false
+        : field.disabled}
+      error={errors[field.name]}
+    />
+  );
+
+  return (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {formFields.slice(0, 4).map(field => 
+          field.type === "input" && renderInputField(field)
+        )}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {formFields.slice(4, 12).map(field => 
+          field.type === "input" 
+            ? renderInputField(field)
+            : field.type === "select" && renderSelectField(field)
+        )}
+      </div>
+    </>
+  );
+};
+
+// Separated subjects handling logic
+const SubjectsSection = ({ 
+  formData, 
+  errors, 
+  handleSubjectChange, 
+  removeSubject 
+}: any) => (
+  <div className="form-control">
+    <label className="label" htmlFor="subjectsOffered">
+      <span className="label-text font-geistMono">Subjects Offered*</span>
+    </label>
+    <div className="flex flex-wrap gap-2 mb-2">
+      {sampleSubjects.map(subject => (
+        <Checkbox
+          key={subject.subjectId}
+          label={subject.name}
+          value={subject.subjectId}
+          checked={formData.subjectsOffered.includes(subject.subjectId)}
+          onChange={handleSubjectChange}
+          disabled={false}
+        />
+      ))}
+    </div>
+    {errors.subjectsOffered && (
+      <p className="text-red-500 text-sm mt-1">{errors.subjectsOffered}</p>
+    )}
+    <div className="flex flex-wrap gap-2 mt-2">
+      {formData.subjectsOffered.map((subjectId:string) => {
+        const subject = sampleSubjects.find(subj => subj.subjectId === subjectId);
+        return subject && (
+          <span key={subjectId} className="badge bg-white text-gray-500 texxt-xs py-4 px-3 flex items-center space-x-1">
+            <span>{subject.name}</span>
+            <button
+              type="button"
+              onClick={() => removeSubject(subjectId)}
+              className="ml-1 text-primary"
+            >×</button>
+          </span>
+        );
+      })}
+    </div>
+  </div>
+);
+
+const getSchoolOptions = (schools: School[]) => {
+  return schools.length > 0
+    ? schools.map(school => ({
+        label: school.name,
+        value: school.code,
+      }))
+    : [{ label: "There are no schools in this L.G.A", value: "" }];
+};
+
+const SignUp = () => {
+  const [loading, setLoading] = useState(false);
+  const { alert, setAlert } = useAlert();
   const [formData, setFormData] = useState<StudentFormData>(() => ({
     ...formDataa,
     gender: formDataa.gender as "M" | "F",
@@ -66,92 +207,56 @@ const SignUp = () => {
   }));
   const dispatch = useDispatch();
   const { push } = useRouter();
-  const [availableSchools, setAvailableSchools] =
-    useState<School[]>(schoolsArr);
+  const [availableSchools, setAvailableSchools] = useState<School[]>(schoolsArr);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Visibility state for password fields
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState<boolean>(false);
-
-  const storage = getLocalStorage();
-  if (storage) {
-    // Use localStorage here
-  }
-
-  // Update available schools based on selected LGA
   useEffect(() => {
     if (formData.lga) {
-      const filteredSchools = schoolsArr.filter(
-        (school) => school.lga === formData.lga
-      );
+      const filteredSchools = schoolsArr.filter(school => school.lga === formData.lga);
       setAvailableSchools(filteredSchools);
-      setFormData((prev) => ({ ...prev, school: "" }));
+      setFormData(prev => ({ ...prev, school: "" }));
     } else {
       setAvailableSchools([]);
-      setFormData((prev) => ({ ...prev, school: "" }));
+      setFormData(prev => ({ ...prev, school: "" }));
     }
   }, [formData.lga]);
 
-  // Handle input changes with validation
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    if (name === "subjectsOffered") {
-      return;
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+    if (name !== "subjectsOffered") {
+      setFormData(prev => ({ ...prev, [name]: value }));
       validateField(name as keyof StudentFormData, value, setErrors, formData);
     }
   };
 
-  // Handle Subjects Offered Change
   const handleSubjectChange = (value: string, checked: boolean) => {
-    let updatedSubjects = [...formData.subjectsOffered];
-    if (checked) {
-      updatedSubjects.push(value);
-    } else {
-      updatedSubjects = updatedSubjects.filter((subject) => subject !== value);
-    }
-    setFormData((prev) => ({
-      ...prev,
-      subjectsOffered: updatedSubjects,
-    }));
+    const updatedSubjects = checked
+      ? [...formData.subjectsOffered, value]
+      : formData.subjectsOffered.filter(subject => subject !== value);
+    
+    setFormData(prev => ({ ...prev, subjectsOffered: updatedSubjects }));
     validateField("subjectsOffered", updatedSubjects, setErrors, formData);
   };
 
-  // Remove subject from badges
   const removeSubject = (subject: string) => {
-    const updatedSubjects = formData.subjectsOffered.filter(
-      (s) => s !== subject
-    );
-    setFormData((prev) => ({
-      ...prev,
-      subjectsOffered: updatedSubjects,
-    }));
+    const updatedSubjects = formData.subjectsOffered.filter(s => s !== subject);
+    setFormData(prev => ({ ...prev, subjectsOffered: updatedSubjects }));
     validateField("subjectsOffered", updatedSubjects, setErrors, formData);
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
-    setLoading(true);
     e.preventDefault();
+    setLoading(true);
 
-    const isValid = validateForm(setErrors, formData);
-    if (!isValid) {
-      console.log("Validation failed:", errors);
+    if (!validateForm(setErrors, formData)) {
       setAlert({
-        message:
-          "Incomplete or incorrect information detected. Please fill out all fields properly.",
+        message: "Incomplete or incorrect information detected. Please fill out all fields properly.",
         type: "error",
       });
       setLoading(false);
-      return; // Exit early if validation fails
+      return;
     }
 
     try {
@@ -168,24 +273,15 @@ const SignUp = () => {
         }, 3000);
       }
     } catch (error: any) {
-      console.log("Sign in error:", error);
       setAlert({
         message: "An unexpected error occurred. Please try again.",
         type: "error",
       });
     } finally {
-      setLoading(false); // Ensure loading state is reset
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (alert.message !== "") {
-      const timer = setTimeout(() => {
-        setAlert({ message: "", type: "error" });
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [alert]);
   return (
     <div className="min-h-screen bg-white p-4">
       <div className="max-w-3xl mx-auto">
@@ -196,164 +292,24 @@ const SignUp = () => {
             </h2>
 
             <form className="space-y-6">
-              {/* Map through formFields to render inputs */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {formFields
-                  .slice(0, 4)
-                  .map((field) =>
-                    field.type === "input" ? (
-                      <InputField
-                        key={field.name}
-                        label={field.label}
-                        type={field.inputType as string}
-                        name={field.name}
-                        value={
-                          Array.isArray(formData[field.name])
-                            ? (formData[field.name] as string[]).join(", ")
-                            : (formData[field.name] as
-                                | "string"
-                                | "number"
-                                | string[])
-                        }
-                        onChange={handleChange}
-                        required={field.required}
-                        error={errors[field.name]}
-                        disabled={field.disabled}
-                        toggleVisibility={field.toggleVisibility}
-                        showPassword={
-                          field.name === "password"
-                            ? showPassword
-                            : showConfirmPassword
-                        }
-                        onToggleVisibility={
-                          field.name === "password"
-                            ? () => setShowPassword(!showPassword)
-                            : field.name === "confirmPassword"
-                            ? () => setShowConfirmPassword(!showConfirmPassword)
-                            : undefined
-                        }
-                      />
-                    ) : null
-                  )}
-              </div>
+              <FormFields
+                formData={formData}
+                handleChange={handleChange}
+                errors={errors}
+                availableSchools={availableSchools}
+                showPassword={showPassword}
+                showConfirmPassword={showConfirmPassword}
+                setShowPassword={setShowPassword}
+                setShowConfirmPassword={setShowConfirmPassword}
+              />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {formFields.slice(4, 12).map((field) =>
-                  field.type === "input" ? (
-                    <InputField
-                      key={field.name}
-                      label={field.label}
-                      type={field.inputType || "text"}
-                      name={field.name}
-                      value={
-                        Array.isArray(formData[field.name])
-                          ? (formData[field.name] as string[]).join(", ")
-                          : (formData[field.name] as
-                              | "string"
-                              | "number"
-                              | string[])
-                      }
-                      onChange={handleChange}
-                      required={field.required}
-                      error={errors[field.name]}
-                      disabled={field.disabled}
-                    />
-                  ) : field.type === "select" ? (
-                    <SelectField
-                      key={field.name}
-                      label={field.label}
-                      name={field.name}
-                      options={
-                        field.name === "school"
-                          ? availableSchools.length > 0
-                            ? availableSchools.map((school) => ({
-                                label: school.name,
-                                value: school.code,
-                              }))
-                            : [
-                                {
-                                  label: "There are no schools in this L.G.A",
-                                  value: "",
-                                },
-                              ]
-                          : field.options || []
-                      }
-                      value={
-                        typeof formData[field.name] === "number"
-                          ? String(formData[field.name])
-                          : (formData[field.name] as
-                              | "string"
-                              | "number"
-                              | string[])
-                      }
-                      onChange={handleChange}
-                      required={field.required}
-                      multiple={false}
-                      disabled={
-                        field.name === "school" && formData["lga"] !== ""
-                          ? false
-                          : field.disabled
-                      }
-                      error={errors[field.name]}
-                    />
-                  ) : null
-                )}
-              </div>
+              <SubjectsSection
+                formData={formData}
+                errors={errors}
+                handleSubjectChange={handleSubjectChange}
+                removeSubject={removeSubject}
+              />
 
-              {/* Subjects Offered as Checkboxes */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-geistMono">
-                    Subjects Offered*
-                  </span>
-                </label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {sampleSubjects.map((subject) => (
-                    <Checkbox
-                      disabled={false}
-                      key={subject.subjectId}
-                      label={subject.name}
-                      value={subject.subjectId}
-                      checked={formData.subjectsOffered.includes(
-                        subject.subjectId
-                      )}
-                      onChange={handleSubjectChange}
-                    />
-                  ))}
-                </div>
-                {errors.subjectsOffered && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.subjectsOffered}
-                  </p>
-                )}
-                {/* Display selected subjects as badges */}
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.subjectsOffered.map((subjectId) => {
-                    const subject = sampleSubjects.find(
-                      (subj) => subj.subjectId === subjectId
-                    );
-                    return (
-                      subject && (
-                        <span
-                          key={subjectId}
-                          className="badge bg-white text-gray-500 texxt-xs py-4 px-3 flex items-center space-x-1"
-                        >
-                          <span>{subject.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeSubject(subjectId)}
-                            className="ml-1 text-primary"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      )
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Submit Button */}
               <div className="mt-8">
                 <button
                   type="button"
@@ -368,7 +324,7 @@ const SignUp = () => {
             {alert.message && (
               <Alert
                 message={alert.message}
-                type={alert.type as "error" | "success" | "warning"}
+                type={alert.type}
               />
             )}
           </div>

@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 
 const AdminSignIn = React.memo(() => {
   const dispatch = useDispatch();
-  const {push} = useRouter()
+  const { push } = useRouter();
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ message: "", type: "error" });
   const [formData, setFormData] = useState({
@@ -31,7 +31,7 @@ const AdminSignIn = React.memo(() => {
       type: res.status === 200 ? "success" : "error",
     });
     if (res.status === 200) {
-      push('/admin/dashboard');
+      push("/admin/dashboard");
     }
   };
 
@@ -47,7 +47,7 @@ const AdminSignIn = React.memo(() => {
   };
 
   useEffect(() => {
-    if (alert.message !== '') {
+    if (alert.message !== "") {
       setTimeout(() => {
         setAlert({ message: "", type: "error" });
       }, 2000);
@@ -88,8 +88,8 @@ const AdminSignIn = React.memo(() => {
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-            {formFields.map((field, index) => (
-              <div key={index} className="relative group">
+            {formFields.map((field) => (
+              <div key={field.name} className="relative group">
                 {field.icon}
                 <input
                   type={field.type}
@@ -115,12 +115,14 @@ const AdminSignIn = React.memo(() => {
           </div>
 
           <div className="flex items-center">
-            <label
+            <button
+              type="button"
+              aria-label="forgot password"
               onClick={handleForgotPassword}
               className="hover:text-orange-700 text-xs cursor-pointer text-primary font-geistMono"
             >
               Forgot Password
-            </label>
+            </button>
           </div>
 
           <button

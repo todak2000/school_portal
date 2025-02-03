@@ -105,7 +105,7 @@ const ResetPassword: React.FC = React.memo(() => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex justify-center space-x-4">
             {formFields.map((field, index) => (
-              <div key={index} className="relative group">
+              <div key={field.name} className="relative group">
                 <input
                   type={field.type}
                   inputMode="numeric"
@@ -126,12 +126,14 @@ const ResetPassword: React.FC = React.memo(() => {
           </div>
 
           <div className="flex items-center">
-            <label
+            <button
+              type="button"
+              aria-label="remember password"
               onClick={handleLogin}
               className="hover:text-orange-700 text-xs cursor-pointer text-primary font-geistMono"
             >
               Remembered your password? Login
-            </label>
+            </button>
           </div>
 
           <button

@@ -45,8 +45,8 @@ const DirectoryPage = () => {
 
       {paginatedSchools.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 py-4 my-2 overflow-y-auto">
-          {paginatedSchools.map((i, index) => (
-            <DirectoryCard key={index} data={i} />
+          {paginatedSchools.map((i) => (
+            <DirectoryCard key={i.name} data={i} />
           ))}
         </div>
       ) : (

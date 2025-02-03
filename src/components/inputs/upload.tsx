@@ -35,7 +35,7 @@ const FileUpload: React.FC<FileUploadProps> = React.memo(
         <div className="text-sm">
           <p className="font-semibold text-white font-geistMono">{label}*</p>
           <p className="text-base-content/70 font-geistMono">
-            Drag & Drop your file here 
+            Drag & Drop your file here
           </p>
         </div>
         <label className="btn  font-geistMono bg-orange-300 text-secondary border-none">

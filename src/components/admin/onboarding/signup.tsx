@@ -90,8 +90,8 @@ push('/admin/onboarding/signin')
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-            {formFields.map((field, index) => (
-              <div key={index} className="relative group">
+            {formFields.map((field) => (
+              <div key={field.name} className="relative group">
                 {field.icon}
                 <input
                   type={field.type}
@@ -117,12 +117,14 @@ push('/admin/onboarding/signin')
           </div>
 
           <div className="flex items-center">
-            <label
+            <button
+              type="button"
+              aria-label="forgot password"
               onClick={handleForgotPassword}
               className="hover:text-orange-700 text-xs cursor-pointer text-primary font-geistMono"
             >
               Forgot Password
-            </label>
+            </button>
           </div>
 
           <button

@@ -69,12 +69,12 @@ const columns: DataTableColumn[] = [
   },
 ];
 
+type TeacherData = Record<string, string | boolean | string[]>;
+
 const SchoolAdminTeachersPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [teachers, setTeachers] = useState<
-    Record<string, string | boolean | string[]>[]
-  >([]);
+  const [teachers, setTeachers] = useState<TeacherData[]>([]);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
 
@@ -100,8 +100,8 @@ const SchoolAdminTeachersPage = React.memo(() => {
               name: string;
               lga: string;
               description: string;
-              avatar?: string | null | undefined;
-              headerImage?: string | undefined;
+              avatar?: string | null;
+              headerImage?: string;
             }
           }
         />
@@ -110,8 +110,8 @@ const SchoolAdminTeachersPage = React.memo(() => {
             title: `Current Number of Teachers at ${user?.schoolId}`,
             value: totalCount,
           },
-        ].map((stat, index) => (
-          <StatsCard key={index} title={stat.title} value={stat.value} />
+        ].map((stat) => (
+          <StatsCard key={stat.title} title={stat.title} value={stat.value} />
         ))}
       </div>
 
