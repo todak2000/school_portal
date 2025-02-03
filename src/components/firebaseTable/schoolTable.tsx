@@ -106,12 +106,17 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
   const dispatch = useDispatch();
 
   const handleStudentResult = (id: string) => {
-    const r =
-      role === ROLE.admin
-        ? role
-        : role === ROLE.student
-        ? "students"
-        : "school_admin";
+    let r: string;
+    switch (role) {
+      case ROLE.admin:
+        r = role;
+        break;
+      case ROLE.student:
+        r = "students";
+        break;
+      default:
+        r = "school_admin";
+    }
     window.open(`/${r}/student/${id}`, "_blank");
   };
 

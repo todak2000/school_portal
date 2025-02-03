@@ -724,7 +724,7 @@ export const deleteUserDoc = async (
   try {
     if (type === ROLE.student) {
       await studentOperation.deleteDocument(id);
-    } else if (type === ROLE.student) {
+    } else if (type === ROLE.admin) {
       await adminOperation.deleteDocument(id);
     } else if (type === ROLE.teacher) {
       await teacherOperation.deleteDocument(id);

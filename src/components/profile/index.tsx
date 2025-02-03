@@ -84,48 +84,55 @@ const ProfileHeader = ({
   isAdmin = false,
   isEditable,
   handleEditClick,
-}: any) => (
-  <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
-    {user?.role === ROLE.student && passportUrl ? (
-      <div className="w-16 h-16 rounded-full">
-        <Image
-          src={passportUrl}
-          alt="Profile"
-          width={100}
-          height={100}
-          className="rounded-full border-white border-2"
-        />
+}: any) => {
+  const getUserId = (user: any) => {
+    switch (user?.role) {
+      case ROLE.student:
+        return (user as StudentUser)?.studentId;
+      case ROLE.teacher:
+        return (user as TeacherUser)?.teacherId;
+      default:
+        return "Admin";
+    }
+  };
+  return (
+    <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
+      {user?.role === ROLE.student && passportUrl ? (
+        <div className="w-16 h-16 rounded-full">
+          <Image
+            src={passportUrl}
+            alt="Profile"
+            width={100}
+            height={100}
+            className="rounded-full border-white border-2"
+          />
+        </div>
+      ) : (
+        <Avatar schoolName={formData?.fullname} />
+      )}
+      <div className="flex-1">
+        <h2 className="text-2xl font-semibold text-center md:text-left">
+          {formData?.fullname}
+        </h2>
+        <p className="text-center md:text-left">{getUserId(user)}</p>
+        {(user?.role === ROLE.student || user?.role === ROLE.teacher) && (
+          <p className="text-center md:text-left text-orange-400">
+            {
+              schoolsArr.find(
+                (school) =>
+                  school.code ===
+                  (formData as StudentUser | TeacherUser).schoolId
+              )?.name
+            }
+          </p>
+        )}
       </div>
-    ) : (
-      <Avatar schoolName={formData?.fullname} />
-    )}
-    <div className="flex-1">
-      <h2 className="text-2xl font-semibold text-center md:text-left">
-        {formData?.fullname}
-      </h2>
-      <p className="text-center md:text-left">
-        {user?.role === ROLE.student
-          ? (user as StudentUser)?.studentId
-          : user?.role === ROLE.teacher
-          ? (user as TeacherUser)?.teacherId
-          : "Admin"}
-      </p>
-      {(user?.role === ROLE.student || user?.role === ROLE.teacher) && (
-        <p className="text-center md:text-left text-orange-400">
-          {
-            schoolsArr.find(
-              (school) =>
-                school.code === (formData as StudentUser | TeacherUser).schoolId
-            )?.name
-          }
-        </p>
+      {isAdmin && (
+        <EditButton isEditable={isEditable} onClick={handleEditClick} />
       )}
     </div>
-    {isAdmin && (
-      <EditButton isEditable={isEditable} onClick={handleEditClick} />
-    )}
-  </div>
-);
+  );
+};
 
 // Separated edit button component
 const EditButton = ({
@@ -165,7 +172,9 @@ const SubjectClassSelection = ({
       <div className="form-control">
         <div className="label">
           <span className="label-text font-medium font-geistMono">
-            {user.role === ROLE.student ? "Subjects Offered" : "Subjects Taught"}
+            {user.role === ROLE.student
+              ? "Subjects Offered"
+              : "Subjects Taught"}
           </span>
         </div>
         <CheckboxGroup
@@ -191,7 +200,9 @@ const SubjectClassSelection = ({
     {user?.role === ROLE.teacher && (
       <div className="form-control">
         <div className="label">
-          <span className="label-text font-medium font-geistMono">Classes Taught</span>
+          <span className="label-text font-medium font-geistMono">
+            Classes Taught
+          </span>
         </div>
         <CheckboxGroup
           items={sampleClasses}
@@ -433,7 +444,9 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
 
       <form className="space-y-6">
         <div
-          className={`${isStudent ? "grid md:grid-cols-2 gap-4" : ""} "space-y-4"`}
+          className={`${
+            isStudent ? "grid md:grid-cols-2 gap-4" : ""
+          } "space-y-4"`}
         >
           {getRoleSpecificFields().map((field) => (
             <InputField
@@ -492,13 +505,9 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
                 disabled={loading}
                 className="btn bg-primary rounded-none border-none text-white flex flex-row items-center justify-center"
               >
-                {loading ? (
-                  <LoaderSpin />
-                ) : editMode ? (
-                  "Save changes"
-                ) : (
-                  "Create"
-                )}
+                {loading && <LoaderSpin />}
+                {!loading && editMode && "Save Changes"}
+                {!loading && !editMode && "Create"}
               </button>
             )}
           </div>
