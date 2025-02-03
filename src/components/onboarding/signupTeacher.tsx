@@ -15,6 +15,7 @@ import { setModal } from "@/store/slices/modal";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { StringOrNumber } from "./signup";
+import { ROLE } from "@/constants";
 
 export interface School {
   name: string;
@@ -58,7 +59,7 @@ const SignUpTeacher = () => {
   }>({ message: "", type: "error" });
   const [formData, setFormData] = useState<TeacherFormData>(() => ({
     ...teacherFormData,
-    role: "teacher" as "teacher" | "admin" | "student",
+    role: ROLE.teacher as "teacher" | "admin" | "student",
     subjectsTaught: [] as string[],
     classesTaught: [] as string[],
   }));
@@ -262,7 +263,7 @@ const SignUpTeacher = () => {
                     <InputField
                       key={field.name}
                       label={field.label}
-                      type={field.inputType || "text"}
+                      type={field.inputType ?? "text"}
                       name={field.name}
                       value={
                         Array.isArray(formData[field.name])

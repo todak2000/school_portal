@@ -18,6 +18,7 @@ import {
   Term,
 } from "@/constants/schools";
 import { Check, Clock7, Hourglass } from "lucide-react";
+import { ROLE } from "@/constants";
 
 const TermComponent = ({ term }: { term: Term }) => {
   // Extracted rendering logic for session state
@@ -137,7 +138,7 @@ const AdminSessionPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />

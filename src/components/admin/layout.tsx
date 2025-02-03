@@ -224,7 +224,7 @@ const dispatch = useDispatch()
           </Dialog>
 
           {/* Main Content */}
-          <div className="md:overflow-y-hidden md:h-[calc(100vh-100px)]">
+          <div className="md:overflow-y-hidden md:h-[calc(100vh-100px)] md:w-[calc(100vw-280px)]">
             {children}
           </div>
         </div>

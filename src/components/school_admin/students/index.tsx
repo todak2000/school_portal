@@ -11,6 +11,7 @@ import Collection from "@/firebase/db";
 import FirebaseSchoolDataTable from "@/components/firebaseTable/schoolTable";
 import { DirectoryCard } from "@/components/directory/card";
 import { schoolsArr } from "@/constants/schools";
+import { ROLE } from "@/constants";
 
 // Avatar component to display the school logo
 export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -75,7 +76,7 @@ const SchoolAdminStudentsPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />

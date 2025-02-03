@@ -14,6 +14,7 @@ import { userSignup } from "@/firebase/onboarding";
 import { setModal } from "@/store/slices/modal";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
+import { ROLE } from "@/constants";
 
 // Types moved to separate file for cleaner organization
 export type StringOrNumber = "string" | "number" | string[];
@@ -41,7 +42,7 @@ export interface StudentFormData {
   passportUrl: string | Blob;
   birthCertificateUrl: string | Blob;
   phone: string;
-  role: "student" | "parent";
+  role: "student";
 }
 
 export interface FormErrors {
@@ -82,7 +83,7 @@ const FormFields = ({
     <InputField
       key={field.name}
       label={field.label}
-      type={field.inputType || "text"}
+      type={field.inputType ?? "text"}
       name={field.name}
       value={Array.isArray(formData[field.name])
         ? formData[field.name].join(", ")
@@ -203,7 +204,7 @@ const SignUp = () => {
   const [formData, setFormData] = useState<StudentFormData>(() => ({
     ...formDataa,
     gender: formDataa.gender as "M" | "F",
-    role: "student",
+    role: ROLE.student as 'student',
   }));
   const dispatch = useDispatch();
   const { push } = useRouter();

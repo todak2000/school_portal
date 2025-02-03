@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ResultService, Term, TermResult } from "@/firebase/results";
@@ -9,19 +10,23 @@ import Image from "next/image";
 import LoaderSpin from "../loader/LoaderSpin";
 import { getGradeDescription } from "@/helpers/gradeRemarks";
 import { Printer } from "lucide-react";
+import { getOngoingSession } from "@/helpers/ongoingSession";
+import { sampleSubjects, schoolsArr, sessionsArr } from "@/constants/schools";
+import { RootState } from "@/store";
+import { useSelector } from "react-redux";
 
 // Constants
-const SCHOOL_INFO = {
-  id: "QISS-EK",
+const AKS_INFO = {
+  id: "AKSRP",
   name: "Akwa Ibom State Schools Result",
   logoPath: "/aks_logo1.webp",
   logoSize: 120,
 };
 
-const TERM_INFO = {
-  term: 1 as Term,
-  session: "2024/2025",
-};
+// const TERM_INFO = {
+//   term: 1 as Term,
+//   session: "2024/2025",
+// };
 
 // Types
 type StudentScores = {
@@ -37,61 +42,47 @@ type StudentScores = {
   };
 };
 
-const getGradeColor = (grade: string): string => {
-  switch (grade) {
-    case "A":
-      return "#4ade80";
-    case "B":
-      return "#4ade80";
-    case "C":
-      return "#4ade80";
-    case "D":
-      return "#facc15";
-    case "E":
-      return "#facc15";
-    case "F":
-      return "#f87171";
-    default:
-      return "black";
-  }
-};
+
 // Reusable Components
-const SchoolHeader = () => (
+const SchoolHeader = ({ school }: { school: string }) => (
   <>
     <div className="flex w-full items-center justify-center h-32">
       <div className="absolute w-48 h-48 bg-transparent rounded-full flex items-center justify-center">
         <Image
-          src={SCHOOL_INFO.logoPath}
+          src={AKS_INFO.logoPath}
           alt="AKS Schools Logo"
-          height={SCHOOL_INFO.logoSize}
-          width={SCHOOL_INFO.logoSize}
+          height={AKS_INFO.logoSize}
+          width={AKS_INFO.logoSize}
           className="object-fit"
           priority
         />
       </div>
     </div>
     <p className="text-center mb-3 font-geistMono font-extrabold text-orange-500">
-      {SCHOOL_INFO.name}
+      {AKS_INFO.name}
+    </p>
+    <p className="text-center mb-3 font-geistMono font-extrabold text-orange-500">
+      {school}
     </p>
   </>
 );
 
 const StudentInfo = ({
   name,
-  schoolId,
   classLevel,
   position,
   assignedStudentId,
   totalStudents,
   termAverage,
+  session,
 }: {
   name: string;
-  schoolId: string;
   classLevel: string;
   position: number;
   assignedStudentId: string;
   totalStudents: number;
   termAverage: number;
+  session: string;
 }) => (
   <div className="flex flex-col gap-6 md:gap-0 md:flex-row items-start justify-between mb-8 border-t pt-8 border-t-orange-500">
     <div className="flex items-start gap-4">
@@ -108,9 +99,6 @@ const StudentInfo = ({
         </h2>
         <div className="grid grid-rows-2 gap-x-1 gap-y-1 text-sm">
           <div>
-            <span className="text-gray-700 font-geistMono">{schoolId}</span>
-          </div>
-          <div>
             <span className="text-gray-700 font-geistMono">
               {assignedStudentId ?? ""}
             </span>
@@ -121,7 +109,7 @@ const StudentInfo = ({
 
     <div className="grid grid-cols-2 md:grid-cols-1 text-xs">
       <InfoRow label="Class" value={classLevel} />
-      <InfoRow label="Session" value={TERM_INFO.session} />
+      <InfoRow label="Session" value={session} />
       <InfoRow label="Position" value={`${position} of ${totalStudents}`} />
       <InfoRow label="Average" value={`${termAverage.toFixed(2)}%`} />
     </div>
@@ -159,9 +147,14 @@ const ResultsTable = ({ results }: { results: StudentScores[] }) => {
           {results.map((result) => (
             <tr
               key={result.id}
-              className="border-none bg-orange-50 font-geistSans font-bold text-secondary"
+              className="border-none bg-orange-50 font-geistMono font-normal text-secondary"
             >
-              <td>{result.subject}</td>
+              <td>
+                {
+                  sampleSubjects?.find((i) => i.subjectId === result.subject)
+                    ?.name
+                }
+              </td>
               <td>{result.scores.ca1}</td>
               <td>{result.scores.ca2}</td>
               <td>{result.scores.exam}</td>
@@ -169,8 +162,7 @@ const ResultsTable = ({ results }: { results: StudentScores[] }) => {
               <td>{result.scores.grade}</td>
               <td>
                 <span
-                  className="text-xs w-full flex flex-row text-center items-center justify-centerfont-geistMono"
-                  style={{ color: getGradeColor(result.scores.grade) }}
+                  className="text-xs w-full font-bold text-black flex flex-row text-center items-center justify-centerfont-geistMono"
                 >
                   {getGradeDescription(result.scores.grade)}
                 </span>
@@ -184,52 +176,81 @@ const ResultsTable = ({ results }: { results: StudentScores[] }) => {
 };
 
 // Main Component
-export const StudentResultView = () => {
-  const { id: studentId } = useParams<{ id: string }>();
-
+export const StudentResultView = ({
+  studentId,
+  session,
+  term,
+  schoolId,
+}: {
+  studentId?: string;
+  session?: string;
+  term?: string;
+  schoolId?: string;
+}) => {
+  const { user } = useSelector((state: RootState) => state.auth);
+  const { id } = useParams<{ id: string }>();
+  const studentIdd = studentId ?? id;
+  const current = getOngoingSession(sessionsArr);
+  const selectedSession = session ?? current?.session;
+  const selectedTerm = term ?? current?.ongoingTerm;
   const handlePrint = () => {
     window && window.print();
   };
   const { data: termResult, isLoading } = useQuery<TermResult | any>({
-    queryKey: ["termResult", studentId, TERM_INFO.term, TERM_INFO.session],
+    queryKey: [
+      "termResult",
+      studentIdd,
+      selectedTerm,
+      selectedSession,
+      schoolId,
+    ],
     queryFn: () =>
       ResultService.getTermResult(
-        studentId,
-        TERM_INFO.term,
-        TERM_INFO.session,
-        SCHOOL_INFO.id
+        studentIdd,
+        selectedTerm as Term,
+        selectedSession as string,
+        schoolId as string
       ),
   });
 
-  if (isLoading) {
+  if (isLoading || typeof termResult === "undefined") {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <LoaderSpin />
       </div>
     );
   }
-
+  if (!termResult) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <p>Oops! This student&#39;s result has not be collated yet!</p>
+      </div>
+    );
+  }
+  const schoolObj = schoolsArr.find((i) => i.code === termResult.schoolId);
+  const school = `${schoolObj?.name}, ${schoolObj?.lga}`;
   return (
     <div
       id="result"
-      className="bg-white rounded-none shadow-sm p-6 md:min-w-[595px] max-w-2xl w-full min-h-[842px] max-h-[900px] relative"
+      className="bg-white mx-auto rounded-none shadow-sm p-6 md:min-w-[595px] max-w-2xl w-full min-h-[842px] max-h-[900px] relative"
     >
-      <SchoolHeader />
-      <StudentInfo {...termResult} />
+      <SchoolHeader school={school} />
+      <StudentInfo {...termResult} session={session} />
 
       <div className="mb-6">
         <h2 className="text-lg font-bold mb-2 font-geistMono text-secondary">
-          Term {TERM_INFO.term} Result
+          Term {selectedTerm} Result
         </h2>
       </div>
 
       <ResultsTable results={termResult.results} />
+      {user?.role !=='student' &&
       <button
         className="btn bg-orange-300 text-white border-none absolute top-2 right-4"
         onClick={handlePrint}
       >
         <Printer />
-      </button>
+      </button>}
     </div>
   );
 };

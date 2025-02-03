@@ -54,6 +54,7 @@ import { useDispatch } from "react-redux";
 import { setModal } from "@/store/slices/modal";
 import CRUDOperation from "@/firebase/functions/CRUDOperation";
 import LoaderSpin from "../loader/LoaderSpin";
+import { ROLE } from "@/constants";
 
 export interface PaginationState {
   currentPage: number;
@@ -351,7 +352,7 @@ const FirebaseDataTable = React.memo(function DataTable<
               <Download size={16} />
               Export
             </button>
-            {role === "admin" && (
+            {role === ROLE.admin && (
               <button
                 onClick={() => handleOpenModal(defaultForm, false)}
                 className="btn bg-primary border-none rounded-none text-white gap-2 hover:opacity-80"

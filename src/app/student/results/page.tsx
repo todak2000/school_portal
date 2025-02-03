@@ -1,19 +1,17 @@
 "use client";
 
-import { StudentDashboardPage } from "@/components/student/dashboard";
 import { StudentLayout } from "@/components/student/dashboard/layout";
+import { StudentResultPage } from "@/components/student/results";
 import { ROLE } from "@/constants";
 import withAuth from "@/hoc/withAuth";
 import React from "react";
 
-const StudentDashboard: React.FC = () => {
+const StudentResult: React.FC = () => {
   return (
     <StudentLayout>
-      <StudentDashboardPage />
+      <StudentResultPage />
     </StudentLayout>
   );
 };
 
-export default withAuth(StudentDashboard, {
-  requiredRole: ROLE.student,
-});
+export default withAuth(StudentResult, { requiredRole: ROLE.student });

@@ -9,6 +9,7 @@ import DataTable, { DataTableColumn } from "@/components/table";
 import { schoolsArr } from "@/constants/schools";
 import { generateSchoolCode } from "@/helpers/generateStudentID";
 import { getInitials } from "@/helpers/getInitials";
+import { ROLE } from "@/constants";
 
 // Avatar component to display the school logo
 const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -89,7 +90,7 @@ const AdminSchoolsPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />

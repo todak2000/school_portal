@@ -47,14 +47,12 @@ interface SidebarButtonProps {
   icon: LucideIcon;
   label: string;
   route: string;
-  // onClick?:()=> void;
 }
 
 const SidebarButton: React.FC<SidebarButtonProps> = ({
   icon: Icon,
   label,
   route,
-  // onClick,
 }) => {
   const path = usePathname();
   const { push } = useRouter();
@@ -102,7 +100,7 @@ const SchoolAdminLayout = React.memo(
 const dispatch = useDispatch()
     const handleLogOut = useCallback(async () => {
       await signingOut();
-      push("/admin/onboarding/signin");
+      push("/");
     }, [push]);
 
     const toggleSidebar = () => {
@@ -200,7 +198,7 @@ const dispatch = useDispatch()
           </Dialog>
 
           {/* Main Content */}
-          <div className="md:overflow-y-hidden md:h-[calc(100vh-100px)]">
+          <div className="md:overflow-y-hidden md:h-[calc(100vh-100px)] md:w-[calc(100vw-280px)]">
             {children}
           </div>
         </div>

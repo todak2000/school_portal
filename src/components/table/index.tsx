@@ -49,6 +49,7 @@ import {
 import EditDeleteModal from "./editDelete";
 import { useDispatch } from "react-redux";
 import { setModal } from "@/store/slices/modal";
+import { key } from "@/helpers/uniqueKey";
 
 const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   data,
@@ -465,9 +466,9 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
             </tr>
           </thead>
           <tbody>
-            {paginatedData?.map((item, index) => (
+            {paginatedData?.map((item) => (
               <tr
-                key={index}
+                key={key()}
                 className="border-b hover:bg-orange-50 border-[0.5px] border-gray-300 text-black font-geistMono"
               >
                 {selectable && (

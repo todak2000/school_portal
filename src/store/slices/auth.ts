@@ -11,7 +11,7 @@ interface AuthState {
   user: Record<string, any> | null;
   loading: boolean;
   error: string | null;
-  role: "admin" | "student" | "teacher" | "parent" | null;
+  role: "admin" | "student" | "teacher"| null;
 }
 
 const initialState: AuthState = {

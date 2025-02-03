@@ -45,6 +45,7 @@ export interface TermResult {
   name: string;
   schoolId: string;
   session: string;
+  assignedStudentId: string;
   classLevel: ClassLevel;
   results: Result[];
   termAverage: number;
@@ -131,7 +132,6 @@ export const ResultService = {
           r.term === term && r.session === session
       );
 
-      // let termResultData: Omit<TermResult, "id"> | undefined;
       let termResultId: string | undefined;
 
       // Fetch results from the Results collection
@@ -139,7 +139,7 @@ export const ResultService = {
         collection(db, Collection.Results),
         where("studentId", "==", studentId),
         where("schoolId", "==", schoolId),
-        where("term", "==", term),
+        where("term", "==", typeof term === "string" ? Number(term) : term),
         where("session", "==", session)
       );
       const resultsSnapshot = await getDocs(resultsQuery);
@@ -147,7 +147,6 @@ export const ResultService = {
       if (resultsSnapshot.empty) {
         return null;
       }
-
       const results = resultsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -179,6 +178,7 @@ export const ResultService = {
         schoolId,
         term,
         session,
+        assignedStudentId: student.studentId,
         classLevel: student.classId,
         results,
         termAverage: average,

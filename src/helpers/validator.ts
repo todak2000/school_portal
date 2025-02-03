@@ -137,7 +137,7 @@ export const validateTeacherField = <T extends keyof TeacherFormData>(
     }));
   };
 
-  const validateEmail = (value: any) => {
+  const validateTeacherEmail = (value: any) => {
     if (!value) return "Email is required.";
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return typeof value === "string" && !emailRegex.test(value)
@@ -145,7 +145,7 @@ export const validateTeacherField = <T extends keyof TeacherFormData>(
       : "";
   };
 
-  const validatePassword = (value: any) => {
+  const validateTeacherPassword = (value: any) => {
     if (!value) return "Password is required.";
     if (typeof value === "string" && value.length < 6) {
       return "Password must be at least 6 characters long.";
@@ -153,7 +153,7 @@ export const validateTeacherField = <T extends keyof TeacherFormData>(
     return "";
   };
 
-  const validateConfirmPassword = (value: any) => {
+  const validateTeacherConfirmPassword = (value: any) => {
     if (!value) return "Please confirm your password.";
     if (value !== formData.password) {
       return "Passwords do not match.";
@@ -163,10 +163,10 @@ export const validateTeacherField = <T extends keyof TeacherFormData>(
 
   switch (fieldName) {
     case "email":
-      error = validateEmail(value);
+      error = validateTeacherEmail(value);
       break;
     case "password":
-      error = validatePassword(value);
+      error = validateTeacherPassword(value);
       if (formData.confirmPassword && value !== formData.confirmPassword) {
         setError("confirmPassword", "Passwords do not match.");
       } else {
@@ -174,7 +174,7 @@ export const validateTeacherField = <T extends keyof TeacherFormData>(
       }
       break;
     case "confirmPassword":
-      error = validateConfirmPassword(value);
+      error = validateTeacherConfirmPassword(value);
       break;
     case "fullname":
       error = !value ? "Full name is required." : "";
