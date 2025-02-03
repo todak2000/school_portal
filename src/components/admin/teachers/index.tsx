@@ -107,7 +107,7 @@ const AdminTeachersPage = React.memo(() => {
 
       if (res.status === 200) {
         setTeachers(
-          (prevTeachers: Record<string, string | boolean | string[]>[]) => [
+          (prevTeachers: TeacherData[]) => [
             newTeacher,
             ...prevTeachers,
           ]

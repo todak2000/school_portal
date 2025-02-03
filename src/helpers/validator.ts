@@ -137,14 +137,6 @@ export const validateTeacherField = <T extends keyof TeacherFormData>(
     }));
   };
 
-  const validateTeacherEmail = (value: any) => {
-    if (!value) return "Email is required.";
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return typeof value === "string" && !emailRegex.test(value)
-      ? "Please enter a valid email address."
-      : "";
-  };
-
   const validateTeacherPassword = (value: any) => {
     if (!value) return "Password is required.";
     if (typeof value === "string" && value.length < 6) {
@@ -163,7 +155,7 @@ export const validateTeacherField = <T extends keyof TeacherFormData>(
 
   switch (fieldName) {
     case "email":
-      error = validateTeacherEmail(value);
+      error = validateEmail(value);
       break;
     case "password":
       error = validateTeacherPassword(value);

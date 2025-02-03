@@ -174,13 +174,21 @@ const SignIn = React.memo(() => {
   }, [alert]);
 
   const getInputClassName = (fieldName: string) => {
-    return `w-full font-geistMono text-black pr-10 pl-4 py-2 bg-gray-50 border ${
-      errors[fieldName as keyof typeof formData]
-        ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-        : formData[fieldName as keyof typeof formData]
-        ? "border-green-500"
-        : "border-green-200 focus:border-green-500"
-    } rounded-none focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 border-green-500 transition-all`;
+    const getClassName = (error: string | undefined, value: string) => {
+      switch (true) {
+        case !!error:
+          return "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500";
+        case !!value:
+          return "border-green-500";
+        default:
+          return "border-green-200 focus:border-green-500";
+      }
+    };
+
+    return `w-full font-geistMono text-black pr-10 pl-4 py-2 bg-gray-50 border ${getClassName(
+      errors[fieldName as keyof typeof formData],
+      formData[fieldName as keyof typeof formData]
+    )} rounded-none focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 border-green-500 transition-all`;
   };
 
   return (
@@ -209,9 +217,7 @@ const SignIn = React.memo(() => {
                 <input
                   type={field.type}
                   placeholder={field.placeholder}
-                  className={`w-full font-geistMono text-black pr-10 pl-4 py-2 bg-gray-50 border  ${getInputClassName(
-                    field.name as keyof FormData
-                  )} rounded-none focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 border-green-500 transition-all`}
+                  className={getInputClassName(field.name as keyof FormData)}
                   value={formData[field.name as keyof FormData]}
                   onChange={(e) =>
                     handleChange(e, field.name as keyof FormData)
