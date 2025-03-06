@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -6,7 +7,7 @@ import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { StatsCard } from "@/components/statsCard";
 import { UserInfo } from "@/components/userInfo";
 import DataTable, { DataTableColumn } from "@/components/table";
-import { sampleSubjects, Subject } from "@/constants/schools";
+import { sampleSeniorSubjects, sampleSubjects, Subject } from "@/constants/schools";
 import { ROLE } from "@/constants";
 
 const columns: DataTableColumn[] = [
@@ -17,6 +18,7 @@ const columns: DataTableColumn[] = [
 const AdminSubjectsPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [subjects, setSubjects] = useState<Subject[]>(sampleSubjects);
+  const [subjectsTwo, setSubjectsTwo] = useState<Subject[]>(sampleSeniorSubjects);
   const today = useMemo(() => getFormattedDate(), []);
 
   const currentTime = useMemo(() => getFormattedTime(), []);
@@ -57,7 +59,7 @@ const AdminSubjectsPage = React.memo(() => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[{ title: "Total Number of Subjects", value: subjects?.length }].map(
+        {[{ title: "Total Number of Subjects (JSS)", value: subjects?.length }, { title: "Total Number of Subjects (SSS)", value: subjectsTwo?.length }].map(
           (stat) => (
             <StatsCard key={stat.title} title={stat.title} value={stat.value} />
           )
@@ -65,7 +67,7 @@ const AdminSubjectsPage = React.memo(() => {
       </div>
       {/* Projects Section */}
       <DataTable
-        data={subjects}
+        data={[...subjects, ...subjectsTwo]}
         editableKeys={["name", "subjectId"]}
         columns={columns}
         defaultForm={{ name: "", subjectId: "" }}

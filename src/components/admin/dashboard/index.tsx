@@ -6,7 +6,7 @@ import { RootState } from "@/store";
 import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { UserInfo } from "@/components/userInfo";
 import { StatsCard } from "@/components/statsCard";
-import { sampleClasses, sampleSubjects, schoolsArr } from "@/constants/schools";
+import { sampleClasses, sampleSeniorSubjects, sampleSubjects, schoolsArr } from "@/constants/schools";
 import { ROLE } from "@/constants";
 
 interface ProjectCardProps {
@@ -73,7 +73,7 @@ const AdminDashboardPage = React.memo(() => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {[
           { title: "Schools", value: schoolsArr?.length, route:'/admin/schools' },
-          { title: "Subjects", value: sampleSubjects?.length, route:'/admin/subjects' },
+          { title: "Subjects", value: sampleSubjects?.length + sampleSeniorSubjects?.length, route:'/admin/subjects' },
           { title: "Classes", value: sampleClasses?.length, route:'/admin/classes' },
           { title: "Students", value: "339", route:'/admin/students' },
           { title: "Teachers", value: "147", route:'/admin/teachers' },

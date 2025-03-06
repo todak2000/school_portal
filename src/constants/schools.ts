@@ -59,8 +59,76 @@ export const sampleClasses: Class[] = [
 
 export const sampleSubjects: Subject[] = [
   { name: "Mathematics", subjectId: "MTH" },
-  { name: "English", subjectId: "ENG" },
-  { name: "Science", subjectId: "SCI" },
+  { name: "English Language", subjectId: "ENG" },
+  { name: "Basic Science", subjectId: "SCI" },
+  { name: "Literature in English", subjectId: "LEN" },
+  { name: "Efik", subjectId: "EFK" },
+  { name: "French", subjectId: "FRN" },
+
+  { name: "Social Studies", subjectId: "SOC" },
+  { name: "Creative Arts", subjectId: "CRA" },
+  { name: "Music", subjectId: "MUS" },
+  { name: "Practical Agricuture", subjectId: "AGR" },
+
+  { name: "Physical & Health Edu", subjectId: "PHE" },
+  { name: "Basic Technology", subjectId: "BST" },
+  { name: "Rel. & Moral Instructions", subjectId: "RMI" },
+  { name: "Technical Drawing", subjectId: "TDW" },
+  { name: "Wood Work", subjectId: "WDW" },
+
+  { name: "Metal Work", subjectId: "MTW" },
+  { name: "Mechanics", subjectId: "MCH" },
+  { name: "Electronics", subjectId: "ELE" },
+  { name: "Local Craft", subjectId: "LCT" },
+
+  { name: "Home Economics", subjectId: "HEC" },
+  { name: "Civic Education", subjectId: "CVE" },
+  { name: "Computer Studies", subjectId: "CTS" },
+  { name: "Business Studies", subjectId: "BSS" },
+
+];
+
+export const sampleSeniorSubjects: Subject[] = [
+  { name: "Mathematics", subjectId: "MTH" },
+  { name: "English Language", subjectId: "ENG" },
+  { name: "Further Mathematics", subjectId: "FMT" },
+  { name: "Literature in English", subjectId: "LEN" },
+  { name: "Civic Education", subjectId: "CVE" },
+  { name: "French", subjectId: "FRN" },
+
+  { name: "Physics", subjectId: "PHY" },
+  
+
+  { name: "Chemistry", subjectId: "CHM" },
+  { name: "Biology", subjectId: "BIO" },
+  { name: "Health Science", subjectId: "HES" },
+  { name: "Agricutural Science", subjectId: "AGS" },
+
+  { name: "Geography", subjectId: "GEO" },
+  { name: "Economics", subjectId: "ECO" },
+  { name: "C.R.K", subjectId: "CRK" },
+  { name: "Phy & Health Education", subjectId: "PHE" },
+  { name: "Government", subjectId: "GOV" },
+  { name: "Home Economics", subjectId: "HEC" },
+
+
+  { name: "Music", subjectId: "MUS" },
+  { name: "Commerce", subjectId: "COM" },
+  { name: "Financial Accounting", subjectId: "FIA" },
+  { name: "Marketing", subjectId: "MAR" },
+
+  
+  
+  { name: "Computer Studies (ICT)", subjectId: "CTS" },
+  { name: "Auto Mechanics", subjectId: "AMC" },
+  { name: "Fine Arts", subjectId: "FNA" },
+
+  { name: "Typewriting", subjectId: "TYW" },
+  { name: "Ibibio", subjectId: "IBB" },
+  { name: "Garment Making", subjectId: "GMA" },
+  { name: "Technical Drawing", subjectId: "TDW" },
+  { name: "Food & Nuts", subjectId: "FON" },
+
 ];
 
 export const schoolsArr = [

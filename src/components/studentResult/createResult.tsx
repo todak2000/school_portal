@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ResultService, Term } from "@/firebase/results";
 import {
   sampleClasses,
+  sampleSeniorSubjects,
   sampleSubjects,
   sessionsArr,
 } from "@/constants/schools";
@@ -342,11 +343,19 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
         }
       >
         <option value="">Select {label}</option>
-        {options.map(({ value, label }) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
+        {name === "subject" && formData["classLevel"].startsWith("SSS")
+          ?sampleSeniorSubjects.map(({ subjectId, name }) => (
+            <option key={subjectId} value={subjectId}>
+              {name}
+            </option>
+          )) 
+          
+          
+          : options.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
       </select>
     </div>
   );
@@ -368,9 +377,11 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
       </td>
     ));
 
-  const subject = formData.subject
+  
+  const subject = formData.subject && formData["classLevel"].startsWith("JSS")
     ? sampleSubjects.find((i) => i.subjectId === formData.subject)?.name
-    : "";
+    : formData.subject && formData["classLevel"].startsWith("SSS")
+    ? sampleSeniorSubjects.find((i) => i.subjectId === formData.subject)?.name :"";
 
   return (
     <div className="card bg-white shadow-xl w-full max-w-4xl mx-auto">
@@ -378,7 +389,7 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
         <h2 className="card-title text-2xl mb-6 text-secondary">
           Record Results
         </h2>
-        
+
         {alert.message && <Alert message={alert.message} type={alert.type} />}
 
         {!showTable ? (
@@ -400,7 +411,6 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
         ) : (
           <>
             <div className="md:w-max md:absolute top-10 right-10">
-            
               {[
                 { label: "Subject", value: subject },
                 { label: "Class", value: formData.classLevel },
@@ -482,8 +492,11 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
                 </button>
               </div>
               <div className="w-full my-5 mx-auto">
-            <Alert message="Please make sure to thoroughly review, verify, and validate the results before submission. Once submitted, modifications, edits, or updates will not be possible" type="warning" />
-            </div>
+                <Alert
+                  message="Please make sure to thoroughly review, verify, and validate the results before submission. Once submitted, modifications, edits, or updates will not be possible"
+                  type="warning"
+                />
+              </div>
             </div>
           </>
         )}

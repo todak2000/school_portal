@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 import React, { useState, useEffect, ChangeEvent } from "react";
-import { sampleClasses, sampleSubjects, schoolsArr } from "@/constants/schools";
+import { sampleClasses, sampleSeniorSubjects, sampleSubjects, schoolsArr, Subject } from "@/constants/schools";
 import { InputField } from "../inputs/text";
 import { teacherFormData, teacherFormFields } from "@/constants/form";
 import { SelectField } from "../inputs/select";
@@ -16,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { StringOrNumber } from "./signup";
 import { ROLE } from "@/constants";
+import { checkPrefixes } from "@/helpers/getSubject";
 
 export interface School {
   name: string;
@@ -67,6 +69,7 @@ const SignUpTeacher = () => {
   const { push } = useRouter();
   const [errors, setErrors] = useState<FormErrors>({});
 
+  const [subjectss, setSubjectss]= useState<Subject[]>([])
   // Visibility state for password fields
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
@@ -208,7 +211,11 @@ const SignUpTeacher = () => {
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [alert]);
+    if (formData.classesTaught && formData.classesTaught.length > 0){
+      const x = checkPrefixes(formData.classesTaught)
+      x ==='SSS'? setSubjectss(sampleSeniorSubjects):x ==='JSS'? setSubjectss(sampleSubjects): setSubjectss([])
+    }
+  }, [alert, formData.classesTaught]);
   return (
     <div className="min-h-screen bg-white p-4">
       <div className="max-w-3xl mx-auto">
@@ -312,64 +319,12 @@ const SignUpTeacher = () => {
                 )}
               </div>
 
-              {/* Subjects Offered as Checkboxes */}
-              <div className="form-control">
-                <label className="label" htmlFor="subjectsTaught">
-                  <span className="label-text font-geistMono">
-                    Subjects Taught*
-                  </span>
-                </label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {sampleSubjects.map((subject) => (
-                    <Checkbox
-                      disabled={false}
-                      key={subject.subjectId}
-                      label={subject.name}
-                      value={subject.subjectId}
-                      checked={formData.subjectsTaught.includes(
-                        subject.subjectId
-                      )}
-                      onChange={handleSubjectChange}
-                    />
-                  ))}
-                </div>
-                {errors.subjectsTaught && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.subjectsTaught}
-                  </p>
-                )}
-                {/* Display selected subjects as badges */}
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.subjectsTaught.map((subjectId) => {
-                    const subject = sampleSubjects.find(
-                      (subj) => subj.subjectId === subjectId
-                    );
-                    return (
-                      subject && (
-                        <span
-                          key={subjectId}
-                          className="badge bg-white text-gray-500 texxt-xs py-4 px-3 flex items-center space-x-1"
-                        >
-                          <span>{subject.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeSubject(subjectId)}
-                            className="ml-1 text-primary"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      )
-                    );
-                  })}
-                </div>
-              </div>
 
               {/* Classes Taugh as Checkboxes */}
               <div className="form-control">
                 <label className="label" htmlFor="classesTaught">
                   <span className="label-text font-geistMono">
-                    Classes Taught*
+                    Classes Taught* (Please you can only select either Junior or Senior Classes)
                   </span>
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -416,6 +371,59 @@ const SignUpTeacher = () => {
                 </div>
               </div>
 
+
+              {/* Subjects Offered as Checkboxes */}
+              <div className="form-control">
+                <label className="label" htmlFor="subjectsTaught">
+                  <span className="label-text font-geistMono">
+                    Subjects Taught*
+                  </span>
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+                  {subjectss.map((subject) => (
+                    <Checkbox
+                      disabled={false}
+                      key={subject.subjectId}
+                      label={subject.name}
+                      value={subject.subjectId}
+                      checked={formData.subjectsTaught.includes(
+                        subject.subjectId
+                      )}
+                      onChange={handleSubjectChange}
+                    />
+                  ))}
+                </div>
+                {errors.subjectsTaught && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.subjectsTaught}
+                  </p>
+                )}
+                {/* Display selected subjects as badges */}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.subjectsTaught.map((subjectId) => {
+                    const subject = subjectss.find(
+                      (subj) => subj.subjectId === subjectId
+                    );
+                    return (
+                      subject && (
+                        <span
+                          key={subjectId}
+                          className="badge bg-white text-gray-500 texxt-xs py-4 px-3 flex items-center space-x-1"
+                        >
+                          <span>{subject.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeSubject(subjectId)}
+                            className="ml-1 text-primary"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      )
+                    );
+                  })}
+                </div>
+              </div>
               {/* Submit Button */}
               <div className="mt-8">
                 <button

@@ -4,7 +4,12 @@ import { PenOff, Trash2, UserRoundPen } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Avatar } from "../admin/students";
 import { Checkbox } from "../inputs/checkbox";
-import { sampleClasses, sampleSubjects, schoolsArr } from "@/constants/schools";
+import {
+  sampleClasses,
+  sampleSeniorSubjects,
+  sampleSubjects,
+  schoolsArr,
+} from "@/constants/schools";
 import InputField from "./input";
 import Alert from "../alert";
 import LoaderSpin from "../loader/LoaderSpin";
@@ -12,6 +17,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import Image from "next/image";
 import { ROLE } from "@/constants";
+import { checkPrefixes } from "@/helpers/getSubject";
 
 export type UserRole = "admin" | "teacher" | "student";
 
@@ -165,11 +171,23 @@ const SubjectClassSelection = ({
       <div className="form-control">
         <div className="label">
           <span className="label-text font-medium font-geistMono">
-            {user.role === ROLE.student ? "Subjects Offered" : "Subjects Taught"}
+            {user.role === ROLE.student
+              ? "Subjects Offered"
+              : "Subjects Taught"}
           </span>
         </div>
         <CheckboxGroup
-          items={sampleSubjects}
+          items={
+            user.role === ROLE.student
+              ? user.classId.startsWith("SSS")
+                ? sampleSeniorSubjects
+                : sampleSubjects
+              : checkPrefixes(user.classesTaught) === "JSS"
+              ? sampleSubjects
+              : checkPrefixes(user.classesTaught) === "SSS"
+              ? sampleSeniorSubjects
+              : [...sampleSubjects, ...sampleSeniorSubjects]
+          }
           itemKey="subjectId"
           itemLabel="name"
           checked={
@@ -191,7 +209,9 @@ const SubjectClassSelection = ({
     {user?.role === ROLE.teacher && (
       <div className="form-control">
         <div className="label">
-          <span className="label-text font-medium font-geistMono">Classes Taught</span>
+          <span className="label-text font-medium font-geistMono">
+            Classes Taught
+          </span>
         </div>
         <CheckboxGroup
           items={sampleClasses}
@@ -433,7 +453,9 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
 
       <form className="space-y-6">
         <div
-          className={`${isStudent ? "grid md:grid-cols-2 gap-4" : ""} "space-y-4"`}
+          className={`${
+            isStudent ? "grid md:grid-cols-2 gap-4" : ""
+          } "space-y-4"`}
         >
           {getRoleSpecificFields().map((field) => (
             <InputField

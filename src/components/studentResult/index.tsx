@@ -11,7 +11,12 @@ import LoaderSpin from "../loader/LoaderSpin";
 import { getGradeDescription } from "@/helpers/gradeRemarks";
 import { Printer } from "lucide-react";
 import { getOngoingSession } from "@/helpers/ongoingSession";
-import { sampleSubjects, schoolsArr, sessionsArr } from "@/constants/schools";
+import {
+  sampleSeniorSubjects,
+  sampleSubjects,
+  schoolsArr,
+  sessionsArr,
+} from "@/constants/schools";
 import { RootState } from "@/store";
 import { useSelector } from "react-redux";
 
@@ -41,7 +46,6 @@ type StudentScores = {
     remarks: string;
   };
 };
-
 
 // Reusable Components
 const SchoolHeader = ({ school }: { school: string }) => (
@@ -122,7 +126,13 @@ const InfoRow = ({ label, value }: { label: string; value: string }) => (
   </p>
 );
 
-const ResultsTable = ({ results }: { results: StudentScores[] }) => {
+const ResultsTable = ({
+  results,
+  classLevel,
+}: {
+  results: StudentScores[];
+  classLevel: string;
+}) => {
   const tableHeaders = [
     "Subject",
     "CA1",
@@ -150,10 +160,12 @@ const ResultsTable = ({ results }: { results: StudentScores[] }) => {
               className="border-none bg-orange-50 font-geistMono font-normal text-secondary"
             >
               <td>
-                {
-                  sampleSubjects?.find((i) => i.subjectId === result.subject)
-                    ?.name
-                }
+                {classLevel.startsWith("JSS")
+                  ? sampleSubjects?.find((i) => i.subjectId === result.subject)
+                      ?.name
+                  : sampleSeniorSubjects?.find(
+                      (i) => i.subjectId === result.subject
+                    )?.name}
               </td>
               <td>{result.scores.ca1}</td>
               <td>{result.scores.ca2}</td>
@@ -161,9 +173,7 @@ const ResultsTable = ({ results }: { results: StudentScores[] }) => {
               <td>{result.scores.total}</td>
               <td>{result.scores.grade}</td>
               <td>
-                <span
-                  className="text-xs w-full font-bold text-black flex flex-row text-center items-center justify-centerfont-geistMono"
-                >
+                <span className="text-xs w-full font-bold text-black flex flex-row text-center items-center justify-centerfont-geistMono">
                   {getGradeDescription(result.scores.grade)}
                 </span>
               </td>
@@ -243,14 +253,18 @@ export const StudentResultView = ({
         </h2>
       </div>
 
-      <ResultsTable results={termResult.results} />
-      {user?.role !=='student' &&
-      <button
-        className="btn bg-orange-300 text-white border-none absolute top-2 right-4"
-        onClick={handlePrint}
-      >
-        <Printer />
-      </button>}
+      <ResultsTable
+        results={termResult.results}
+        classLevel={termResult.classLevel}
+      />
+      {user?.role !== "student" && (
+        <button
+          className="btn bg-orange-300 text-white border-none absolute top-2 right-4"
+          onClick={handlePrint}
+        >
+          <Printer />
+        </button>
+      )}
     </div>
   );
 };

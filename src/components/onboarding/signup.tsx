@@ -1,8 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect, ChangeEvent } from "react";
-import { sampleSubjects, schoolsArr } from "@/constants/schools";
+import {
+  sampleSeniorSubjects,
+  sampleSubjects,
+  schoolsArr,
+  Subject,
+} from "@/constants/schools";
 import { InputField } from "../inputs/text";
 import { formDataa, formFields } from "@/constants/form";
 import { SelectField } from "../inputs/select";
@@ -69,15 +75,15 @@ const useAlert = () => {
 };
 
 // Separated form field rendering logic
-const FormFields = ({ 
-  formData, 
-  handleChange, 
-  errors, 
-  availableSchools, 
-  showPassword, 
+const FormFields = ({
+  formData,
+  handleChange,
+  errors,
+  availableSchools,
+  showPassword,
   showConfirmPassword,
   setShowPassword,
-  setShowConfirmPassword 
+  setShowConfirmPassword,
 }: any) => {
   const renderInputField = (field: any) => (
     <InputField
@@ -85,15 +91,19 @@ const FormFields = ({
       label={field.label}
       type={field.inputType ?? "text"}
       name={field.name}
-      value={Array.isArray(formData[field.name])
-        ? formData[field.name].join(", ")
-        : formData[field.name]}
+      value={
+        Array.isArray(formData[field.name])
+          ? formData[field.name].join(", ")
+          : formData[field.name]
+      }
       onChange={handleChange}
       required={field.required}
       error={errors[field.name]}
       disabled={field.disabled}
       toggleVisibility={field.toggleVisibility}
-      showPassword={field.name === "password" ? showPassword : showConfirmPassword}
+      showPassword={
+        field.name === "password" ? showPassword : showConfirmPassword
+      }
       onToggleVisibility={
         field.name === "password"
           ? () => setShowPassword(!showPassword)
@@ -114,15 +124,19 @@ const FormFields = ({
           ? getSchoolOptions(availableSchools)
           : field.options || []
       }
-      value={typeof formData[field.name] === "number"
-        ? String(formData[field.name])
-        : formData[field.name]}
+      value={
+        typeof formData[field.name] === "number"
+          ? String(formData[field.name])
+          : formData[field.name]
+      }
       onChange={handleChange}
       required={field.required}
       multiple={false}
-      disabled={field.name === "school" && formData["lga"] !== ""
-        ? false
-        : field.disabled}
+      disabled={
+        field.name === "school" && formData["lga"] !== ""
+          ? false
+          : field.disabled
+      }
       error={errors[field.name]}
     />
   );
@@ -130,38 +144,42 @@ const FormFields = ({
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {formFields.slice(0, 4).map(field => 
-          field.type === "input" && renderInputField(field)
-        )}
+        {formFields
+          .slice(0, 4)
+          .map((field) => field.type === "input" && renderInputField(field))}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {formFields.slice(4, 12).map(field => 
-          field.type === "input" 
-            ? renderInputField(field)
-            : field.type === "select" && renderSelectField(field)
-        )}
+        {formFields
+          .slice(4, 12)
+          .map((field) =>
+            field.type === "input"
+              ? renderInputField(field)
+              : field.type === "select" && renderSelectField(field)
+          )}
       </div>
     </>
   );
 };
 
 // Separated subjects handling logic
-const SubjectsSection = ({ 
-  formData, 
-  errors, 
-  handleSubjectChange, 
-  removeSubject 
+const SubjectsSection = ({
+  formData,
+  subjectss,
+  errors,
+  handleSubjectChange,
+  removeSubject,
 }: any) => (
   <div className="form-control">
     <label className="label" htmlFor="subjectsOffered">
-      <span className="label-text font-geistMono">Subjects Offered*</span>
+      <span className="label-text font-geistMono">Subjects Offered* (Kindly select all subjects offered)</span>
     </label>
-    <div className="flex flex-wrap gap-2 mb-2">
-      {sampleSubjects.map(subject => (
+    {/* <div className="flex flex-wrap gap-2 mb-2"> */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+      {subjectss.map((subject: { subjectId: React.Key | null | undefined; name: string; }) => (
         <Checkbox
           key={subject.subjectId}
           label={subject.name}
-          value={subject.subjectId}
+          value={subject.subjectId as string}
           checked={formData.subjectsOffered.includes(subject.subjectId)}
           onChange={handleSubjectChange}
           disabled={false}
@@ -172,17 +190,26 @@ const SubjectsSection = ({
       <p className="text-red-500 text-sm mt-1">{errors.subjectsOffered}</p>
     )}
     <div className="flex flex-wrap gap-2 mt-2">
-      {formData.subjectsOffered.map((subjectId:string) => {
-        const subject = sampleSubjects.find(subj => subj.subjectId === subjectId);
-        return subject && (
-          <span key={subjectId} className="badge bg-white text-gray-500 texxt-xs py-4 px-3 flex items-center space-x-1">
-            <span>{subject.name}</span>
-            <button
-              type="button"
-              onClick={() => removeSubject(subjectId)}
-              className="ml-1 text-primary"
-            >×</button>
-          </span>
+      {formData.subjectsOffered.map((subjectId: string) => {
+        const subject = subjectss.find(
+          (subj: { subjectId: string; }) => subj.subjectId === subjectId
+        );
+        return (
+          subject && (
+            <span
+              key={subjectId}
+              className="badge bg-white text-gray-500 texxt-xs py-4 px-3 flex items-center space-x-1"
+            >
+              <span>{subject.name}</span>
+              <button
+                type="button"
+                onClick={() => removeSubject(subjectId)}
+                className="ml-1 text-primary"
+              >
+                ×
+              </button>
+            </span>
+          )
         );
       })}
     </div>
@@ -191,7 +218,7 @@ const SubjectsSection = ({
 
 const getSchoolOptions = (schools: School[]) => {
   return schools.length > 0
-    ? schools.map(school => ({
+    ? schools.map((school) => ({
         label: school.name,
         value: school.code,
       }))
@@ -204,30 +231,43 @@ const SignUp = () => {
   const [formData, setFormData] = useState<StudentFormData>(() => ({
     ...formDataa,
     gender: formDataa.gender as "M" | "F",
-    role: ROLE.student as 'student',
+    role: ROLE.student as "student",
   }));
   const dispatch = useDispatch();
   const { push } = useRouter();
-  const [availableSchools, setAvailableSchools] = useState<School[]>(schoolsArr);
+  const [availableSchools, setAvailableSchools] =
+    useState<School[]>(schoolsArr);
+  const [subjectss, setSubjectss] = useState<Subject[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
+    formData.class.startsWith("JSS")
+      ? setSubjectss(sampleSubjects)
+      : formData.class.startsWith("SSS")
+      ? setSubjectss(sampleSeniorSubjects)
+      : null;
+
     if (formData.lga) {
-      const filteredSchools = schoolsArr.filter(school => school.lga === formData.lga);
+      const filteredSchools = schoolsArr.filter(
+        (school) => school.lga === formData.lga
+      );
       setAvailableSchools(filteredSchools);
-      setFormData(prev => ({ ...prev, school: "" }));
+      setFormData((prev) => ({ ...prev, school: "" }));
     } else {
       setAvailableSchools([]);
-      setFormData(prev => ({ ...prev, school: "" }));
+      setFormData((prev) => ({ ...prev, school: "" }));
     }
-  }, [formData.lga]);
+  }, [formData.lga, formData.class]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     if (name !== "subjectsOffered") {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
       validateField(name as keyof StudentFormData, value, setErrors, formData);
     }
   };
@@ -235,15 +275,17 @@ const SignUp = () => {
   const handleSubjectChange = (value: string, checked: boolean) => {
     const updatedSubjects = checked
       ? [...formData.subjectsOffered, value]
-      : formData.subjectsOffered.filter(subject => subject !== value);
-    
-    setFormData(prev => ({ ...prev, subjectsOffered: updatedSubjects }));
+      : formData.subjectsOffered.filter((subject) => subject !== value);
+
+    setFormData((prev) => ({ ...prev, subjectsOffered: updatedSubjects }));
     validateField("subjectsOffered", updatedSubjects, setErrors, formData);
   };
 
   const removeSubject = (subject: string) => {
-    const updatedSubjects = formData.subjectsOffered.filter(s => s !== subject);
-    setFormData(prev => ({ ...prev, subjectsOffered: updatedSubjects }));
+    const updatedSubjects = formData.subjectsOffered.filter(
+      (s) => s !== subject
+    );
+    setFormData((prev) => ({ ...prev, subjectsOffered: updatedSubjects }));
     validateField("subjectsOffered", updatedSubjects, setErrors, formData);
   };
 
@@ -253,7 +295,8 @@ const SignUp = () => {
 
     if (!validateForm(setErrors, formData)) {
       setAlert({
-        message: "Incomplete or incorrect information detected. Please fill out all fields properly.",
+        message:
+          "Incomplete or incorrect information detected. Please fill out all fields properly.",
         type: "error",
       });
       setLoading(false);
@@ -306,6 +349,7 @@ const SignUp = () => {
 
               <SubjectsSection
                 formData={formData}
+                subjectss={subjectss}
                 errors={errors}
                 handleSubjectChange={handleSubjectChange}
                 removeSubject={removeSubject}
@@ -323,10 +367,7 @@ const SignUp = () => {
               </div>
             </form>
             {alert.message && (
-              <Alert
-                message={alert.message}
-                type={alert.type}
-              />
+              <Alert message={alert.message} type={alert.type} />
             )}
           </div>
         </div>
