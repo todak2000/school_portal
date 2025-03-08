@@ -10,7 +10,7 @@ const SchoolAdminDashboard: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   return (
-    <div className="flex flex-col items-center overflow-y-auto py-10 bg-gray-200 w-[100vw] min-h-screen">
+    <div className="flex flex-col items-center overflow-y-auto py-0 bg-gray-200 w-[100vw] min-h-screen">
       <StudentResultView schoolId={user?.schoolId} />
     </div>
   );

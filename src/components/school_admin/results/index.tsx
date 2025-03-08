@@ -13,11 +13,11 @@ import {
   sampleClasses,
   sampleSeniorSubjects,
   sampleSubjects,
-  sessionsArr,
   Subject,
 } from "@/constants/schools";
 import { getOngoingSession } from "@/helpers/ongoingSession";
 import { ROLE } from "@/constants";
+import useFetchSessions from "@/hooks/useSchoolSessions";
 
 const termss = [
   { value: 1, label: "First Term" },
@@ -26,8 +26,10 @@ const termss = [
 ];
 
 const SchoolAdminResultPage = React.memo(() => {
+  
+    const { sessions } = useFetchSessions()
   const { user } = useSelector((state: RootState) => state.auth);
-  const current = getOngoingSession(sessionsArr);
+  const current = getOngoingSession(sessions);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
   const [classId, setClassId] = useState<string>("");
@@ -101,7 +103,7 @@ const SchoolAdminResultPage = React.memo(() => {
             onChange={(e) => setSession(e.target.value)}
           >
             <option value="">Select Session</option>
-            {sessionsArr.map((sess) => (
+            {sessions.map((sess) => (
               <option key={sess.session} value={sess.session}>
                 {sess.session}
               </option>
@@ -160,7 +162,7 @@ const SchoolAdminResultPage = React.memo(() => {
             </span>
           </label>
           <select
-            className="select select-bordered w-full bg-orange-100 font-geistMono text-secondary rounded-none"
+            className="select select-bordered w-full bg-orange-100  disabled:bg-orange-50 disabled:border-none font-geistMono text-secondary rounded-none"
             value={subjectId}
             disabled={classId===''}
             onChange={(e) => setSubjectId(e.target.value)}

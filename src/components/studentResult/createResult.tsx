@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ResultService, Term } from "@/firebase/results";
 import {
   sampleClasses,
   sampleSeniorSubjects,
   sampleSubjects,
-  sessionsArr,
 } from "@/constants/schools";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
@@ -16,6 +15,8 @@ import LoaderSpin from "../loader/LoaderSpin";
 import { setModal } from "@/store/slices/modal";
 import { getOngoingSession } from "@/helpers/ongoingSession";
 import { saveAs } from "file-saver";
+import useFetchSessions from "@/hooks/useSchoolSessions";
+import { formatToInteger } from "@/helpers/gradeRemarks";
 
 interface FormData {
   classLevel: string;
@@ -36,7 +37,40 @@ interface FormField {
 export const CreateResult = ({ schoolId }: { schoolId: string }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
-  const current = getOngoingSession(sessionsArr);
+  const { sessions } = useFetchSessions();
+  const current = getOngoingSession(sessions);
+
+  const initialState = {
+    formData: {
+      classLevel: "",
+      subject: "",
+      term: current?.ongoingTerm as Term,
+      session: current?.session as string,
+    },
+    students: [] as Record<string, any>[],
+    scores: {} as Record<string, { ca1: number; exam: number }>,
+    showTable: false,
+    loader: false,
+    csvError: "",
+    alert: { message: "", type: "error" as "error" | "success" | "warning" },
+  };
+
+
+  const [state, setState] = useState(initialState);
+  const { formData, students, scores, showTable, loader, alert } = state;
+
+  useEffect(() => {
+    if (current && !state.formData.term) {
+      setState((prevState) => ({
+        ...prevState,
+        formData: {
+          ...prevState.formData,
+          term: current.ongoingTerm as Term,
+          session: current.session as string,
+        },
+      }));
+    }
+  }, [current, state.formData.term]);
 
   const formFields: FormField[] = [
     {
@@ -58,28 +92,21 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
   ];
 
   const scoreTypes = [
-    { name: "ca1", max: 30, label: "CA1 (30)" },
-    { name: "ca2", max: 30, label: "CA2 (30)" },
-    { name: "exam", max: 40, label: "Exam (40)" },
-  ] as const;
-
-  const initialState = {
-    formData: {
-      classLevel: "",
-      subject: "",
-      term: current?.ongoingTerm as Term,
-      session: current?.session as string,
+    {
+      name: "ca1",
+      max: 30,
+      label: `Class Work ${
+        formData.classLevel.startsWith("JSS") ? "(30%)" : "(40%)"
+      }`,
     },
-    students: [] as Record<string, any>[],
-    scores: {} as Record<string, { ca1: number; ca2: number; exam: number }>,
-    showTable: false,
-    loader: false,
-    csvError: "",
-    alert: { message: "", type: "error" as "error" | "success" | "warning" },
-  };
-
-  const [state, setState] = useState(initialState);
-  const { formData, students, scores, showTable, loader, alert } = state;
+    {
+      name: "exam",
+      max: 40,
+      label: `Term Exam ${
+        formData.classLevel.startsWith("JSS") ? "(70%)" : "(60%)"
+      }`,
+    },
+  ] as const;
 
   const updateState = (updates: Partial<typeof state>) => {
     setState((prev) => ({ ...prev, ...updates }));
@@ -94,7 +121,7 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
     const initialScores = classStudents.reduce(
       (acc, student) => ({
         ...acc,
-        [student.id]: { ca1: 0, ca2: 0, exam: 0 },
+        [student.id]: { ca1: 0, exam: 0 },
       }),
       {}
     );
@@ -106,6 +133,7 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
       loader: false,
     });
   };
+
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +153,7 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
 
   const handleScoreChange = (
     studentId: string,
-    scoreType: "ca1" | "ca2" | "exam",
+    scoreType: "ca1" | "exam",
     value: number
   ) => {
     setState((prev) => ({
@@ -134,7 +162,7 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
         ...prev.scores,
         [studentId]: {
           ...prev.scores[studentId],
-          [scoreType]: value,
+          [scoreType]: formatToInteger(value),
         },
       },
     }));
@@ -145,18 +173,16 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
 
     // Define max scores for validation
     const maxScores = {
-      ca1: 30,
-      ca2: 30,
-      exam: 40,
+      ca1: formData.classLevel.startsWith("JSS") ? 30 : 40,
+      // ca2: 30,
+      exam: formData.classLevel.startsWith("JSS") ? 70 : 60,
     };
 
     // Validate scores
     const invalidScores = students.filter((student) => {
       const studentScores = scores[student.id];
       return (
-        studentScores.ca1 > maxScores.ca1 ||
-        studentScores.ca2 > maxScores.ca2 ||
-        studentScores.exam > maxScores.exam
+        studentScores.ca1 > maxScores.ca1 || studentScores.exam > maxScores.exam
       );
     });
 
@@ -182,10 +208,10 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
             assignedStudentId: student.studentId,
             subject: formData.subject,
             classLevel: formData.classLevel,
-            term: formData.term as Term,
+            term: current?.ongoingTerm as Term,
             name: student.fullname,
             schoolId,
-            session: formData.session,
+            session: current?.session as string,
             scores: {
               ...scores[student.id],
               total: 0,
@@ -231,14 +257,13 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
       "Student Name",
       "School",
       "Class",
-      "CA1 (30)",
-      "CA2 (30)",
-      "Exam (40)",
+      `Class Work ${formData.classLevel.startsWith("JSS") ? "(30%)" : "(40%)"}`,
+      `Term Exams ${formData.classLevel.startsWith("JSS") ? "(70%)" : "(60%)"}`,
     ];
     const rows = students.map((student) => {
       const studentScores = scores[student.id] || {
         ca1: "",
-        ca2: "",
+        // ca2: "",
         exam: "",
       };
       return [
@@ -247,7 +272,7 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
         student.schoolId,
         student.classId,
         studentScores.ca1,
-        studentScores.ca2,
+        // studentScores.ca2,
         studentScores.exam,
       ].join(",");
     });
@@ -263,7 +288,7 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
 
     return rows.reduce(
       (acc: { scores: any; errors: string[] }, row, index) => {
-        const [studentId, _, __, ___, ca1, ca2, exam] = row
+        const [studentId, _, __, ___, ca1, exam] = row
           .split(",")
           .map((f) => f.trim());
 
@@ -278,9 +303,14 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
         }
 
         const scores = {
-          ca1: Math.min(30, Math.max(0, Number(ca1) || 0)),
-          ca2: Math.min(30, Math.max(0, Number(ca2) || 0)),
-          exam: Math.min(40, Math.max(0, Number(exam) || 0)),
+          ca1: Math.min(
+            formData.classLevel.startsWith("JSS") ? 30 : 40,
+            Math.max(0, Number(ca1) || 0)
+          ),
+          exam: Math.min(
+            formData.classLevel.startsWith("JSS") ? 40 : 60,
+            Math.max(0, Number(exam) || 0)
+          ),
         };
 
         acc.scores[student.id] = scores;
@@ -344,18 +374,16 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
       >
         <option value="">Select {label}</option>
         {name === "subject" && formData["classLevel"].startsWith("SSS")
-          ?sampleSeniorSubjects.map(({ subjectId, name }) => (
-            <option key={subjectId} value={subjectId}>
-              {name}
-            </option>
-          )) 
-          
-          
+          ? sampleSeniorSubjects.map(({ subjectId, name }) => (
+              <option key={subjectId} value={subjectId}>
+                {name}
+              </option>
+            ))
           : options.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
       </select>
     </div>
   );
@@ -377,11 +405,13 @@ export const CreateResult = ({ schoolId }: { schoolId: string }) => {
       </td>
     ));
 
-  
-  const subject = formData.subject && formData["classLevel"].startsWith("JSS")
-    ? sampleSubjects.find((i) => i.subjectId === formData.subject)?.name
-    : formData.subject && formData["classLevel"].startsWith("SSS")
-    ? sampleSeniorSubjects.find((i) => i.subjectId === formData.subject)?.name :"";
+  const subject =
+    formData.subject && formData["classLevel"].startsWith("JSS")
+      ? sampleSubjects.find((i) => i.subjectId === formData.subject)?.name
+      : formData.subject && formData["classLevel"].startsWith("SSS")
+      ? sampleSeniorSubjects.find((i) => i.subjectId === formData.subject)?.name
+      : "";
+
 
   return (
     <div className="card bg-white shadow-xl w-full max-w-4xl mx-auto">

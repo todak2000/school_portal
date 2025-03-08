@@ -1,6 +1,7 @@
- 
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import {
@@ -14,14 +15,55 @@ import DataTable, { DataTableColumn } from "@/components/table";
 import {
   convertToFirebaseTimestamp,
   Session,
-  sessionsArr,
   Term,
 } from "@/constants/schools";
 import { Check, Clock7, Hourglass } from "lucide-react";
 import { ROLE } from "@/constants";
+import { SessionService } from "@/firebase/session";
 
-const TermComponent = ({ term }: { term: Term }) => {
+
+function findMatchingKey(mainObject:Session, targetObject:Term) {
+  for (const key in mainObject) {
+    if (mainObject.hasOwnProperty(key)) {
+      // Compare the value (object) of the current key with the targetObject
+      if (JSON.stringify(mainObject[key as keyof Session]) === JSON.stringify(targetObject)) {
+        return key; // Return the key if the values match
+      }
+    }
+  }
+  return null; // Return null if no match is found
+}
+const TermComponent = ({ term, id ,fetchData}: { term: Term, id:Session, fetchData:()=>void }) => {
   // Extracted rendering logic for session state
+  const handleUpdateSession = async()=>{
+    const extractedKey = findMatchingKey(id, term)
+    console.log( extractedKey, 'hgiuk')
+ const docId = id.id
+    let newState= 'not started'
+    switch (term.sessionState) {
+      case 'not started':
+        newState = "ongoing"
+        break;
+      case 'ongoing':
+        newState = "completed"
+        break;
+      case 'completed':
+        newState = "completed"
+        break;
+      default:
+        newState= 'not started'
+        break;
+    }
+
+    // docId:string, term:string, newSessionState: Term
+    const res = await SessionService.updateSessionTerm(
+      docId as string,
+      extractedKey as string,
+      newState
+    )
+    res.status === 200 && fetchData()
+  }
+
   let sessionStateContent;
 
   if (term.sessionState === "ongoing") {
@@ -59,40 +101,48 @@ const TermComponent = ({ term }: { term: Term }) => {
     );
   }
 
-  return <div className="space-y-2">{sessionStateContent}</div>;
+  return <div className="space-y-2" onClick={handleUpdateSession}>{sessionStateContent}</div>;
 };
 
-const columns: DataTableColumn[] = [
-  { key: "session", label: "Academic Session", sortable: false },
-  {
-    key: "firstTerm",
-    label: "First Term",
-    sortable: false,
-    render: (term: Term) => <TermComponent term={term} />,
-  },
-  {
-    key: "secondTerm",
-    label: "Second Term",
-    sortable: false,
-    render: (term: Term) => <TermComponent term={term} />,
-  },
-  {
-    key: "thirdTerm",
-    label: "Third Term",
-    sortable: false,
-    render: (term: Term) => <TermComponent term={term} />,
-  },
-];
+
 
 const AdminSessionPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const [sessions, setSessions] = useState<Session[]>(sessionsArr);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
-  const handleCreateSession = (data: Record<string, string>) => {
+
+  const fetchData = async () => {
+    const res:any= await SessionService.getLatestSessions();
+    setSessions(res.items)
+  };
+  
+  const columns: DataTableColumn[] = [
+    { key: "session", label: "Academic Session", sortable: false },
+    {
+      key: "firstTerm",
+      label: "First Term",
+      sortable: false,
+      render: (term: Term, id:Session) => <TermComponent term={term} id={id} fetchData={fetchData}/>,
+    },
+    {
+      key: "secondTerm",
+      label: "Second Term",
+      sortable: false,
+      render: (term: Term, id:Session) => <TermComponent term={term} id={id} fetchData={fetchData}/>,
+    },
+    {
+      key: "thirdTerm",
+      label: "Third Term",
+      sortable: false,
+      render: (term: Term, id:Session) => <TermComponent term={term} id={id} fetchData={fetchData}/>,
+    },
+  ];
+
+  const handleCreateSession = async (data: Record<string, string>) => {
     const newSession: Session = {
       session: data.session,
-      year: "2022",
+      year: data.session.split("/")[0],
       firstTerm: {
         start: convertToFirebaseTimestamp(data.firstTermStart),
         end: convertToFirebaseTimestamp(data.firstTermEnd),
@@ -110,6 +160,7 @@ const AdminSessionPage = React.memo(() => {
       },
     };
 
+    await SessionService.createSession(newSession);
     // Update the classes state with the new class
     setSessions((prev: Session[]) => [newSession, ...prev]);
   };
@@ -123,12 +174,20 @@ const AdminSessionPage = React.memo(() => {
     );
   };
 
+  
+
   const handleDeleteSession = (session: string) => {
     // Remove the class from the state
     setSessions((prev: Session[]) =>
       prev.filter((cls) => cls.session !== session)
     );
   };
+
+
+  useEffect(() => {
+    
+    fetchData();
+  }, []);
 
   return (
     <main className="flex-1 p-6">

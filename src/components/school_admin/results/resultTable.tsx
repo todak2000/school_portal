@@ -118,9 +118,8 @@ const ResultsTable = ({
 
   const tableHeaders = [
     "Student Name",
-    "CA1",
-    "CA2",
-    "Exam",
+    "Class Work",
+    "Term Exam",
     "Total",
     "Grade",
     "Remarks",
@@ -178,7 +177,6 @@ const ResultsTable = ({
                 <tr key={result.id} className="text-xs text-secondary">
                   <td>{result.name}</td>
                   <td>{result.scores.ca1}</td>
-                  <td>{result.scores.ca2}</td>
                   <td>{result.scores.exam}</td>
                   <td>{result.scores.total}</td>
                   <td>

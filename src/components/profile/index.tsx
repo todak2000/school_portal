@@ -255,7 +255,6 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
   const [loading, setLoading] = useState(false);
   const [isEditable, setIsEditable] = useState(!editMode);
   const { alert, setAlert } = useAlert();
-  console.log(user, "seree");
   const initialFormData =
     loggedUser?.role === ROLE.teacher
       ? { ...user, subjectsTaught: user?.subjectsTaught || [] }
