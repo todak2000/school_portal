@@ -644,7 +644,7 @@ export default class CRUDOperation<T> {
     sortDirection: "asc" | "desc" = "desc",
     filters: { key: string; value: any }[] = []
   ): Promise<PaginatedResult<T>> {
-    console.log(filters, "filters");
+   
     try {
       let baseQuery = query(
         collection(db, this.collectionName),

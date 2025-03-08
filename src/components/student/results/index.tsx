@@ -1,13 +1,13 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { UserInfo } from "@/components/userInfo";
-import { sessionsArr } from "@/constants/schools";
 import { getOngoingSession } from "@/helpers/ongoingSession";
 import StudentResultView from "@/components/studentResult";
 import { ROLE } from "@/constants";
+import useFetchSessions from "@/hooks/useSchoolSessions";
 
 const termss = [
   { value: 1, label: "First Term" },
@@ -17,13 +17,26 @@ const termss = [
 
 const StudentResultPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const current = getOngoingSession(sessionsArr);
+  const { sessions } = useFetchSessions();
+  const current = getOngoingSession(sessions);
+
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
   const [session, setSession] = useState<string>(current?.session ?? "");
   const [term, setTerm] = useState<string>(
     current?.ongoingTerm?.toString() ?? ""
   );
+
+  const updateSessionAndTerm = useCallback(() => {
+    if (current) {
+      setSession(current?.session);
+      setTerm(current?.ongoingTerm?.toString());
+    }
+  }, []);
+
+  useEffect(() => {
+    updateSessionAndTerm();
+  }, [updateSessionAndTerm]);
 
   return (
     <main className="flex-1 p-6 md:min-w-[75vw]">
@@ -54,7 +67,7 @@ const StudentResultPage = React.memo(() => {
             onChange={(e) => setSession(e.target.value)}
           >
             <option value="">Select Session</option>
-            {sessionsArr.map((sess) => (
+            {sessions.map((sess) => (
               <option key={sess.session} value={sess.session}>
                 {sess.session}
               </option>

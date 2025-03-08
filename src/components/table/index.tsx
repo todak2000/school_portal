@@ -490,7 +490,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
                       ? column.render(getNestedValue(item, column.key), item)
                       : String(getNestedValue(item, column.key) ?? "");
 
-                  return <td key={column.label}>{renderedValue}</td>;
+                  return <td key={column.label} >{renderedValue}</td>;
                 })}
                 <td>
                   <span className="flex flex-row items-center justify-center gap-1">

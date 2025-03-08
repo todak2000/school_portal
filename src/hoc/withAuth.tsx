@@ -53,6 +53,7 @@ const withAuth = (
           ((role && role === requiredRole) || jsonUser.role === requiredRole)
         ) {
           !user && dispatch(setUser(jsonUser));
+          
         }
       }
     }, [user, loading, role, requiredRole, router, jsonUser, dispatch]);

@@ -28,7 +28,7 @@ export interface Result {
   session: string;
   scores: {
     ca1: number;
-    ca2: number;
+    // ca2: number;
     exam: number;
     total: number;
     grade: string;
@@ -43,6 +43,8 @@ export interface TermResult {
   studentId: string;
   term: Term;
   name: string;
+  gender:string;
+  classAverageScore: number;
   schoolId: string;
   session: string;
   assignedStudentId: string;
@@ -87,9 +89,9 @@ export const ResultService = {
         lastModified: new Date(),
         scores: {
           ...result.scores,
-          total: result.scores.ca1 + result.scores.ca2 + result.scores.exam,
+          total: result.scores.ca1 + result.scores.exam,
           grade: calculateGrade(
-            result.scores.ca1 + result.scores.ca2 + result.scores.exam
+            result.scores.ca1 + result.scores.exam
           ),
         },
       };
@@ -169,12 +171,27 @@ export const ResultService = {
         where("session", "==", session),
         where("classLevel", "==", student.classId)
       );
-      const classResults = await getDocs(classResultsQuery);
-      const position = calculatePosition(average, classResults);
+      const classResultsDocs = await getDocs(classResultsQuery);
+      const classResultsSnapshot = await getDocs(classResultsQuery);
+    const classResults = classResultsSnapshot.docs.map(doc => doc.data());
+    
+    // Calculate class average score
+    let classAverageScore = 0;
+    const totalStudents = classResults.length;
+    
+    if (totalStudents > 0) {
+      const classTotalAverages = classResults.reduce(
+        (sum, result) => sum + (result.termAverage || 0), 
+        0
+      );
+      classAverageScore = classTotalAverages / totalStudents;
+    }
+      const position = calculatePosition(average, classResultsDocs);
 
       const termResult: Omit<TermResult, "id"> = {
         studentId,
         name: student.fullname,
+        gender:student.gender,
         schoolId,
         term,
         session,
@@ -183,7 +200,8 @@ export const ResultService = {
         results,
         termAverage: average,
         position,
-        totalStudents: classResults.size,
+        classAverageScore,
+        totalStudents,
         dateCalculated: new Date(),
         lastUpdated: new Date(),
       };
