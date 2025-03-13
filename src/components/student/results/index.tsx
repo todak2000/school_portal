@@ -8,6 +8,7 @@ import { getOngoingSession } from "@/helpers/ongoingSession";
 import StudentResultView from "@/components/studentResult";
 import { ROLE } from "@/constants";
 import useFetchSessions from "@/hooks/useSchoolSessions";
+import { Printer } from "lucide-react";
 
 const termss = [
   { value: 1, label: "First Term" },
@@ -16,7 +17,7 @@ const termss = [
 ];
 
 const StudentResultPage = React.memo(() => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, role } = useSelector((state: RootState) => state.auth);
   const { sessions } = useFetchSessions();
   const current = getOngoingSession(sessions);
 
@@ -38,8 +39,23 @@ const StudentResultPage = React.memo(() => {
     updateSessionAndTerm();
   }, [updateSessionAndTerm]);
 
+  const handleStudentResult = (id: string) => {
+    let r: string;
+    switch (role) {
+      case ROLE.admin:
+        r = role;
+        break;
+      case ROLE.student:
+        r = "student";
+        break;
+      default:
+        r = "school_admin";
+    }
+    window.open(`/${r}/student/${id}`, "_blank");
+  };
+
   return (
-    <main className="flex-1 p-6 md:min-w-[75vw]">
+    <main className="flex-1 p-6 w-[100vw] md:min-w-[75vw] md:max-w-[80vw]">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-medium mb-2 font-geistMono">
@@ -93,8 +109,17 @@ const StudentResultPage = React.memo(() => {
             ))}
           </select>
         </div>
+        {session !== "" && term !== "" && (
+          <button
+            onClick={() => handleStudentResult(user?.id)}
+            className="md:hidden btn btn-ghost gap-2 rounded-none bg-primary mt-3 text-white"
+          >
+            <Printer size={16} />
+            Print Result
+          </button>
+        )}
       </div>
-      <div className="mx-auto overflow-y-auto h-[50vh] scrollbar-hide w-[85vw] md:w-full">
+      <div className="hidden md:flex mx-auto overflow-y-auto h-[50vh] scrollbar-hide w-[85vw] md:w-full">
         <StudentResultView
           studentId={user?.id}
           session={session}
@@ -102,6 +127,15 @@ const StudentResultPage = React.memo(() => {
           schoolId={user?.schoolId}
         />
       </div>
+      {session !== "" && term !== "" && (
+        <button
+          onClick={() => handleStudentResult(user?.id)}
+          className="hidden md:flex mx-auto btn btn-ghost gap-2 rounded-none bg-primary mt-3 text-white"
+        >
+          <Printer size={16} />
+          Print Result
+        </button>
+      )}
     </main>
   );
 });

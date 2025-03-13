@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -12,7 +13,7 @@ export type DataTableColumn = {
 
 export interface DataTableProps<T> {
   data: T[];
-  setTotalCount: React.Dispatch<React.SetStateAction<number>>;
+  setTotalCount: React.Dispatch<React.SetStateAction<number>>| null;
   setData: React.Dispatch<React.SetStateAction<T[]>>;
   columns: DataTableColumn[];
   defaultForm: Record<string, any> | null;
@@ -135,9 +136,8 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
         filterData !== "" ? filterData : searchTerm,
         searchableColumns
       );
-
       setData(result.items);
-      setTotalCount(result.totalOverallCount);
+      setTotalCount && setTotalCount(result.totalOverallCount);
       setPaginationState((prev) => ({
         ...prev,
         totalPages: Math.ceil(result.totalCount / prev.itemsPerPage),
@@ -315,9 +315,9 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
   };
 
   return (
-    <div className="w-full min-w-[85vw] md:min-w-[80vw] md:max-w-[85vw] bg-white border-none">
+    <div className="w-[87vw] md:w-full md:min-w-[80vw] md:max-w-[85vw] bg-white border-none">
       {/* Header */}
-      <div className="p-4 border-b ">
+      <div className="p-4 border-b "> 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center text-black font-geistSans font-bold">
             List
@@ -452,7 +452,7 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto border-none overflow-y-auto max-h-[50vh] relative scrollbar-hide pb-20 bg-gray-50">
+      <div className="overflow-x-auto border-none overflow-y-auto max-h-[50vh] relative scrollbar-hide pb-40 bg-gray-50">
         <table className="table w-full bg-gray-50">
           <thead className="bg-gray-100 text-secondary font-geistSans font-normal">
             <tr>

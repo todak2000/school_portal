@@ -9,6 +9,7 @@ import {
   Power,
   BarChart2,
   Users,
+  Blocks,
   LucideIcon,
   UserCheck,
   Shield,
@@ -20,7 +21,13 @@ import {
   CircleX,
 } from "lucide-react";
 
-import React, { ReactElement, ReactNode, useCallback, useEffect, useState } from "react";
+import React, {
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
@@ -92,7 +99,7 @@ const sidebarItems = [
     route: "/admin/subjects",
   },
   {
-    icon: GraduationCap,
+    icon: Blocks,
     label: "Sessions",
     route: "/admin/sessions",
   },
@@ -120,13 +127,13 @@ const sidebarItems = [
 
 const AdminLayout = React.memo(
   ({ children }: { children: ReactElement | ReactNode }) => {
-    const { push } = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-const dispatch = useDispatch()
+    const dispatch = useDispatch();
+
     const handleLogOut = useCallback(async () => {
       await signingOut();
-      push("/admin/onboarding/signin");
-    }, [push]);
+      window.location.href = "/admin/onboarding/signin";
+    }, []);
 
     const toggleSidebar = () => {
       setIsSidebarOpen(!isSidebarOpen);
@@ -134,8 +141,8 @@ const dispatch = useDispatch()
 
     useEffect(() => {
       dispatch(setModal({ open: false, type: "" }));
-    }, [])
-    
+    }, []);
+
     return (
       <div className="min-h-screen md:h-screen bg-gray-50 overflow-y-hidden">
         {/* Navbar */}
@@ -187,7 +194,7 @@ const dispatch = useDispatch()
           <aside className="w-64 bg-white h-screen p-4 hidden md:block">
             <div className="space-y-2">
               {sidebarItems.map((item) => (
-                <SidebarButton 
+                <SidebarButton
                   key={item.label}
                   icon={item.icon}
                   label={item.label}

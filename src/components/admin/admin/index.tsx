@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -6,13 +7,9 @@ import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { StatsCard } from "@/components/statsCard";
 import { UserInfo } from "@/components/userInfo";
 import { DataTableColumn } from "@/components/table";
+import FirebaseDataTable from "@/components/firebaseTable";
 import Collection from "@/firebase/db";
-import FirebaseSchoolDataTable from "@/components/firebaseTable/schoolTable";
-import { DirectoryCard } from "@/components/directory/card";
-import { Ban, Check } from "lucide-react";
 import { ROLE } from "@/constants";
-import useSchoolData from "@/hooks/useSchoolById";
-import CentralLoader from "@/components/loader/centralLoader";
 
 // Avatar component to display the school logo
 export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -45,14 +42,6 @@ export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
   );
 };
 
-const StatusIcon: React.FC<{ status: boolean }> = ({ status }) => {
-  return status ? (
-    <Check color="green" className="mx-auto" />
-  ) : (
-    <Ban color="red" className="mx-auto" />
-  );
-};
-
 // Columns with the avatar component
 const columns: DataTableColumn[] = [
   {
@@ -61,32 +50,19 @@ const columns: DataTableColumn[] = [
     sortable: false,
     render: (studentName) => <Avatar schoolName={studentName} />,
   },
-  { key: "teacherId", label: "Teacher ID", sortable: false },
-  { key: "fullname", label: "Teacher Name", sortable: false },
+  { key: "fullname", label: "Student Name", sortable: false },
   { key: "email", label: "Email", sortable: false },
-  { key: "schoolId", label: "School", sortable: true },
-  // { key: "isSuperAdmin", label: "School Admin", sortable: true },
-  {
-    key: "isSuperAdmin",
-    label: "School Admin",
-    sortable: true,
-    render: (isSuperAdmin) => <StatusIcon status={isSuperAdmin} />,
-  },
+  { key: "isSuperAdmin", label: "School Admin", sortable: true },
 ];
 
-type TeacherData = Record<string, string | boolean | string[]>;
+type AdminData = Record<string, string | boolean | string[]>;
 
-const SchoolAdminTeachersPage = React.memo(() => {
+const AdminAdminPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const [teachers, setTeachers] = useState<TeacherData[]>([]);
-
-  const { data } = useSchoolData(user?.schoolId);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [administrators, setAdministrators] = useState<AdminData[]>([]);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
-
-  if (!data.name) {
-    return <CentralLoader />;
-  }
 
   return (
     <main className="flex-1 p-6">
@@ -103,54 +79,29 @@ const SchoolAdminTeachersPage = React.memo(() => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mb-6">
-        <DirectoryCard
-          data={
-            data as {
-              name: string;
-              lga: string;
-              description: string;
-              avatar?: string | null;
-              headerImage?: string;
-              teacherCount: string;
-              studentCount: string;
-            }
-          }
-        />
-        {[
-          {
-            title: `Number of Teachers at ${user?.schoolId}`,
-            value: data.teacherCount,
-          },
-        ].map((stat) => (
-          <StatsCard
-            key={stat.title}
-            title={stat.title}
-            value={Number(stat.value)}
-          />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {[{ title: "Total Administrators", value: totalCount }].map((stat) => (
+          <StatsCard key={stat.title} title={stat.title} value={stat.value} />
         ))}
       </div>
 
       {/* Projects Section */}
-      <FirebaseSchoolDataTable
-        collectionName={Collection.Teachers}
-        data={teachers}
-        setTotalCount={null}
-        setData={setTeachers}
+      <FirebaseDataTable
+        collectionName={Collection.Admins}
+        data={administrators}
+        setTotalCount={setTotalCount}
+        setData={setAdministrators}
         columns={columns}
         defaultSort={{ field: "createdAt", direction: "desc" }}
         defaultForm={null}
-        searchableColumns={["classId", "fullname", "email"]}
+        role={ROLE.teacher}
+        searchableColumns={["fullname"]}
         onCreate={() => null}
         onDelete={() => null}
         onEdit={() => null}
-        fieldValue={user?.schoolId}
-        field="schoolId"
-        role="school"
-        filterData={""}
       />
     </main>
   );
 });
-SchoolAdminTeachersPage.displayName = "SchoolAdminTeachersPage";
-export { SchoolAdminTeachersPage };
+AdminAdminPage.displayName = "AdminAdminPage";
+export { AdminAdminPage };

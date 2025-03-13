@@ -466,7 +466,7 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
           {getRoleSpecificFields().map((field) => (
             <InputField
               key={field.key}
-              {...field}
+              {...{ label: field.label, type: field.type, value: field.value, name: field.name }}
               isEditable={isStudent ? false : isEditable}
               onChange={handleChange}
             />

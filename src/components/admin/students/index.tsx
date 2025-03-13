@@ -158,7 +158,7 @@ const AdminStudentsPage = React.memo(() => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[{ title: "Total Number of Students", value: totalCount }].map(
+        {[{ title: "Total Students", value: totalCount }].map(
           (stat) => (
             <StatsCard key={stat.title} title={stat.title} value={stat.value} />
           )
@@ -178,7 +178,7 @@ const AdminStudentsPage = React.memo(() => {
         onCreate={handleCreateStudent}
         onDelete={handleDeleteStudent}
         onEdit={handleEditStudent}
-        role={ROLE.student}
+        role={ROLE.admin}
       />
     </main>
   );

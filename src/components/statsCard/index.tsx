@@ -8,7 +8,7 @@ interface StatsCardProps {
 }
 
 const StatsCard: React.FC<StatsCardProps> = React.memo(({ title, value,route=null }) => (
-  <div className="bg-white p-4 rounded-lg shadow-sm">
+  <div className="bg-white p-4 rounded-lg shadow-sm min-h-[184px] w-[87vw] md:w-80">
     <div className="flex justify-between items-center">
       <h3 className="text-gray-500 text-sm font-geistMono">{title}</h3>
       {route &&

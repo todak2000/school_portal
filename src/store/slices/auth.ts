@@ -14,7 +14,7 @@ interface AuthState {
   role: "admin" | "student" | "teacher"| null;
 }
 
-const initialState: AuthState = {
+export const initialState: AuthState = {
   user: null,
   loading: false,
   error: null,

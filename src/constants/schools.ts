@@ -14,6 +14,13 @@ export interface Class {
   classId: string;
 }
 
+export interface SchoolProps {
+  name: string;
+  lga: string;
+  code: string;
+  description: string;
+  avatar: string|null;
+}
 export const lgas: LGA[] = [
   { name: "Abak", code: "ABK" }, //0
   { name: "Eastern Obolo", code: "EBO" }, //1
