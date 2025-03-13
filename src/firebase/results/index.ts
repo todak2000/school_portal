@@ -117,6 +117,7 @@ export const ResultService = {
     session: string,
     schoolId: string
   ): Promise<TermResult | null> {
+
     try {
       // First, get the student document to check for existing result
       const studentRef = doc(db, Collection.Students_Parents, studentId);
@@ -136,6 +137,7 @@ export const ResultService = {
 
       let termResultId: string | undefined;
 
+      schoolId = schoolId ? schoolId: student.schoolId
       // Fetch results from the Results collection
       const resultsQuery = query(
         collection(db, Collection.Results),

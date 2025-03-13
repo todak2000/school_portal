@@ -135,6 +135,21 @@ const FirebaseDataTable = React.memo(function DataTable<
     searchTerm,
   ]);
 
+  const handleStudentResult = (id: string) => {
+    let r: string;
+    switch (role) {
+      case ROLE.admin:
+        r = role;
+        break;
+      case ROLE.student:
+        r = "students";
+        break;
+      default:
+        r = "school_admin";
+    }
+    window.open(`/${r}/student/${id}`, "_blank");
+  };
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -429,7 +444,7 @@ const FirebaseDataTable = React.memo(function DataTable<
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto border-none overflow-y-auto max-h-[50vh] relative scrollbar-hide pb-20 bg-gray-50">
+      <div className="overflow-x-auto border-none overflow-y-auto max-h-[50vh] relative scrollbar-hide pb-40 bg-gray-50">
         <table className="table w-full bg-gray-50">
           <thead className="bg-gray-100 text-secondary font-geistSans font-normal">
             <tr>
@@ -506,10 +521,10 @@ const FirebaseDataTable = React.memo(function DataTable<
                       >
                         <UserPen size={16} className="text-orange-400" />
                       </button>
-                      {!noResult &&
+                      {!noResult && role===ROLE.admin &&
                       <button
                         className="btn btn-ghost btn-sm"
-                        onClick={() => handleOpenModal(item, true)}
+                        onClick={() => handleStudentResult(item.id)}
                       >
                         <FileSliders size={16} className="text-orange-600" />
                       </button>}

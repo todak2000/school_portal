@@ -178,7 +178,7 @@ const AdminStudentsPage = React.memo(() => {
         onCreate={handleCreateStudent}
         onDelete={handleDeleteStudent}
         onEdit={handleEditStudent}
-        role={ROLE.student}
+        role={ROLE.admin}
       />
     </main>
   );

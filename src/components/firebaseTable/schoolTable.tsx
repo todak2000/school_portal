@@ -452,7 +452,7 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto border-none overflow-y-auto max-h-[50vh] relative scrollbar-hide pb-20 bg-gray-50">
+      <div className="overflow-x-auto border-none overflow-y-auto max-h-[50vh] relative scrollbar-hide pb-40 bg-gray-50">
         <table className="table w-full bg-gray-50">
           <thead className="bg-gray-100 text-secondary font-geistSans font-normal">
             <tr>

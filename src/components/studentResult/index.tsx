@@ -4,14 +4,12 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ResultService, Term, TermResult } from "@/firebase/results";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import LoaderSpin from "../loader/LoaderSpin";
 
 import { Printer } from "lucide-react";
 import { getOngoingSession } from "@/helpers/ongoingSession";
 import { schoolsArr } from "@/constants/schools";
-import { RootState } from "@/store";
-import { useSelector } from "react-redux";
 import ReportSheet from "./resultSheet";
 import useFetchSessions from "@/hooks/useSchoolSessions";
 import { activitiesData, behaviorData } from "@/constants/result";
@@ -28,10 +26,9 @@ export const StudentResultView = ({
   term?: string;
   schoolId?: string;
 }) => {
-  const { user } = useSelector((state: RootState) => state.auth);
   const { id } = useParams<{ id: string }>();
   const studentIdd = studentId ?? id;
-
+  const pathname = usePathname()
   const { sessions } = useFetchSessions();
   const current = getOngoingSession(sessions);
   const selectedSession = session ?? current?.session;
@@ -99,10 +96,11 @@ export const StudentResultView = ({
     affectiveDomainGrades: behaviorData,
     psychomotorDomainGrades: activitiesData,
   };
+  
   return (
     <>
       <ReportSheet {...reportData} />
-      {user?.role !== "student" && (
+      {pathname !== "/student/results" && (
         <button
           className="btn bg-orange-300 text-white border-none absolute top-2 right-4"
           onClick={handlePrint}
