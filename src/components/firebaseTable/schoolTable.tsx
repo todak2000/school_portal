@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -12,7 +13,7 @@ export type DataTableColumn = {
 
 export interface DataTableProps<T> {
   data: T[];
-  setTotalCount: React.Dispatch<React.SetStateAction<number>>;
+  setTotalCount: React.Dispatch<React.SetStateAction<number>>| null;
   setData: React.Dispatch<React.SetStateAction<T[]>>;
   columns: DataTableColumn[];
   defaultForm: Record<string, any> | null;
@@ -135,9 +136,8 @@ const FirebaseSchoolDataTable = React.memo(function DataTable<
         filterData !== "" ? filterData : searchTerm,
         searchableColumns
       );
-
       setData(result.items);
-      setTotalCount(result.totalOverallCount);
+      setTotalCount && setTotalCount(result.totalOverallCount);
       setPaginationState((prev) => ({
         ...prev,
         totalPages: Math.ceil(result.totalCount / prev.itemsPerPage),

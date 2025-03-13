@@ -88,6 +88,7 @@ const StudentLayout = React.memo(
 const dispatch = useDispatch()
     const handleLogOut = useCallback(async () => {
       await signingOut();
+      
       push("/");
     }, [push]);
 

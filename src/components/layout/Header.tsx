@@ -1,12 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 "use client";
 
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setModal } from "@/store/slices/modal";
 import { useRouter } from "next/navigation";
+import { RootState } from "@/store";
+import { Avatar } from "../admin/students";
+import { ROLE } from "@/constants";
 
 const navItems = [
   {
@@ -30,8 +34,9 @@ const mobileNavItems = [
 
 const Header = () => {
   const dispatch = useDispatch();
+  const { user } = useSelector((state: RootState) => state.auth);
   const { push } = useRouter();
-  const scrollToFooter = () => {
+  const scrollToFooter = () => { 
     const footer = document.querySelector("footer");
     footer?.scrollIntoView({ behavior: "smooth" });
   };
@@ -41,7 +46,24 @@ const Header = () => {
   };
 
   const handleRegistration = () => {
-    push("/register");
+    if (user?.user) {
+      switch (user.role) {
+        case ROLE.student:
+          push("student/dashboard");
+          break;
+        case ROLE.teacher:
+          push("school_admin/dashboard");
+          break;
+        case ROLE.admin:
+          push("admin/dashboard");
+          break;
+        default:
+          push("/");
+          break;
+      }
+    } else {
+      push("/register");
+    }
   };
   return (
     <div className="navbar bg-white shadow-sm lg:px-20 2xl:px-[20%]">
@@ -120,18 +142,33 @@ const Header = () => {
           ))}
         </ul>
 
-        <input
-          type="button"
-          onClick={() => handleOnboarding("login")}
-          className="text-gray-700 cursor-pointer hover:text-primary font-geistSans"
-          value="Login"
-        />
-        <input
-          type="button"
-          onClick={handleRegistration}
-          className="bg-secondary cursor-pointer text-white px-4 py-2 hover:bg-primary transition-colors font-geistSans font-bold"
-          value="Register"
-        />
+        {user?.user ? (
+          <>
+            <input
+              type="button"
+              onClick={handleRegistration}
+              className="bg-secondary cursor-pointer text-white px-4 py-2 hover:bg-primary transition-colors font-geistSans font-bold"
+              value="Dashboard"
+            />
+            <span>Welcome Daniel!</span>
+            <Avatar schoolName={user.fullname} />
+          </>
+        ) : (
+          <>
+            <input
+              type="button"
+              onClick={() => handleOnboarding("login")}
+              className="text-gray-700 cursor-pointer hover:text-primary font-geistSans"
+              value="Login"
+            />
+            <input
+              type="button"
+              onClick={handleRegistration}
+              className="bg-secondary cursor-pointer text-white px-4 py-2 hover:bg-primary transition-colors font-geistSans font-bold"
+              value="Register"
+            />
+          </>
+        )}
       </div>
     </div>
   );

@@ -11,12 +11,13 @@ export interface DirectoryCardProps {
     description: string;
     avatar?: string | null;
     headerImage?: string;
+    studentCount: string
   };
 }
 
 const DirectoryCard = React.memo(({ data }: DirectoryCardProps) => {
   DirectoryCard.displayName = "DirectoryCard"; // Added display name for the component
-  const { name, lga, description, avatar, headerImage } = data;
+  const { name, lga, description, avatar, headerImage, studentCount } = data;
 
   const generateInitials = (name: string) => {
     return name
@@ -92,7 +93,7 @@ const DirectoryCard = React.memo(({ data }: DirectoryCardProps) => {
             <div className="flex items-center gap-1">
               <User size={16} />
               <span className="text-sm">
-                <CountUp end={123800} duration={3} separator="," />
+                <CountUp end={Number(studentCount)} duration={3} separator="," />
               </span>
             </div>
           </div>

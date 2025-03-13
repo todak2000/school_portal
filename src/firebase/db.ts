@@ -4,7 +4,8 @@ const Collection = {
   Students_Parents:'StudentsAndParents',
   Results:'Results',
   TermResult:'TermResult',
-  Session: 'Sessions'
+  Session: 'Sessions',
+  School: 'Schools'
 };
 
 export default Collection;

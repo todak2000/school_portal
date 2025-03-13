@@ -206,7 +206,7 @@ const AdminSessionPage = React.memo(() => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
-          { title: "Total Number of School Sessions", value: sessions?.length },
+          { title: "Total Sessions", value: sessions?.length },
         ].map((stat) => (
           <StatsCard key={stat.title} title={stat.title} value={stat.value} />
         ))}
