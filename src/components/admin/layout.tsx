@@ -127,14 +127,13 @@ const sidebarItems = [
 
 const AdminLayout = React.memo(
   ({ children }: { children: ReactElement | ReactNode }) => {
-    const { push } = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const dispatch = useDispatch();
+
     const handleLogOut = useCallback(async () => {
       await signingOut();
-      
-      push("/admin/onboarding/signin");
-    }, [push]);
+      window.location.href = "/admin/onboarding/signin";
+    }, []);
 
     const toggleSidebar = () => {
       setIsSidebarOpen(!isSidebarOpen);

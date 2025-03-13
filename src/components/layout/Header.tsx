@@ -36,7 +36,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
   const { push } = useRouter();
-  const scrollToFooter = () => { 
+  const scrollToFooter = () => {
     const footer = document.querySelector("footer");
     footer?.scrollIntoView({ behavior: "smooth" });
   };
@@ -46,7 +46,7 @@ const Header = () => {
   };
 
   const handleRegistration = () => {
-    if (user?.user) {
+    if (user) {
       switch (user.role) {
         case ROLE.student:
           push("student/dashboard");
@@ -142,7 +142,7 @@ const Header = () => {
           ))}
         </ul>
 
-        {user?.user ? (
+        {user ? (
           <>
             <input
               type="button"

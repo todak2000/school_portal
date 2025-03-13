@@ -7,7 +7,7 @@ import { Search } from "lucide-react";
 import Pagination from "../pagination";
 import { SearchBar } from "./searchBar";
 import useSchools from "@/hooks/useSchools";
-import LoaderSpin from "../loader/LoaderSpin";
+import CentralLoader from "../loader/centralLoader";
 
 const DirectoryPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,9 +41,7 @@ const DirectoryPage = () => {
 
   if (!data) {
     return (
-      <main className="flex-1 p-6">
-        <LoaderSpin />
-      </main>
+      <CentralLoader />
     );
   }
   return (

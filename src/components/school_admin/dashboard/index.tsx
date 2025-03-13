@@ -9,8 +9,8 @@ import { UserInfo } from "@/components/userInfo";
 import { StatsCard } from "@/components/statsCard";
 import { DirectoryCard } from "@/components/directory/card";
 import { ROLE } from "@/constants";
-import LoaderSpin from "@/components/loader/LoaderSpin";
 import useSchoolData from "@/hooks/useSchoolById";
+import CentralLoader from "@/components/loader/centralLoader";
 
  
 const SchoolAdminDashboardPage = React.memo(() => {
@@ -23,9 +23,7 @@ const SchoolAdminDashboardPage = React.memo(() => {
 
   if (!data.name) {
     return (
-      <main className="flex-1 p-6">
-        <LoaderSpin />
-      </main>
+      <CentralLoader />
     );
   }
   return (

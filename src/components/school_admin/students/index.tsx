@@ -12,7 +12,7 @@ import FirebaseSchoolDataTable from "@/components/firebaseTable/schoolTable";
 import { DirectoryCard } from "@/components/directory/card";
 import { ROLE } from "@/constants";
 import useSchoolData from "@/hooks/useSchoolById";
-import LoaderSpin from "@/components/loader/LoaderSpin";
+import CentralLoader from "@/components/loader/centralLoader";
 
 // Avatar component to display the school logo
 export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -71,9 +71,7 @@ const SchoolAdminStudentsPage = React.memo(() => {
 
   if (!data.name) {
     return (
-      <main className="flex-1 p-6">
-        <LoaderSpin />
-      </main>
+      <CentralLoader />
     );
   }
 

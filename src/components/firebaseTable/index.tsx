@@ -292,7 +292,7 @@ const FirebaseDataTable = React.memo(function DataTable<
   };
 
   return (
-    <div className="w-full min-w-[85vw] md:min-w-[80vw] md:max-w-[85vw] bg-white border-none">
+    <div className="w-[87vw] md:w-full md:min-w-[80vw] md:max-w-[85vw] bg-white border-none">
       {/* Header */}
       <div className="p-4 border-b ">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

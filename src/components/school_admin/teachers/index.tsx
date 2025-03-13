@@ -1,4 +1,3 @@
- 
 "use client";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -13,7 +12,7 @@ import { DirectoryCard } from "@/components/directory/card";
 import { Ban, Check } from "lucide-react";
 import { ROLE } from "@/constants";
 import useSchoolData from "@/hooks/useSchoolById";
-import LoaderSpin from "@/components/loader/LoaderSpin";
+import CentralLoader from "@/components/loader/centralLoader";
 
 // Avatar component to display the school logo
 export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -47,7 +46,11 @@ export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
 };
 
 const StatusIcon: React.FC<{ status: boolean }> = ({ status }) => {
-  return status ? <Check color="green" className="mx-auto"/> : <Ban color="red" className="mx-auto"/>;
+  return status ? (
+    <Check color="green" className="mx-auto" />
+  ) : (
+    <Ban color="red" className="mx-auto" />
+  );
 };
 
 // Columns with the avatar component
@@ -82,11 +85,7 @@ const SchoolAdminTeachersPage = React.memo(() => {
   const currentTime = useMemo(() => getFormattedTime(), []);
 
   if (!data.name) {
-    return (
-      <main className="flex-1 p-6">
-        <LoaderSpin />
-      </main>
-    );
+    return <CentralLoader />;
   }
 
   return (
@@ -124,7 +123,11 @@ const SchoolAdminTeachersPage = React.memo(() => {
             value: data.teacherCount,
           },
         ].map((stat) => (
-          <StatsCard key={stat.title} title={stat.title} value={Number(stat.value)} />
+          <StatsCard
+            key={stat.title}
+            title={stat.title}
+            value={Number(stat.value)}
+          />
         ))}
       </div>
 

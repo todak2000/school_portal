@@ -25,7 +25,7 @@ const Hero = () => {
   ];
 
   const handleLogin = () => {
-    if (user?.user) {
+    if (user) {
       switch (user.role) {
         case ROLE.student:
           push("student/dashboard");
@@ -59,7 +59,7 @@ const Hero = () => {
             type="button"
             className=" bg-primary px-10 py-4 w-max text-white hover:bg-opacity-70"
           >
-            {user?.user ? "Go to Dashboard" : "Get Started"}
+            {user ? "Go to Dashboard" : "Get Started"}
           </button>
         </div>
         <Image
