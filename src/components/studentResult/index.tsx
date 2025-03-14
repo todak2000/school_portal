@@ -28,14 +28,41 @@ export const StudentResultView = ({
 }) => {
   const { id } = useParams<{ id: string }>();
   const studentIdd = studentId ?? id;
-  const pathname = usePathname()
+  const pathname = usePathname();
   const { sessions } = useFetchSessions();
   const current = getOngoingSession(sessions);
   const selectedSession = session ?? current?.session;
   const selectedTerm = term ?? current?.ongoingTerm;
+
   const handlePrint = () => {
+    // Create a print-specific style
+    const style = document.createElement("style");
+    style.type = "text/css";
+    style.innerHTML = `
+      @media print {
+        body {
+          margin: 0; /* Removes default margins */
+        }
+        * {
+          -webkit-print-color-adjust: exact !important; /* Prevent background graphics from being printed */
+          print-color-adjust: exact !important; /* Cross-browser */
+          background: none !important; /* Disable background graphics */
+        }
+      }
+    `;
+
+    // Append the style to the document's head
+    document.head.appendChild(style);
+
+    // Trigger the print dialog
     window && window.print();
+
+    // Cleanup the style after printing
+    setTimeout(() => {
+      document.head.removeChild(style);
+    }, 1000);
   };
+
   const { data: termResult, isLoading } = useQuery<TermResult | any>({
     queryKey: [
       "termResult",
@@ -55,14 +82,14 @@ export const StudentResultView = ({
 
   if (isLoading || typeof termResult === "undefined") {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[400px] w-full">
         <LoaderSpin />
       </div>
     );
   }
   if (!termResult) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[400px] w-full">
         <p>Oops! This student&#39;s result has not be collated yet!</p>
       </div>
     );
@@ -78,6 +105,7 @@ export const StudentResultView = ({
 
   const reportData = {
     studentInfo: {
+      studentId: studentIdd,
       schoolName: school,
       studentName: termResult.name,
       className: termResult.classLevel,
@@ -96,7 +124,7 @@ export const StudentResultView = ({
     affectiveDomainGrades: behaviorData,
     psychomotorDomainGrades: activitiesData,
   };
-  
+
   return (
     <>
       <ReportSheet {...reportData} />

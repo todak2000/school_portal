@@ -6,6 +6,7 @@ import Image from "next/image";
 import { processStudentRecords } from "@/helpers/getStudentResult";
 import { evaluateStudentPerformance } from "@/helpers/evaluateResult";
 import { getPosition } from "@/helpers/getPosition";
+import QRCodeComponent from "./qrCode";
 
 export type IScores = {
   ca1: number | string;
@@ -44,6 +45,7 @@ export interface GradeKey {
 }
 
 export interface StudentInfo {
+  studentId: string;
   schoolName: string;
   studentName: string;
   className: string;
@@ -111,7 +113,7 @@ const StudentInfoSection: React.FC<StudentInfoSectionProps> = ({
   } = studentInfo;
 
   return (
-    <div className="border-b border-gray-400 py-1 space-y-1">
+    <div className=" py-1 space-y-1">
       <div className="flex">
         <p className="font-semibold mr-2 font-geistSans text-xs">
           NAME OF SCHOOL:
@@ -143,7 +145,10 @@ const StudentInfoSection: React.FC<StudentInfoSectionProps> = ({
         items={[
           { title: "TERM", value: getPosition(Number(term)) },
           { title: "NEXT TERM BEGINS", value: nextTermBegins },
-          { title: "STUDENT'S AVERAGE", value: formatToInteger(studentAverage) },
+          {
+            title: "STUDENT'S AVERAGE",
+            value: formatToInteger(studentAverage),
+          },
         ]}
       />
 
@@ -151,7 +156,10 @@ const StudentInfoSection: React.FC<StudentInfoSectionProps> = ({
         items={[
           { title: "DATE", value: date },
           { title: "20", value: year },
-          { title: "CLASS AVERAGE", value: formatToInteger(classAverage as string|number) },
+          {
+            title: "CLASS AVERAGE",
+            value: formatToInteger(classAverage as string | number),
+          },
           { title: "SESSION", value: session },
         ]}
       />
@@ -165,7 +173,9 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ className }) => {
   const educationLevel = className.startsWith("JSS") ? "JUNIOR" : "SENIOR";
-  const SecondText = className.startsWith("JSS") ? "STATE UNIVERSAL BASIC EDUCATION BOARD" : "STATE SECONDARY EDUCATION BOARD";
+  const SecondText = className.startsWith("JSS")
+    ? "STATE UNIVERSAL BASIC EDUCATION BOARD"
+    : "STATE SECONDARY EDUCATION BOARD";
   return (
     <div className="flex items-center justify-between mb-1">
       <div className="w-24">
@@ -262,16 +272,23 @@ const DomainTable: React.FC<DomainTableProps> = ({
 interface AcademicTableProps {
   className: string;
   data: SubjectScore[];
+  gradeKeys: {
+    grade: string;
+    description: string;
+    range: string;
+  }[];
   evaluationResults: {
     decision: string;
     comment: string;
   };
+  studentId: string;
 }
 
 const AcademicTable: React.FC<AcademicTableProps> = ({
   className,
   data,
   evaluationResults,
+  gradeKeys,
 }) => {
   const tableHeaders = [
     { id: 1, label: "SUBJECTS", value: null },
@@ -377,29 +394,7 @@ const AcademicTable: React.FC<AcademicTableProps> = ({
           </tr>
         </tbody>
       </table>
-    </div>
-  );
-};
-
-interface CommentsSectionProps {
-  className: string;
-  evaluationResults: {
-    comment: string;
-  };
-  gradeKeys: {
-    grade: string;
-    description: string;
-    range: string;
-  }[];
-}
-
-const CommentsSection: React.FC<CommentsSectionProps> = ({
-  evaluationResults,
-  gradeKeys,
-}) => {
-  return (
-    <div className=" font-geistSans text-xs">
-      <div className="py-2">
+      <div className="py-1">
         <div className="flex">
           <p className="font-semibold mr-2">CLASS TEACHER&#39;S REMARKS:</p>
           <p className="flex-1 border-b border-gray-400 font-geistMono text-xs text-black">
@@ -408,28 +403,29 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
         </div>
       </div>
 
-      <div className="flex my-1">
-        <div className="w-2/3 pr-2">
-          <div className="py-1">
-            <div className="flex">
-              <p className="font-semibold mr-2">PRINCIPAL&#39;S COMMENTS:</p>
-              <p className="flex-1 border-b border-gray-400 text-black font-geistMono">
-                {evaluationResults.comment}
-              </p>
-            </div>
-          </div>
-          <div className="text-xs mt-0">
-            <div className="grid grid-cols-2 text-[0.65rem] border px-1">
-              {gradeKeys.map((item) => (
-                <React.Fragment key={item.grade}>
-                  <div>{`${item.grade} = ${item.description}`}</div>
-                  <div>{item.range}</div>
-                </React.Fragment>
-              ))}
-            </div>
+      <div className="py-1">
+        <div className="flex">
+          <p className="font-semibold mr-2">PRINCIPAL&#39;S COMMENTS:</p>
+          <p className="flex-1 border-b border-gray-400 font-geistMono text-xs text-black">
+            {evaluationResults.comment}
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {/* <div className="  p-2 mx-auto">
+          <QRCodeComponent studentId={studentId} />
+        </div> */}
+        <div className="text-xs mt-0">
+          <div className="grid grid-cols-2 text-[0.65rem]  px-1">
+            {gradeKeys.map((item) => (
+              <React.Fragment key={item.grade}>
+                <div>{`${item.grade} = ${item.description}`}</div>
+                <div>{item.range}</div>
+              </React.Fragment>
+            ))}
           </div>
         </div>
-        <div className="w-1/3 border p-2">
+        <div className=" p-2 mt-0">
           <div className="text-center font-geistSans mb-8">
             PRINCIPAL AUTHORITY SIGNATURE AND DATE
           </div>
@@ -461,68 +457,68 @@ const ReportSheet: React.FC<ReportSheetProps> = ({
   affectiveDomainGrades,
   psychomotorDomainGrades,
 }) => {
-  const { className } = studentInfo;
-
+  const { className, studentId } = studentInfo;
   const getGradeType = () => {
     return className.startsWith("JSS") ? JSS_GRADES : STANDARD_GRADES;
   };
 
   const data = processStudentRecords(subjectScores);
+
   const evaluationResults = evaluateStudentPerformance(data);
 
   return (
     <div className="bg-gray-100 max-w-4xl mx-auto font-sans">
-      <div className="bg-white p-4  border-gray-300 relative">
-
-  <div className="absolute inset-0 z-0 flex [transform:rotate(-45deg)] items-center justify-center text-primary text-5xl font-bold opacity-10">
-    OFFICIAL REPORT SHEET
-  </div>
-  <div className="absolute inset-0 z-0 flex  items-center justify-center text-5xl font-bold opacity-5">
-  <Image
-          src="/coas.png"
-          alt="Nigerian Coat of Arms"
-          width={200}
-          height={200}
-        />
-  </div>
-        <Header className={className} />
-        <StudentInfoSection studentInfo={studentInfo} />
-
-        <div className="flex mt-2">
-          <AcademicTable
-            className={className}
-            data={data}
-            evaluationResults={evaluationResults}
-          />
-
-          <div className="w-[30%] pl-2 text-xs font-geistSans">
-            <DomainTable
-              title="AFFECTIVE DOMAIN"
-              subtitle="(VALUES, ATTITUDE, INTERESTS, CHARACTER ETC.)"
-              domainGrades={affectiveDomainGrades}
-              headerLabel="BEHAVIOURS"
-            />
-
-            <DomainTable
-              title="PSYCHOMOTOR DOMAIN"
-              subtitle="(Manual and Physical Skill)"
-              domainGrades={psychomotorDomainGrades}
-              headerLabel="ACTIVITIES"
-            />
-
-            <GradeKey
-              grades={STANDARD_GRADES}
-              title="KEY TO RATINGS"
-              subtitle="AFFECTIVE & PSYCHOMOTOR DOMAIN"
+      <div className="bg-white border-gray-300 h-[1100px]">
+        <div className="bg-white p-4 pt-2  border-gray-300 relative max-h-[1000px]">
+          <div className="absolute inset-0 z-0 flex [transform:rotate(-45deg)] items-center justify-center text-primary text-5xl font-bold opacity-10">
+            OFFICIAL REPORT SHEET
+          </div>
+          <div className="absolute inset-0 z-0 flex  items-center justify-center text-5xl font-bold opacity-5">
+            <Image
+              src="/coas.png"
+              alt="Nigerian Coat of Arms"
+              width={200}
+              height={200}
             />
           </div>
-        </div>
+          <Header className={className} />
+          <StudentInfoSection studentInfo={studentInfo} />
 
-        <CommentsSection
-          className={className}
-          evaluationResults={evaluationResults}
-          gradeKeys={getGradeType()}
-        />
+          <div className="flex mt-2">
+            <AcademicTable
+              className={className}
+              data={data}
+              evaluationResults={evaluationResults}
+              gradeKeys={getGradeType()}
+              studentId={studentInfo.studentId}
+            />
+
+            <div className="w-[30%] pl-2 text-xs font-geistSans">
+              <DomainTable
+                title="AFFECTIVE DOMAIN"
+                subtitle="(VALUES, ATTITUDE, INTERESTS, CHARACTER ETC.)"
+                domainGrades={affectiveDomainGrades}
+                headerLabel="BEHAVIOURS"
+              />
+
+              <DomainTable
+                title="PSYCHOMOTOR DOMAIN"
+                subtitle="(Manual and Physical Skill)"
+                domainGrades={psychomotorDomainGrades}
+                headerLabel="ACTIVITIES"
+              />
+
+              <GradeKey
+                grades={STANDARD_GRADES}
+                title="KEY TO RATINGS"
+                subtitle="AFFECTIVE & PSYCHOMOTOR DOMAIN"
+              />
+              <div className="  p-2 flex flex-row items-center justify-center w-full">
+                <QRCodeComponent studentId={studentId} />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
