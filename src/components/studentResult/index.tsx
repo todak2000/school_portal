@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ResultService, Term, TermResult } from "@/firebase/results";
 import { useParams, usePathname } from "next/navigation";
@@ -13,6 +13,7 @@ import { schoolsArr } from "@/constants/schools";
 import ReportSheet from "./resultSheet";
 import useFetchSessions from "@/hooks/useSchoolSessions";
 import { activitiesData, behaviorData } from "@/constants/result";
+import MobileReportSheet from "./mobileResultSheet";
 
 // Main Component
 export const StudentResultView = ({
@@ -20,11 +21,13 @@ export const StudentResultView = ({
   session,
   term,
   schoolId,
+  setCanPrint,
 }: {
   studentId?: string;
   session?: string;
   term?: string;
   schoolId?: string;
+  setCanPrint?: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const { id } = useParams<{ id: string }>();
   const studentIdd = studentId ?? id;
@@ -80,6 +83,11 @@ export const StudentResultView = ({
       ),
   });
 
+  useEffect(() => {
+    termResult && setCanPrint && setCanPrint(true);
+    !termResult && setCanPrint && setCanPrint(false);
+  }, [termResult]);
+
   if (isLoading || typeof termResult === "undefined") {
     return (
       <div className="flex items-center justify-center min-h-[400px] w-full">
@@ -90,7 +98,9 @@ export const StudentResultView = ({
   if (!termResult) {
     return (
       <div className="flex items-center justify-center min-h-[400px] w-full">
-        <p>Oops! This student&#39;s result has not be collated yet!</p>
+        <p className="text-center">
+          Oops! This student&#39;s result has not be collated yet!
+        </p>
       </div>
     );
   }
@@ -127,15 +137,21 @@ export const StudentResultView = ({
 
   return (
     <>
-      <ReportSheet {...reportData} />
-      {pathname !== "/student/results" && (
-        <button
-          className="btn bg-orange-300 text-white border-none absolute top-2 right-4"
-          onClick={handlePrint}
-        >
-          <Printer />
-        </button>
-      )}
+      <div className="block md:hidden p-2 overflow-x-auto scrollbar-hide">
+        <MobileReportSheet {...reportData} />
+      </div>
+      <div className="md:block hidden">
+        <ReportSheet {...reportData} />
+
+        {pathname !== "/student/results" && (
+          <button
+            className="btn bg-orange-300 text-white border-none absolute top-2 right-4"
+            onClick={handlePrint}
+          >
+            <Printer />
+          </button>
+        )}
+      </div>
     </>
   );
 };

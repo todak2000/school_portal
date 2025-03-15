@@ -21,6 +21,7 @@ const StudentResultPage = React.memo(() => {
   const { sessions } = useFetchSessions();
   const current = getOngoingSession(sessions);
 
+  const [canPrint, setCanPrint] = useState<boolean>(false)
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
   const [session, setSession] = useState<string>(current?.session ?? "");
@@ -109,7 +110,7 @@ const StudentResultPage = React.memo(() => {
             ))}
           </select>
         </div>
-        {session !== "" && term !== "" && (
+        {session !== "" && term !== "" && canPrint &&(
           <button
             onClick={() => handleStudentResult(user?.id)}
             className="md:hidden btn btn-ghost gap-2 rounded-none bg-primary mt-3 text-white"
@@ -119,15 +120,17 @@ const StudentResultPage = React.memo(() => {
           </button>
         )}
       </div>
-      <div className="hidden md:flex mx-auto overflow-y-auto h-[50vh] scrollbar-hide w-[85vw] md:w-full">
+      <div className="overflow-x-auto scrollbar-hide w-full lg:h-[50vh] ">
         <StudentResultView
           studentId={user?.id}
           session={session}
           term={term}
+          setCanPrint={setCanPrint}
           schoolId={user?.schoolId}
         />
       </div>
-      {session !== "" && term !== "" && (
+
+      {session !== "" && term !== "" && canPrint && (
         <button
           onClick={() => handleStudentResult(user?.id)}
           className="hidden md:flex mx-auto btn btn-ghost gap-2 rounded-none bg-primary mt-3 text-white"

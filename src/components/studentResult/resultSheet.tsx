@@ -412,9 +412,6 @@ const AcademicTable: React.FC<AcademicTableProps> = ({
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        {/* <div className="  p-2 mx-auto">
-          <QRCodeComponent studentId={studentId} />
-        </div> */}
         <div className="text-xs mt-0">
           <div className="grid grid-cols-2 text-[0.65rem]  px-1">
             {gradeKeys.map((item) => (
