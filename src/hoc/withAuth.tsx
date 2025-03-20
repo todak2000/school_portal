@@ -2,6 +2,7 @@
 "use client";
 
 import LoaderSpin from "@/components/loader/LoaderSpin";
+import { ROLE } from "@/constants";
 import { signingOut } from "@/firebase/onboarding";
 import { RootState } from "@/store";
 import { setUser } from "@/store/slices/auth";
@@ -35,7 +36,7 @@ const withAuth = (
     useEffect(() => {
       if (!loading) {
         if (!user && !jsonUser) {
-          if (requiredRole === "admin") {
+          if (requiredRole === ROLE.admin) {
             router.replace("/admin/onboarding/signin");
           } else {
             router.replace("/");
@@ -52,6 +53,7 @@ const withAuth = (
           ((role && role === requiredRole) || jsonUser.role === requiredRole)
         ) {
           !user && dispatch(setUser(jsonUser));
+          
         }
       }
     }, [user, loading, role, requiredRole, router, jsonUser, dispatch]);

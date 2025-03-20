@@ -10,7 +10,9 @@ import { DataTableColumn } from "@/components/table";
 import Collection from "@/firebase/db";
 import FirebaseSchoolDataTable from "@/components/firebaseTable/schoolTable";
 import { DirectoryCard } from "@/components/directory/card";
-import { schoolsArr } from "@/constants/schools";
+import { ROLE } from "@/constants";
+import useSchoolData from "@/hooks/useSchoolById";
+import CentralLoader from "@/components/loader/centralLoader";
 
 // Avatar component to display the school logo
 export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -60,12 +62,18 @@ const columns: DataTableColumn[] = [
 
 const SchoolAdminStudentsPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const [totalCount, setTotalCount] = useState<number>(0);
+  const { data } = useSchoolData(user?.schoolId);
   const [students, setStudents] = useState<
     Record<string, string | boolean | string[]>[]
   >([]);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
+
+  if (!data.name) {
+    return (
+      <CentralLoader />
+    );
+  }
 
   return (
     <main className="flex-1 p-6">
@@ -75,32 +83,34 @@ const SchoolAdminStudentsPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mb-6">
         <DirectoryCard
           data={
-            schoolsArr.find((i) => i.code === user?.schoolId) as {
+            data as {
               name: string;
               lga: string;
               description: string;
-              avatar?: string | null | undefined;
-              headerImage?: string | undefined;
+              avatar?: string | null;
+              headerImage?: string;
+              teacherCount: string;
+              studentCount: string;
             }
           }
         />
         {[
           {
-            title: `Current Number of Students at ${user?.schoolId}`,
-            value: totalCount,
+            title: `Number of Students at ${user?.schoolId}`,
+            value: data.studentCount,
           },
-        ].map((stat, index) => (
-          <StatsCard key={index} title={stat.title} value={stat.value} />
+        ].map((stat) => (
+          <StatsCard key={stat.title} title={stat.title} value={Number(stat.value)} />
         ))}
       </div>
 
@@ -108,7 +118,7 @@ const SchoolAdminStudentsPage = React.memo(() => {
       <FirebaseSchoolDataTable
         collectionName={Collection.Students_Parents}
         data={students}
-        setTotalCount={setTotalCount}
+        setTotalCount={null}
         setData={setStudents}
         columns={columns}
         defaultSort={{ field: "createdAt", direction: "desc" }}

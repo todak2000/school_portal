@@ -11,7 +11,7 @@ export interface UserSignupData {
   password: string;
   name?: string;
   fullname?: string;
-  role: "student" | "parent" | "admin" | "teacher";
+  role: "student" | "admin" | "teacher";
   schoolId?: string;
   subjectsTaught?: string[];
   isSuperAdmin?: boolean;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -6,7 +7,8 @@ import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { StatsCard } from "@/components/statsCard";
 import { UserInfo } from "@/components/userInfo";
 import DataTable, { DataTableColumn } from "@/components/table";
-import { sampleSubjects, Subject } from "@/constants/schools";
+import { sampleSeniorSubjects, sampleSubjects, Subject } from "@/constants/schools";
+import { ROLE } from "@/constants";
 
 const columns: DataTableColumn[] = [
   { key: "name", label: "Subject Name", sortable: true },
@@ -16,6 +18,7 @@ const columns: DataTableColumn[] = [
 const AdminSubjectsPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [subjects, setSubjects] = useState<Subject[]>(sampleSubjects);
+  const [subjectsTwo, setSubjectsTwo] = useState<Subject[]>(sampleSeniorSubjects);
   const today = useMemo(() => getFormattedDate(), []);
 
   const currentTime = useMemo(() => getFormattedTime(), []);
@@ -48,23 +51,23 @@ const AdminSubjectsPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student as 'student'}
           name={today}
           editTime={currentTime}
         />
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[{ title: "Total Number of Subjects", value: subjects?.length }].map(
-          (stat, index) => (
-            <StatsCard key={index} title={stat.title} value={stat.value} />
+      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mb-6">
+        {[{ title: "Total Subjects (JSS)", value: subjects?.length }, { title: "Total Subjects (SSS)", value: subjectsTwo?.length }].map(
+          (stat) => (
+            <StatsCard key={stat.title} title={stat.title} value={stat.value} />
           )
         )}
       </div>
       {/* Projects Section */}
       <DataTable
-        data={subjects}
+        data={[...subjects, ...subjectsTwo]}
         editableKeys={["name", "subjectId"]}
         columns={columns}
         defaultForm={{ name: "", subjectId: "" }}

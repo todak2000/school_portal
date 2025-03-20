@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { signingOut } from "@/firebase/onboarding";
@@ -8,6 +9,7 @@ import {
   Power,
   BarChart2,
   Users,
+  Blocks,
   LucideIcon,
   UserCheck,
   Shield,
@@ -19,10 +21,18 @@ import {
   CircleX,
 } from "lucide-react";
 
-import React, { ReactElement, ReactNode, useCallback, useState } from "react";
+import React, {
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
+import { setModal } from "@/store/slices/modal";
+import { useDispatch } from "react-redux";
 
 interface NavButtonProps {
   icon: LucideIcon;
@@ -89,7 +99,7 @@ const sidebarItems = [
     route: "/admin/subjects",
   },
   {
-    icon: GraduationCap,
+    icon: Blocks,
     label: "Sessions",
     route: "/admin/sessions",
   },
@@ -117,17 +127,21 @@ const sidebarItems = [
 
 const AdminLayout = React.memo(
   ({ children }: { children: ReactElement | ReactNode }) => {
-    const { push } = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const dispatch = useDispatch();
 
     const handleLogOut = useCallback(async () => {
       await signingOut();
-      push("/admin/onboarding/signin");
-    }, [push]);
+      window.location.href = "/admin/onboarding/signin";
+    }, []);
 
     const toggleSidebar = () => {
       setIsSidebarOpen(!isSidebarOpen);
     };
+
+    useEffect(() => {
+      dispatch(setModal({ open: false, type: "" }));
+    }, []);
 
     return (
       <div className="min-h-screen md:h-screen bg-gray-50 overflow-y-hidden">
@@ -179,9 +193,9 @@ const AdminLayout = React.memo(
           {/* Sidebar */}
           <aside className="w-64 bg-white h-screen p-4 hidden md:block">
             <div className="space-y-2">
-              {sidebarItems.map((item, index) => (
-                <SidebarButton 
-                  key={index}
+              {sidebarItems.map((item) => (
+                <SidebarButton
+                  key={item.label}
                   icon={item.icon}
                   label={item.label}
                   route={item.route}
@@ -203,9 +217,9 @@ const AdminLayout = React.memo(
                   onClick={toggleSidebar}
                 />
                 <div className="space-y-2 p-4 h-screen">
-                  {sidebarItems.map((item, index) => (
+                  {sidebarItems.map((item) => (
                     <SidebarButton
-                      key={index}
+                      key={item.label}
                       icon={item.icon}
                       label={item.label}
                       route={item.route}
@@ -217,7 +231,7 @@ const AdminLayout = React.memo(
           </Dialog>
 
           {/* Main Content */}
-          <div className="md:overflow-y-hidden md:h-[calc(100vh-100px)]">
+          <div className="md:overflow-y-hidden md:h-[calc(100vh-100px)] md:w-[calc(100vw-280px)]">
             {children}
           </div>
         </div>

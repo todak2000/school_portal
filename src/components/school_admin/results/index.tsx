@@ -1,4 +1,5 @@
- 
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+
 "use client";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,10 +11,13 @@ import { setModal } from "@/store/slices/modal";
 import ResultsTable from "./resultTable";
 import {
   sampleClasses,
+  sampleSeniorSubjects,
   sampleSubjects,
-  sessionsArr,
+  Subject,
 } from "@/constants/schools";
 import { getOngoingSession } from "@/helpers/ongoingSession";
+import { ROLE } from "@/constants";
+import useFetchSessions from "@/hooks/useSchoolSessions";
 
 const termss = [
   { value: 1, label: "First Term" },
@@ -22,15 +26,18 @@ const termss = [
 ];
 
 const SchoolAdminResultPage = React.memo(() => {
+  
+    const { sessions } = useFetchSessions()
   const { user } = useSelector((state: RootState) => state.auth);
-  const current = getOngoingSession(sessionsArr);
+  const current = getOngoingSession(sessions);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
   const [classId, setClassId] = useState<string>("");
   const [subjectId, setSubjectId] = useState<string>("");
-  const [session, setSession] = useState<string>(current?.session || "");
+  const [subjectss, setSubjectss] = useState<Subject[]>([]);
+  const [session, setSession] = useState<string>(current?.session ?? "");
   const [term, setTerm] = useState<string>(
-    current?.ongoingTerm?.toString() || ""
+    current?.ongoingTerm?.toString() ?? ""
   );
 
   const dispatch = useDispatch();
@@ -54,7 +61,7 @@ const SchoolAdminResultPage = React.memo(() => {
         </h1>
 
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />
@@ -85,8 +92,10 @@ const SchoolAdminResultPage = React.memo(() => {
       {/* Projects Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-3 mb-6">
         <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text font-bold text-primary font-sans">Session</span>
+          <label className="label" htmlFor="session">
+            <span className="label-text font-bold text-primary font-sans">
+              Session
+            </span>
           </label>
           <select
             className="select select-bordered w-full bg-orange-100 font-geistMono text-secondary rounded-none"
@@ -94,7 +103,7 @@ const SchoolAdminResultPage = React.memo(() => {
             onChange={(e) => setSession(e.target.value)}
           >
             <option value="">Select Session</option>
-            {sessionsArr.map((sess) => (
+            {sessions.map((sess) => (
               <option key={sess.session} value={sess.session}>
                 {sess.session}
               </option>
@@ -102,8 +111,10 @@ const SchoolAdminResultPage = React.memo(() => {
           </select>
         </div>
         <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text font-bold text-primary font-sans">Term</span>
+          <label className="label" htmlFor="term">
+            <span className="label-text font-bold text-primary font-sans">
+              Term
+            </span>
           </label>
           <select
             className="select select-bordered w-full bg-orange-100 font-geistMono text-secondary rounded-none"
@@ -119,13 +130,21 @@ const SchoolAdminResultPage = React.memo(() => {
           </select>
         </div>
         <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text font-bold text-primary font-sans">Class</span>
+          <label className="label" htmlFor="classId">
+            <span className="label-text font-bold text-primary font-sans">
+              Class
+            </span>
           </label>
           <select
             className="select select-bordered w-full bg-orange-100 font-geistMono text-secondary rounded-none"
             value={classId}
-            onChange={(e) => setClassId(e.target.value)}
+            onChange={(e) => {
+              e.target.value.startsWith("JSS")
+                ? setSubjectss(sampleSubjects)
+                : setSubjectss(sampleSeniorSubjects);
+
+              setClassId(e.target.value);
+            }}
           >
             <option value="">Select Class</option>
             {sampleClasses.map((cls) => (
@@ -137,16 +156,20 @@ const SchoolAdminResultPage = React.memo(() => {
         </div>
 
         <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text font-bold text-primary font-sans">Subject</span>
+          <label className="label" htmlFor="subjectId">
+            <span className="label-text font-bold text-primary font-sans">
+              Subject
+            </span>
           </label>
           <select
-            className="select select-bordered w-full bg-orange-100 font-geistMono text-secondary rounded-none"
+            className="select select-bordered w-full bg-orange-100  disabled:bg-orange-50 disabled:border-none font-geistMono text-secondary rounded-none"
             value={subjectId}
+            disabled={classId===''}
             onChange={(e) => setSubjectId(e.target.value)}
           >
+            
             <option value="">Select Subject</option>
-            {sampleSubjects.map((subj) => (
+            {subjectss.map((subj) => (
               <option key={subj.subjectId} value={subj.subjectId}>
                 {subj.name}
               </option>

@@ -2,6 +2,7 @@
 
 import { StudentDashboardPage } from "@/components/student/dashboard";
 import { StudentLayout } from "@/components/student/dashboard/layout";
+import { ROLE } from "@/constants";
 import withAuth from "@/hoc/withAuth";
 import React from "react";
 
@@ -14,5 +15,5 @@ const StudentDashboard: React.FC = () => {
 };
 
 export default withAuth(StudentDashboard, {
-  requiredRole: "student",
+  requiredRole: ROLE.student,
 });

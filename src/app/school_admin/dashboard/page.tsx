@@ -2,6 +2,7 @@
 
 import { SchoolAdminDashboardPage } from "@/components/school_admin/dashboard";
 import { SchoolAdminLayout } from "@/components/school_admin/dashboard/layout";
+import { ROLE } from "@/constants";
 import withAuth from "@/hoc/withAuth";
 import React from "react";
 
@@ -13,4 +14,4 @@ const SchoolAdminDashboard: React.FC = () => {
   );
 };
 
-export default withAuth(SchoolAdminDashboard, { requiredRole: "teacher" });
+export default withAuth(SchoolAdminDashboard, { requiredRole: ROLE.teacher });

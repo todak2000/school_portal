@@ -13,6 +13,7 @@ import { generateTeacherID } from "@/helpers/generateStudentID";
 import FirebaseDataTable from "@/components/firebaseTable";
 import Collection from "@/firebase/db";
 import { updateUserDoc, userSignup } from "@/firebase/onboarding";
+import { ROLE } from "@/constants";
 
 // Avatar component to display the school logo
 export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -60,13 +61,13 @@ const columns: DataTableColumn[] = [
   { key: "isSuperAdmin", label: "School Admin", sortable: true },
 ];
 
+type TeacherData = Record<string, string | boolean | string[]>;
+
 const AdminTeachersPage = React.memo(() => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [teachers, setTeachers] = useState<
-    Record<string, string | boolean | string[]>[]
-  >([]);
+  const [teachers, setTeachers] = useState<TeacherData[]>([]);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
 
@@ -82,7 +83,7 @@ const AdminTeachersPage = React.memo(() => {
   
 
   const handleCreateTeacher = async (
-    data: Record<string, string | boolean | string[]>
+    data: TeacherData
   ) => {
     // Create a new teacher object
     const id = `${key()}`;
@@ -101,12 +102,12 @@ const AdminTeachersPage = React.memo(() => {
         name: data.fullname as string,
         email: data.email as string, // Ensure email is included
         password: "Zxcvb@12345", // Ensure password is included
-        role: "teacher", // Set the role appropriately
+        role: ROLE.teacher as "teacher", // Set the role appropriately
       });
 
       if (res.status === 200) {
         setTeachers(
-          (prevTeachers: Record<string, string | boolean | string[]>[]) => [
+          (prevTeachers: TeacherData[]) => [
             newTeacher,
             ...prevTeachers,
           ]
@@ -123,15 +124,15 @@ const AdminTeachersPage = React.memo(() => {
   };
 
   const handleEditTeacher = async (
-    data: Record<string, string | boolean | string[]>
+    data: TeacherData
   ) => {
     // Update the item in the main data
     try {
       const res = await updateUserDoc(
-        "teacher",
+        ROLE.teacher as "teacher",
         data.id as string,
         data,
-        user?.role as "admin"
+        user?.role as "teacher"
       );
 
       if (res.status === 200) {
@@ -167,7 +168,7 @@ const AdminTeachersPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />
@@ -175,9 +176,9 @@ const AdminTeachersPage = React.memo(() => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[{ title: "Total Number of Teachers", value: totalCount }].map(
-          (stat, index) => (
-            <StatsCard key={index} title={stat.title} value={stat.value} />
+        {[{ title: "Total Teachers", value: totalCount }].map(
+          (stat) => (
+            <StatsCard key={stat.title} title={stat.title} value={stat.value} />
           )
         )}
       </div>
@@ -191,7 +192,7 @@ const AdminTeachersPage = React.memo(() => {
         columns={columns}
         defaultSort={{ field: "createdAt", direction: "desc" }}
         defaultForm={null}
-        role="teacher"
+        role={ROLE.teacher}
         searchableColumns={["fullname"]}
         onCreate={handleCreateTeacher}
         onDelete={handleDeleteTeacher}

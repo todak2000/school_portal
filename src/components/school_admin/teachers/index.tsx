@@ -1,4 +1,3 @@
- 
 "use client";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -10,8 +9,10 @@ import { DataTableColumn } from "@/components/table";
 import Collection from "@/firebase/db";
 import FirebaseSchoolDataTable from "@/components/firebaseTable/schoolTable";
 import { DirectoryCard } from "@/components/directory/card";
-import { schoolsArr } from "@/constants/schools";
 import { Ban, Check } from "lucide-react";
+import { ROLE } from "@/constants";
+import useSchoolData from "@/hooks/useSchoolById";
+import CentralLoader from "@/components/loader/centralLoader";
 
 // Avatar component to display the school logo
 export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
@@ -45,7 +46,11 @@ export const Avatar: React.FC<{ schoolName: string }> = ({ schoolName }) => {
 };
 
 const StatusIcon: React.FC<{ status: boolean }> = ({ status }) => {
-  return status ? <Check color="green" className="mx-auto"/> : <Ban color="red" className="mx-auto"/>;
+  return status ? (
+    <Check color="green" className="mx-auto" />
+  ) : (
+    <Ban color="red" className="mx-auto" />
+  );
 };
 
 // Columns with the avatar component
@@ -69,14 +74,19 @@ const columns: DataTableColumn[] = [
   },
 ];
 
+type TeacherData = Record<string, string | boolean | string[]>;
+
 const SchoolAdminTeachersPage = React.memo(() => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [teachers, setTeachers] = useState<
-    Record<string, string | boolean | string[]>[]
-  >([]);
+  const [teachers, setTeachers] = useState<TeacherData[]>([]);
+
+  const { data } = useSchoolData(user?.schoolId);
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
+
+  if (!data.name) {
+    return <CentralLoader />;
+  }
 
   return (
     <main className="flex-1 p-6">
@@ -86,32 +96,38 @@ const SchoolAdminTeachersPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mb-6">
         <DirectoryCard
           data={
-            schoolsArr.find((i) => i.code === user?.schoolId) as {
+            data as {
               name: string;
               lga: string;
               description: string;
-              avatar?: string | null | undefined;
-              headerImage?: string | undefined;
+              avatar?: string | null;
+              headerImage?: string;
+              teacherCount: string;
+              studentCount: string;
             }
           }
         />
         {[
           {
-            title: `Current Number of Teachers at ${user?.schoolId}`,
-            value: totalCount,
+            title: `Number of Teachers at ${user?.schoolId}`,
+            value: data.teacherCount,
           },
-        ].map((stat, index) => (
-          <StatsCard key={index} title={stat.title} value={stat.value} />
+        ].map((stat) => (
+          <StatsCard
+            key={stat.title}
+            title={stat.title}
+            value={Number(stat.value)}
+          />
         ))}
       </div>
 
@@ -119,7 +135,7 @@ const SchoolAdminTeachersPage = React.memo(() => {
       <FirebaseSchoolDataTable
         collectionName={Collection.Teachers}
         data={teachers}
-        setTotalCount={setTotalCount}
+        setTotalCount={null}
         setData={setTeachers}
         columns={columns}
         defaultSort={{ field: "createdAt", direction: "desc" }}

@@ -8,6 +8,7 @@ import { UserInfo } from "@/components/userInfo";
 import DataTable, { DataTableColumn } from "@/components/table";
 import { Class, sampleClasses } from "@/constants/schools";
 import { generateClassId } from "@/helpers/generateStudentID";
+import { ROLE } from "@/constants";
 
 const columns: DataTableColumn[] = [
   { key: "name", label: "Class Name", sortable: true },
@@ -23,7 +24,7 @@ const AdminClassPage = React.memo(() => {
     // Create a new class object
     const newSchool = {
       ...data,
-      classId: generateClassId(data?.name as string),
+      classId: generateClassId(data.name),
     };
 
     // Update the classes state with the new class
@@ -54,7 +55,7 @@ const AdminClassPage = React.memo(() => {
           Hey, <b>{user?.fullname?.split(" ")[0] ?? `Admin`}!</b>
         </h1>
         <UserInfo
-          userType={user?.role ?? "student"}
+          userType={user?.role ?? ROLE.student}
           name={today}
           editTime={currentTime}
         />
@@ -62,9 +63,9 @@ const AdminClassPage = React.memo(() => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[{ title: "Total Number of Classes", value: classes?.length }].map(
-          (stat, index) => (
-            <StatsCard key={index} title={stat.title} value={stat.value} />
+        {[{ title: "Total Classes", value: classes?.length }].map(
+          (stat) => (
+            <StatsCard key={stat.title} title={stat.title} value={stat.value} />
           )
         )}
       </div>

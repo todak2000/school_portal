@@ -11,10 +11,10 @@ interface AuthState {
   user: Record<string, any> | null;
   loading: boolean;
   error: string | null;
-  role: "admin" | "student" | "teacher" | "parent" | null;
+  role: "admin" | "student" | "teacher"| null;
 }
 
-const initialState: AuthState = {
+export const initialState: AuthState = {
   user: null,
   loading: false,
   error: null,

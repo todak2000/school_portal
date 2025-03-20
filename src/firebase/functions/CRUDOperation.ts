@@ -15,7 +15,6 @@ import {
   startAfter,
   CollectionReference,
   DocumentData,
-  updateDoc,
   deleteDoc,
 } from "firebase/firestore";
 
@@ -33,8 +32,8 @@ interface PaginatedResult<T> {
 
 export default class CRUDOperation<T> {
   // -- collection name
-  private collectionName: string;
-  private cachedLastDocs: Map<number, DocumentSnapshot>;
+  private readonly collectionName: string;
+  private readonly cachedLastDocs: Map<number, DocumentSnapshot>;
   private totalDocuments: number;
 
   constructor(collectionName: string) {
@@ -56,6 +55,22 @@ export default class CRUDOperation<T> {
     }
   }
 
+  // Inside CRUDOperation class
+async getCountByFilter(filters: Record<string, any>): Promise<number> {
+  try {
+    let queryRef = query(collection(db, this.collectionName));
+    Object.entries(filters).forEach(([field, value]) => {
+      if (value !== undefined && value !== null) {
+        queryRef = query(queryRef, where(field, "==", value));
+      }
+    });
+    const snapshot = await getDocs(queryRef);
+    return snapshot.size;
+  } catch (error) {
+    console.error("Error getting count by filter:", error);
+    return 0;
+  }
+}
   async getPaginatedData<T extends Record<string, any>>(
     pageSize: number,
     pageNumber: number,
@@ -69,7 +84,7 @@ export default class CRUDOperation<T> {
       // Start with base collection
       let baseQuery = collection(db, this.collectionName);
       // If there's a search term and searchable columns
-      
+
       if (searchTerm && searchableColumns && searchableColumns?.length > 0) {
         const searchTermLower = searchTerm.toLowerCase();
         console.log(searchTerm, searchableColumns);
@@ -136,10 +151,9 @@ export default class CRUDOperation<T> {
         orderBy(sortField, sortDirection),
         limit(pageSize)
       ) as CollectionReference<DocumentData, DocumentData>;
-      
+
       // Apply any filters
       Object.entries(filters).forEach(([field, value]) => {
-    
         if (value) {
           baseQuery = query(
             baseQuery,
@@ -208,10 +222,13 @@ export default class CRUDOperation<T> {
   ): Promise<PaginatedResult<T>> {
     try {
       // Start with base collection
-      let baseQuery = query(
-        collection(db, this.collectionName),
-        where(field, "==", value)
-      );
+      let baseQuery =
+        field !== "" && value !== ""
+          ? query(
+              collection(db, this.collectionName),
+              where(field, "==", value)
+            )
+          : query(collection(db, this.collectionName));
       const querySnapshott = await getDocs(baseQuery);
       // If there's a search term and searchable columns
 
@@ -413,7 +430,6 @@ export default class CRUDOperation<T> {
     try {
       const docRef = doc(db, this.collectionName, id);
       const docSnap = await getDoc(docRef);
-
       return docSnap.exists() ? (docSnap.data() as T) : null;
     } catch (error: unknown) {
       throw new Error(errMessage);
@@ -646,7 +662,6 @@ export default class CRUDOperation<T> {
     sortDirection: "asc" | "desc" = "desc",
     filters: { key: string; value: any }[] = []
   ): Promise<PaginatedResult<T>> {
-    console.log(filters, "filters");
     try {
       let baseQuery = query(
         collection(db, this.collectionName),

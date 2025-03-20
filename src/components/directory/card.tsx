@@ -3,6 +3,7 @@ import Image from "next/image";
 import React from "react";
 import { motion } from "framer-motion";
 import CountUp from "react-countup";
+import { usePathname } from "next/navigation";
 
 export interface DirectoryCardProps {
   data: {
@@ -11,25 +12,28 @@ export interface DirectoryCardProps {
     description: string;
     avatar?: string | null;
     headerImage?: string;
+    studentCount: string;
   };
 }
 
 const DirectoryCard = React.memo(({ data }: DirectoryCardProps) => {
   DirectoryCard.displayName = "DirectoryCard"; // Added display name for the component
-  const { name, lga, description, avatar, headerImage } = data;
+  const { name, lga, description, avatar, headerImage, studentCount } = data;
+  const pathname = usePathname()
+  const isDirectory = pathname.includes("directory")
 
   const generateInitials = (name: string) => {
     return name
-      .split(" ")
-      .slice(0, 3)
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase();
+      ?.split(" ")
+      ?.slice(0, 3)
+      ?.map((word) => word[0])
+      ?.join("")
+      ?.toUpperCase();
   };
 
   return (
     <motion.div
-      className="card rounded-none bg-[#fffdfb] shadow-md w-full sm:w-60 md:w-80 overflow-hidden hover:shadow-lg transition-shadow"
+      className={`card rounded-none ${isDirectory ? "w-[95vw]":"w-[87vw]"} bg-[#fffdfb] shadow-md sm:w-60 md:w-80 overflow-hidden hover:shadow-lg transition-shadow`}
       whileHover={{ scale: 1.05 }}
     >
       {/* Header Image Container */}
@@ -81,9 +85,9 @@ const DirectoryCard = React.memo(({ data }: DirectoryCardProps) => {
           </p>
 
           <div className="flex flex-wrap gap-2 mt-3">
-            {[lga].map((tag, index) => (
+            {[lga].map((tag) => (
               <span
-                key={index}
+                key={tag}
                 className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-primary"
               >
                 {tag}
@@ -92,7 +96,11 @@ const DirectoryCard = React.memo(({ data }: DirectoryCardProps) => {
             <div className="flex items-center gap-1">
               <User size={16} />
               <span className="text-sm">
-                <CountUp end={123800} duration={3} separator="," />
+                <CountUp
+                  end={Number(studentCount)}
+                  duration={3}
+                  separator=","
+                />
               </span>
             </div>
           </div>

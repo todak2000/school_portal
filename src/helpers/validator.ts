@@ -1,5 +1,27 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormErrors, StudentFormData } from "@/components/onboarding/signup";
 import { TeacherFormData } from "@/components/onboarding/signupTeacher";
+
+const validateEmail = (value: any): string => {
+  if (!value) return "Email is required.";
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return typeof value === "string" && !emailRegex.test(value)
+    ? "Please enter a valid email address."
+    : "";
+};
+
+const validatePassword = (value: any, confirmPassword: any): string => {
+  if (!value) return "Password is required.";
+  if (typeof value === "string" && value.length < 6)
+    return "Password must be at least 6 characters long.";
+  return confirmPassword && value !== confirmPassword
+    ? "Passwords do not match."
+    : "";
+}; 
+
+const validateRequiredField = (value: any, fieldName: string): string => {
+  return !value ? `${fieldName} is required.` : "";
+};
 
 export const validateField = <T extends keyof StudentFormData>(
   fieldName: T,
@@ -11,89 +33,49 @@ export const validateField = <T extends keyof StudentFormData>(
 
   switch (fieldName) {
     case "email":
-      if (!value) {
-        error = "Email is required.";
-      } else {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (typeof value === "string" && !emailRegex.test(value)) {
-          error = "Please enter a valid email address.";
-        }
-      }
+      error = validateEmail(value);
       break;
     case "password":
-      if (!value) {
-        error = "Password is required.";
-      } else if (typeof value === "string" && value.length < 6) {
-        error = "Password must be at least 6 characters long.";
-      }
-      // Check confirm password match
-      if (formData.confirmPassword && value !== formData.confirmPassword) {
-        setErrors((prev) => ({
-          ...prev,
-          confirmPassword: "Passwords do not match.",
-        }));
-      } else {
-        setErrors((prev) => ({
-          ...prev,
-          confirmPassword: "",
-        }));
-      }
+      error = validatePassword(value, formData.confirmPassword);
       break;
     case "confirmPassword":
-      if (!value) {
-        error = "Please confirm your password.";
-      } else if (value !== formData.password) {
-        error = "Passwords do not match.";
-      }
+      error = validatePassword(value, formData.password);
       break;
     case "name":
-      if (!value) {
-        error = "Full name is required.";
-      }
+      error = validateRequiredField(value, "Full name");
       break;
     case "guardian":
-      if (!value) {
-        error = "Guardian name is required.";
-      }
+      error = validateRequiredField(value, "Guardian name");
       break;
     case "dateOfBirth":
-      if (!value) {
-        error = "Date of birth is required.";
-      }
+      error = validateRequiredField(value, "Date of birth");
       break;
     case "address":
-      if (!value) {
-        error = "Address is required.";
-      }
+      error = validateRequiredField(value, "Address");
       break;
     case "class":
-      if (!value) {
-        error = "Class selection is required.";
-      }
+      error = validateRequiredField(value, "Class selection");
       break;
     case "lga":
-      if (!value) {
-        error = "LGA selection is required.";
-      }
+      error = validateRequiredField(value, "LGA selection");
       break;
     case "school":
-      if (!value) {
-        error = "School selection is required.";
-      }
+      error = validateRequiredField(value, "School selection");
       break;
     case "subjectsOffered":
-      if (!value || (Array.isArray(value) && value.length === 0)) {
-        error = "At least one subject must be selected.";
-      }
+      error =
+        !value || (Array.isArray(value) && value.length === 0)
+          ? "At least one subject must be selected."
+          : "";
       break;
     case "phone":
       if (!value) {
         error = "Phone number is required.";
       } else {
         const phoneRegex = /^[0-9]{10,15}$/;
-        if (!phoneRegex.test(String(value))) {
-          error = "Please enter a valid phone number.";
-        }
+        error = !phoneRegex.test(String(value))
+          ? "Please enter a valid phone number."
+          : "";
       }
       break;
     default:
@@ -148,72 +130,67 @@ export const validateTeacherField = <T extends keyof TeacherFormData>(
 ) => {
   let error = "";
 
+  const setError = (field: string, message: string) => {
+    setErrors((prev) => ({
+      ...prev,
+      [field]: message,
+    }));
+  };
+
+  const validateTeacherPassword = (value: any) => {
+    if (!value) return "Password is required.";
+    if (typeof value === "string" && value.length < 6) {
+      return "Password must be at least 6 characters long.";
+    }
+    return "";
+  };
+
+  const validateTeacherConfirmPassword = (value: any) => {
+    if (!value) return "Please confirm your password.";
+    if (value !== formData.password) {
+      return "Passwords do not match.";
+    }
+    return "";
+  };
+
   switch (fieldName) {
     case "email":
-      if (!value) {
-        error = "Email is required.";
-      } else {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (typeof value === "string" && !emailRegex.test(value)) {
-          error = "Please enter a valid email address.";
-        }
-      }
+      error = validateEmail(value);
       break;
     case "password":
-      if (!value) {
-        error = "Password is required.";
-      } else if (typeof value === "string" && value.length < 6) {
-        error = "Password must be at least 6 characters long.";
-      }
-      // Check confirm password match
+      error = validateTeacherPassword(value);
       if (formData.confirmPassword && value !== formData.confirmPassword) {
-        setErrors((prev) => ({
-          ...prev,
-          confirmPassword: "Passwords do not match.",
-        }));
+        setError("confirmPassword", "Passwords do not match.");
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          confirmPassword: "",
-        }));
+        setError("confirmPassword", "");
       }
       break;
     case "confirmPassword":
-      if (!value) {
-        error = "Please confirm your password.";
-      } else if (value !== formData.password) {
-        error = "Passwords do not match.";
-      }
+      error = validateTeacherConfirmPassword(value);
       break;
     case "fullname":
-      if (!value) {
-        error = "Full name is required.";
-      }
+      error = !value ? "Full name is required." : "";
       break;
     case "school":
-      if (!value) {
-        error = "School selection is required.";
-      }
+      error = !value ? "School selection is required." : "";
       break;
     case "subjectsTaught":
-      if (!value || (Array.isArray(value) && value.length === 0)) {
-        error = "At least one subject must be selected.";
-      }
+      error =
+        !value || (Array.isArray(value) && value.length === 0)
+          ? "At least one subject must be selected."
+          : "";
       break;
     case "classesTaught":
-      if (!value || (Array.isArray(value) && value.length === 0)) {
-        error = "At least one class must be selected.";
-      }
+      error =
+        !value || (Array.isArray(value) && value.length === 0)
+          ? "At least one class must be selected."
+          : "";
       break;
-
     default:
       break;
   }
 
-  setErrors((prev) => ({
-    ...prev,
-    [fieldName]: error,
-  }));
+  setError(fieldName, error);
   return error;
 };
 

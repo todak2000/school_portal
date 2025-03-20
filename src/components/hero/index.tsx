@@ -1,9 +1,12 @@
-'use client'
+"use client";
 import { BookOpenText, GraduationCap, UserRoundPen } from "lucide-react";
 import Countdown from "../countdown";
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { ROLE } from "@/constants";
 
 const mainTitle = "Welcome to Akwa Ibom State Schools Portal";
 const subTitle = `Streamlining Educational Registration, Database Management for all
@@ -14,6 +17,7 @@ const govImage =
 
 const Hero = () => {
   const { push } = useRouter();
+  const { user } = useSelector((state: RootState) => state.auth);
   const statistics = [
     { icon: <BookOpenText size={50} />, value: 50, unit: "Schools" },
     { icon: <UserRoundPen size={50} />, value: 100, unit: "Teachers" },
@@ -21,7 +25,24 @@ const Hero = () => {
   ];
 
   const handleLogin = () => {
-    push("/register");
+    if (user) {
+      switch (user.role) {
+        case ROLE.student:
+          push("student/dashboard");
+          break;
+        case ROLE.teacher:
+          push("school_admin/dashboard");
+          break;
+        case ROLE.admin:
+          push("admin/dashboard");
+          break;
+        default:
+          push("/");
+          break;
+      }
+    } else {
+      push("/register");
+    }
   };
   return (
     <div className="2xl:px-[15%] hero bg-transparent h-auto flex flex-col lg:flex-row justify-center items-center lg:items-end gap-6 p-4 lg:p-0">
@@ -38,7 +59,7 @@ const Hero = () => {
             type="button"
             className=" bg-primary px-10 py-4 w-max text-white hover:bg-opacity-70"
           >
-            Get Started
+            {user ? "Go to Dashboard" : "Get Started"}
           </button>
         </div>
         <Image
@@ -49,9 +70,9 @@ const Hero = () => {
           className="lg:hidden w-full lg:w-1/2 object-cover mt-6 lg:mt-0"
         />
         <div className="flex flex-wrap justify-center lg:justify-start items-center w-full gap-3 mb-6">
-          {statistics.map((stat, index) => (
+          {statistics.map((stat) => (
             <Countdown
-              key={index}
+              key={stat.unit}
               icon={stat.icon}
               value={stat.value}
               unit={stat.unit}
