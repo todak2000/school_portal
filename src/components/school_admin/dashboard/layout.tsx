@@ -17,7 +17,13 @@ import {
   BookOpenCheck,
 } from "lucide-react";
 
-import React, { ReactElement, ReactNode, useCallback, useEffect, useState } from "react";
+import React, {
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
@@ -95,13 +101,13 @@ const sidebarItems = [
 
 const SchoolAdminLayout = React.memo(
   ({ children }: { children: ReactElement | ReactNode }) => {
-    const { push } = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-const dispatch = useDispatch()
+    const dispatch = useDispatch();
+
     const handleLogOut = useCallback(async () => {
       await signingOut();
-      push("/");
-    }, [push]);
+      window.location.href = "/";
+    }, []);
 
     const toggleSidebar = () => {
       setIsSidebarOpen(!isSidebarOpen);
@@ -109,7 +115,7 @@ const dispatch = useDispatch()
 
     useEffect(() => {
       dispatch(setModal({ open: false, type: "" }));
-    }, [])
+    }, []);
     return (
       <div className="min-h-screen md:h-screen bg-gray-50 overflow-y-hidden">
         {/* Navbar */}

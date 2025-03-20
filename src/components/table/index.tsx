@@ -297,7 +297,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
   }, [alert]);
 
   return (
-    <div className="w-full min-w-[85vw] md:min-w-[80vw] md:max-w-[85vw] bg-white border-none">
+    <div className="w-[87vw] md:w-full md:min-w-[80vw] md:max-w-[85vw] bg-white border-none">
       {/* Header */}
       <div className="p-4 border-b ">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -490,7 +490,7 @@ const DataTable = React.memo(function DataTable<T extends Record<string, any>>({
                       ? column.render(getNestedValue(item, column.key), item)
                       : String(getNestedValue(item, column.key) ?? "");
 
-                  return <td key={column.label}>{renderedValue}</td>;
+                  return <td key={column.label} >{renderedValue}</td>;
                 })}
                 <td>
                   <span className="flex flex-row items-center justify-center gap-1">

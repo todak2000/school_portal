@@ -47,24 +47,25 @@ const SignIn = React.memo(() => {
   };
 
   const validatePassword = (password: string): string | undefined => {
-    const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
-    const numberRegex = /\d/;
-    const uppercaseRegex = /[A-Z]/;
-    const lowercaseRegex = /[a-z]/;
+    // const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    // const numberRegex = /\d/;
+    // const uppercaseRegex = /[A-Z]/;
+    // const lowercaseRegex = /[a-z]/;
 
     if (!password) {
       return "Password is required.";
     } else if (password.length < 6) {
       return "Password must be at least 6 characters long.";
-    } else if (!specialCharRegex.test(password)) {
-      return "Password must include at least one special character.";
-    } else if (!numberRegex.test(password)) {
-      return "Password must include at least one number.";
-    } else if (!uppercaseRegex.test(password)) {
-      return "Password must include at least one uppercase letter.";
-    } else if (!lowercaseRegex.test(password)) {
-      return "Password must include at least one lowercase letter.";
-    }
+    } 
+    // else if (!specialCharRegex.test(password)) {
+    //   return "Password must include at least one special character.";
+    // } else if (!numberRegex.test(password)) {
+    //   return "Password must include at least one number.";
+    // } else if (!uppercaseRegex.test(password)) {
+    //   return "Password must include at least one uppercase letter.";
+    // } else if (!lowercaseRegex.test(password)) {
+    //   return "Password must include at least one lowercase letter.";
+    // }
     return undefined;
   };
 

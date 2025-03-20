@@ -3,7 +3,9 @@ const Collection = {
   Teachers: 'Teachers',
   Students_Parents:'StudentsAndParents',
   Results:'Results',
-  TermResult:'TermResult'
+  TermResult:'TermResult',
+  Session: 'Sessions',
+  School: 'Schools'
 };
 
 export default Collection;

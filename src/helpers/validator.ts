@@ -17,7 +17,7 @@ const validatePassword = (value: any, confirmPassword: any): string => {
   return confirmPassword && value !== confirmPassword
     ? "Passwords do not match."
     : "";
-};
+}; 
 
 const validateRequiredField = (value: any, fieldName: string): string => {
   return !value ? `${fieldName} is required.` : "";

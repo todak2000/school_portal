@@ -63,7 +63,7 @@ const AdminClassPage = React.memo(() => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[{ title: "Total Number of Classes", value: classes?.length }].map(
+        {[{ title: "Total Classes", value: classes?.length }].map(
           (stat) => (
             <StatsCard key={stat.title} title={stat.title} value={stat.value} />
           )

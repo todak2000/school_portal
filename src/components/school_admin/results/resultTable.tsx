@@ -118,9 +118,8 @@ const ResultsTable = ({
 
   const tableHeaders = [
     "Student Name",
-    "CA1",
-    "CA2",
-    "Exam",
+    "Class Work",
+    "Term Exam",
     "Total",
     "Grade",
     "Remarks",
@@ -128,7 +127,7 @@ const ResultsTable = ({
 
   if (!classId && !subjectId) {
     return (
-      <div className="flex items-center justify-center p-4 pt-10 w-1/2 mx-auto">
+      <div className="flex items-center justify-center p-4 pt-10 w-full md:w-1/2 mx-auto">
         <Alert
           message="Please Select a Class and a Subject to Proceed"
           type="warning"
@@ -147,7 +146,7 @@ const ResultsTable = ({
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center p-4 pt-10 w-1/2 mx-auto">
+      <div className="flex items-center justify-center p-4 pt-10 w-full md:w-1/2 mx-auto">
         <Alert message={error.message as string} type="error" />
       </div>
     );
@@ -155,7 +154,7 @@ const ResultsTable = ({
 
   if (!data?.length) {
     return (
-      <div className="flex items-center justify-center p-4 pt-10 w-1/2 mx-auto">
+      <div className="flex items-center justify-center p-4 pt-10 w-full md:w-1/2 mx-auto">
         <Alert message="No results found" type="warning" />
       </div>
     );
@@ -178,7 +177,6 @@ const ResultsTable = ({
                 <tr key={result.id} className="text-xs text-secondary">
                   <td>{result.name}</td>
                   <td>{result.scores.ca1}</td>
-                  <td>{result.scores.ca2}</td>
                   <td>{result.scores.exam}</td>
                   <td>{result.scores.total}</td>
                   <td>

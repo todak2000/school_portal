@@ -4,7 +4,12 @@ import { PenOff, Trash2, UserRoundPen } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Avatar } from "../admin/students";
 import { Checkbox } from "../inputs/checkbox";
-import { sampleClasses, sampleSubjects, schoolsArr } from "@/constants/schools";
+import {
+  sampleClasses,
+  sampleSeniorSubjects,
+  sampleSubjects,
+  schoolsArr,
+} from "@/constants/schools";
 import InputField from "./input";
 import Alert from "../alert";
 import LoaderSpin from "../loader/LoaderSpin";
@@ -12,6 +17,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import Image from "next/image";
 import { ROLE } from "@/constants";
+import { checkPrefixes } from "@/helpers/getSubject";
 
 export type UserRole = "admin" | "teacher" | "student";
 
@@ -178,7 +184,17 @@ const SubjectClassSelection = ({
           </span>
         </div>
         <CheckboxGroup
-          items={sampleSubjects}
+          items={
+            user.role === ROLE.student
+              ? user.classId.startsWith("SSS")
+                ? sampleSeniorSubjects
+                : sampleSubjects
+              : checkPrefixes(user.classesTaught) === "JSS"
+              ? sampleSubjects
+              : checkPrefixes(user.classesTaught) === "SSS"
+              ? sampleSeniorSubjects
+              : [...sampleSubjects, ...sampleSeniorSubjects]
+          }
           itemKey="subjectId"
           itemLabel="name"
           checked={
@@ -246,7 +262,6 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
   const [loading, setLoading] = useState(false);
   const [isEditable, setIsEditable] = useState(!editMode);
   const { alert, setAlert } = useAlert();
-  console.log(user, "seree");
   const initialFormData =
     loggedUser?.role === ROLE.teacher
       ? { ...user, subjectsTaught: user?.subjectsTaught || [] }
@@ -451,7 +466,7 @@ const UserProfileEdit = ({ data }: { data: Record<string, any> }) => {
           {getRoleSpecificFields().map((field) => (
             <InputField
               key={field.key}
-              {...field}
+              {...{ label: field.label, type: field.type, value: field.value, name: field.name }}
               isEditable={isStudent ? false : isEditable}
               onChange={handleChange}
             />

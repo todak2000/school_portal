@@ -1,13 +1,14 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { getFormattedDate, getFormattedTime } from "@/helpers/getToday";
 import { UserInfo } from "@/components/userInfo";
-import { sessionsArr } from "@/constants/schools";
 import { getOngoingSession } from "@/helpers/ongoingSession";
 import StudentResultView from "@/components/studentResult";
 import { ROLE } from "@/constants";
+import useFetchSessions from "@/hooks/useSchoolSessions";
+import { Printer } from "lucide-react";
 
 const termss = [
   { value: 1, label: "First Term" },
@@ -16,8 +17,11 @@ const termss = [
 ];
 
 const StudentResultPage = React.memo(() => {
-  const { user } = useSelector((state: RootState) => state.auth);
-  const current = getOngoingSession(sessionsArr);
+  const { user, role } = useSelector((state: RootState) => state.auth);
+  const { sessions } = useFetchSessions();
+  const current = getOngoingSession(sessions);
+
+  const [canPrint, setCanPrint] = useState<boolean>(false)
   const today = useMemo(() => getFormattedDate(), []);
   const currentTime = useMemo(() => getFormattedTime(), []);
   const [session, setSession] = useState<string>(current?.session ?? "");
@@ -25,8 +29,34 @@ const StudentResultPage = React.memo(() => {
     current?.ongoingTerm?.toString() ?? ""
   );
 
+  const updateSessionAndTerm = useCallback(() => {
+    if (current) {
+      setSession(current?.session);
+      setTerm(current?.ongoingTerm?.toString());
+    }
+  }, []);
+
+  useEffect(() => {
+    updateSessionAndTerm();
+  }, [updateSessionAndTerm]);
+
+  const handleStudentResult = (id: string) => {
+    let r: string;
+    switch (role) {
+      case ROLE.admin:
+        r = role;
+        break;
+      case ROLE.student:
+        r = "student";
+        break;
+      default:
+        r = "school_admin";
+    }
+    window.open(`/${r}/student/${id}`, "_blank");
+  };
+
   return (
-    <main className="flex-1 p-6 md:min-w-[75vw]">
+    <main className="flex-1 p-6 w-[100vw] md:min-w-[75vw] md:max-w-[80vw]">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-medium mb-2 font-geistMono">
@@ -54,7 +84,7 @@ const StudentResultPage = React.memo(() => {
             onChange={(e) => setSession(e.target.value)}
           >
             <option value="">Select Session</option>
-            {sessionsArr.map((sess) => (
+            {sessions.map((sess) => (
               <option key={sess.session} value={sess.session}>
                 {sess.session}
               </option>
@@ -80,15 +110,35 @@ const StudentResultPage = React.memo(() => {
             ))}
           </select>
         </div>
+        {session !== "" && term !== "" && canPrint &&(
+          <button
+            onClick={() => handleStudentResult(user?.id)}
+            className="md:hidden btn btn-ghost gap-2 rounded-none bg-primary mt-3 text-white"
+          >
+            <Printer size={16} />
+            Print Result
+          </button>
+        )}
       </div>
-      <div className="mx-auto overflow-y-auto h-[50vh] scrollbar-hide w-[85vw] md:w-full">
+      <div className="overflow-x-auto scrollbar-hide w-full lg:h-[50vh] ">
         <StudentResultView
           studentId={user?.id}
           session={session}
           term={term}
+          setCanPrint={setCanPrint}
           schoolId={user?.schoolId}
         />
       </div>
+
+      {session !== "" && term !== "" && canPrint && (
+        <button
+          onClick={() => handleStudentResult(user?.id)}
+          className="hidden md:flex mx-auto btn btn-ghost gap-2 rounded-none bg-primary mt-3 text-white"
+        >
+          <Printer size={16} />
+          Print Result
+        </button>
+      )}
     </main>
   );
 });

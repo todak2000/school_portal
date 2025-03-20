@@ -55,6 +55,7 @@ import { setModal } from "@/store/slices/modal";
 import CRUDOperation from "@/firebase/functions/CRUDOperation";
 import LoaderSpin from "../loader/LoaderSpin";
 import { ROLE } from "@/constants";
+import { usePathname } from "next/navigation";
 
 export interface PaginationState {
   currentPage: number;
@@ -81,6 +82,9 @@ const FirebaseDataTable = React.memo(function DataTable<
   collectionName,
   defaultSort = { field: "createdAt", direction: "desc" },
 }: DataTableProps<T>) {
+
+  const pathname = usePathname()
+  const noResult = ['/admin/admins'].includes(pathname)
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchDebounceTimeout, setSearchDebounceTimeout] =
@@ -130,6 +134,21 @@ const FirebaseDataTable = React.memo(function DataTable<
     filters,
     searchTerm,
   ]);
+
+  const handleStudentResult = (id: string) => {
+    let r: string;
+    switch (role) {
+      case ROLE.admin:
+        r = role;
+        break;
+      case ROLE.student:
+        r = "students";
+        break;
+      default:
+        r = "school_admin";
+    }
+    window.open(`/${r}/student/${id}`, "_blank");
+  };
 
   useEffect(() => {
     fetchData();
@@ -288,7 +307,7 @@ const FirebaseDataTable = React.memo(function DataTable<
   };
 
   return (
-    <div className="w-full min-w-[85vw] md:min-w-[80vw] md:max-w-[85vw] bg-white border-none">
+    <div className="w-[87vw] md:w-full md:min-w-[80vw] md:max-w-[85vw] bg-white border-none">
       {/* Header */}
       <div className="p-4 border-b ">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -425,7 +444,7 @@ const FirebaseDataTable = React.memo(function DataTable<
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto border-none overflow-y-auto max-h-[50vh] relative scrollbar-hide pb-20 bg-gray-50">
+      <div className="overflow-x-auto border-none overflow-y-auto max-h-[50vh] relative scrollbar-hide pb-40 bg-gray-50">
         <table className="table w-full bg-gray-50">
           <thead className="bg-gray-100 text-secondary font-geistSans font-normal">
             <tr>
@@ -502,12 +521,13 @@ const FirebaseDataTable = React.memo(function DataTable<
                       >
                         <UserPen size={16} className="text-orange-400" />
                       </button>
+                      {!noResult && role===ROLE.admin &&
                       <button
                         className="btn btn-ghost btn-sm"
-                        onClick={() => handleOpenModal(item, true)}
+                        onClick={() => handleStudentResult(item.id)}
                       >
                         <FileSliders size={16} className="text-orange-600" />
-                      </button>
+                      </button>}
                     </span>
                   </td>
                 </tr>
