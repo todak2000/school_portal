@@ -38,10 +38,34 @@ export const StudentResultView = ({
   const selectedTerm = term ?? current?.ongoingTerm;
 
   const handlePrint = () => {
-    // Create a print-specific style
+    // Create a style element for print-specific rules
     const style = document.createElement("style");
     style.type = "text/css";
     style.innerHTML = `
+      /* Hide everything by default */
+      body * {
+        visibility: hidden;
+      }
+  
+      /* Show only the printable content */
+      #printable-content, #printable-content * {
+        visibility: visible;
+      }
+  
+      /* Ensure the printable content is positioned correctly */
+      #printable-content {
+        display: flex; /* Use flexbox for layout */
+        flex-direction: column; /* Stack child elements vertically */
+        align-items: center; /* Center content horizontally */
+        justify-content: center; /* Center content vertically */
+        
+        width: 100%; /* Span the full width of the page */
+        height: 100%; /* Span the full height of the page */
+        padding: 20px; /* Add some padding for spacing */
+        box-sizing: border-box; /* Include padding in the width/height calculation */
+      }
+  
+      /* Remove any unwanted styles during printing */
       @media print {
         body {
           margin: 0; /* Removes default margins */
@@ -65,6 +89,35 @@ export const StudentResultView = ({
       document.head.removeChild(style);
     }, 1000);
   };
+
+  // const handlePrint = () => {
+  //   // Create a print-specific style
+  //   const style = document.createElement("style");
+  //   style.type = "text/css";
+  //   style.innerHTML = `
+  //     @media print {
+  //       body {
+  //         margin: 0; /* Removes default margins */
+  //       }
+  //       * {
+  //         -webkit-print-color-adjust: exact !important; /* Prevent background graphics from being printed */
+  //         print-color-adjust: exact !important; /* Cross-browser */
+  //         background: none !important; /* Disable background graphics */
+  //       }
+  //     }
+  //   `;
+
+  //   // Append the style to the document's head
+  //   document.head.appendChild(style);
+
+  //   // Trigger the print dialog
+  //   window && window.print();
+
+  //   // Cleanup the style after printing
+  //   setTimeout(() => {
+  //     document.head.removeChild(style);
+  //   }, 1000);
+  // };
 
   const { data: termResult, isLoading } = useQuery<TermResult | any>({
     queryKey: [
