@@ -220,7 +220,8 @@ interface AcademicTableProps {
   }[];
   evaluationResults: {
     decision: string;
-    comment: string;
+    principalComment: string;
+    teacherComment: string;
   };
   studentId: string;
 }
@@ -338,7 +339,7 @@ const AcademicTable: React.FC<AcademicTableProps> = ({
         <div className="flex">
           <p className="font-semibold mr-2">CLASS TEACHER&#39;S REMARKS:</p>
           <p className="flex-1 border-b border-gray-400 font-geistMono text-xs text-black">
-            {evaluationResults.comment}
+            {evaluationResults.teacherComment}
           </p>
         </div>
       </div>
@@ -347,7 +348,7 @@ const AcademicTable: React.FC<AcademicTableProps> = ({
         <div className="flex">
           <p className="font-semibold mr-2">PRINCIPAL&#39;S COMMENTS:</p>
           <p className="flex-1 border-b border-gray-400 font-geistMono text-xs text-black">
-            {evaluationResults.comment}
+            {evaluationResults.principalComment}
           </p>
         </div>
       </div>
@@ -364,7 +365,7 @@ const AcademicTable: React.FC<AcademicTableProps> = ({
         </div>
         <div className=" p-2 mt-0">
           <div className="text-center font-geistSans mb-8">
-            PRINCIPAL AUTHORITY SIGNATURE AND DATE
+            PRINCIPAL SIGNATURE AND DATE
           </div>
           <div className="pb-2 text-center"></div>
         </div>

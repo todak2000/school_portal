@@ -279,7 +279,8 @@ interface AcademicTableProps {
   }[];
   evaluationResults: {
     decision: string;
-    comment: string;
+    principalComment: string;
+    teacherComment: string;
   };
   studentId: string;
 }
@@ -362,17 +363,10 @@ const AcademicTable: React.FC<AcademicTableProps> = ({
                 <td className="border border-gray-400 w-[30px]">
                   {scores.grade}
                 </td>
-                {/* <td className="border border-gray-400 w-[30px]">
-                  {scores.position}
-                </td> */}
                 <td className="border border-gray-400 w-[30px] text-[0.55rem]">
                   {getGradeDescription(scores.grade, className)}
                 </td>
-                <td className="border border-gray-400 text-left w-[30px]">
-                  {/* {scores.teacherSignature ?? (
-                    <span className="text-white">""</span>
-                  )} */}
-                </td>
+                <td className="border border-gray-400 text-left w-[30px]"></td>
               </tr>
             );
           })}
@@ -397,8 +391,8 @@ const AcademicTable: React.FC<AcademicTableProps> = ({
       <div className="py-1">
         <div className="flex">
           <p className="font-semibold mr-2">CLASS TEACHER&#39;S REMARKS:</p>
-          <p className="flex-1 border-b border-gray-400 font-geistMono text-xs text-black">
-            {evaluationResults.comment}
+          <p className="flex-1 border-b border-gray-400 font-geistSans  text-[0.65rem] text-black pl-1">
+            {evaluationResults.teacherComment}
           </p>
         </div>
       </div>
@@ -406,8 +400,8 @@ const AcademicTable: React.FC<AcademicTableProps> = ({
       <div className="py-1">
         <div className="flex">
           <p className="font-semibold mr-2">PRINCIPAL&#39;S COMMENTS:</p>
-          <p className="flex-1 border-b border-gray-400 font-geistMono text-xs text-black">
-            {evaluationResults.comment}
+          <p className="flex-1 border-b border-gray-400 font-geistSans text-[0.65rem] text-black pl-1">
+            {evaluationResults.principalComment}
           </p>
         </div>
       </div>
@@ -424,7 +418,7 @@ const AcademicTable: React.FC<AcademicTableProps> = ({
         </div>
         <div className=" p-2 mt-0">
           <div className="text-center font-geistSans mb-8">
-            PRINCIPAL AUTHORITY SIGNATURE AND DATE
+            PRINCIPAL SIGNATURE AND DATE
           </div>
           <div className="pb-2 text-center"></div>
         </div>
@@ -464,7 +458,7 @@ const ReportSheet: React.FC<ReportSheetProps> = ({
   const evaluationResults = evaluateStudentPerformance(data);
 
   return (
-    <div className="bg-gray-100 max-w-4xl mx-auto font-sans">
+    <div className="bg-gray-100 max-w-4xl mx-auto font-sans" id="printable-content">
       <div className="bg-white border-gray-300 h-[1100px]">
         <div className="bg-white p-4 pt-2  border-gray-300 relative max-h-[1000px]">
           <div className="absolute inset-0 z-0 flex [transform:rotate(-45deg)] items-center justify-center text-primary text-5xl font-bold opacity-10">
